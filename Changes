@@ -176,3 +176,10 @@ Revision history for Perl extension EyeDrops
 	- minor change to shape: simon
 	- documentation: minor changes
 	- documentation: added 'Sierpinski Triangles' section
+
+1.14	Sun Sep 22 18:42:14 2002
+
+	- converted siertri shape to a built-in (removed siertri.eye)
+	- documentation: retracted claim that Mtv's Sierpinski program
+	  is the shortest (thankyou Adam and Eugene)
+	- documentation: minor changes

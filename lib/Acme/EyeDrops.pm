@@ -16,7 +16,7 @@ require Exporter;
                 reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.13';
+$VERSION = '1.14';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -662,6 +662,19 @@ sub make_triangle {
    $str;
 }
 
+sub make_siertri {
+   my $rarg = shift;
+   my $width = $rarg->{Width};
+   $width < 3 and $width = 5;
+   my $height = 2 ** $width;
+   my $str = ""; my $ns = $height;
+   for my $i (1 .. $height) {
+      $str .= ' ' x --$ns .
+         join('', map($ns&$_ ? '  ' : '##', 0 .. $i-1)) . "\n";
+   }
+   $str;
+}
+
 # Linux /usr/games/banner can be used.
 # Long term, Perl CPAN Text::Banner will be enhanced
 # so it can be used too.
@@ -722,6 +735,7 @@ my $sightly_suffix = '.eye';
 
 my %builtin_shapes = (
    'triangle'   => \&make_triangle,
+   'siertri'    => \&make_siertri,
    'banner'     => \&make_banner,
    'srcbanner'  => \&make_srcbanner
 );
@@ -1436,9 +1450,9 @@ the generated program would malfunction in strange ways because
 it is running inside a regular expression and Perl's regex engine
 is not reentrant. In this case, we must resort to:
 
-    print sightly({Shape        => 'japh',
-                   SourceString => $src,
-                   Regex        => 0 } );
+    print sightly( { Shape        => 'japh',
+                     SourceString => $src,
+                     Regex        => 0 } );
 
 which runs the generated sightly program via C<eval> instead.
 If you want to use Regex => 1, ensure the program to be converted
@@ -1447,10 +1461,10 @@ is careful with its use of regular expressions and C<$_>.
 To produce a I<JAPH> that resembles the original
 I<Just another Perl hacker,> aka I<Randal L Schwartz>, try this:
 
-    print sightly({ Shape        => 'merlyn',
-                    SourceString => 'Just another Perl hacker,',
-                    Regex        => 1,
-                    Print        => 1 } );
+    print sightly( { Shape        => 'merlyn',
+                     SourceString => 'Just another Perl hacker,',
+                     Regex        => 1,
+                     Print        => 1 } );
 
 producing:
 
@@ -1786,7 +1800,7 @@ of 128 * 94 = 12,032 camels.
 Sierpinski triangle generators have proved popular on various
 Perl mailing lists and at Perl monks too.
 
-The shortest known Sierpinski triangle generator, F<siertri.pl>, is:
+A simple and concise Sierpinski triangle generator, F<siertri.pl>, is:
 
     #!perl -l
     $x=2**pop;print$"x--$x,map$x&$_?$"x2:"/\\",0..$y++while$x
@@ -1798,6 +1812,18 @@ Running this program:
     perl siertri.pl 4
 
 displays a Sierpinski triangle with 2**4 lines.
+
+Proclaiming Mtv's program as the shortest (in Acme::EyeDrops 1.13)
+only served to provoke Adam Antonik and Eugene van der Pijll into
+shortening it by exploiting a hard C<$^F>, as shown in some of the
+examples below:
+
+    -l print$"x--$x,map$x&$_?$"x2:"/\\",0..$_-1for 1..($x=2**pop)
+    -l $x=2**pop;print$"x--$x,map$x&$_?$"x2:"/\\",0..$y++while$x
+    -l $^F**=pop;print$"x--$^F,map$^F&$_?$"x2:"/\\",0..$y++while$^F
+    -lX061 print$"x--$/,map$/&$_?$"x2:"/\\",0..$y++while$/<<=pop
+    -l print$"x--$^F,map$^F&$_?$"x2:"/\\",0..$y++while$^F*=2**pop
+    -l $_=$"x2**pop;$_="$'/\\",print,s/(?<=\\)../$&^KI^D5/egwhile/^ /
 
 An interesting obfuscated Sierpinski triangle generator is:
 
@@ -1819,6 +1845,10 @@ Sierpinski triangle generator based on Mtv's program like this:
                      Indent          => 1,
                      BorderGap       => 1,
                      BorderWidth     => 2,
+                     # For 'siertri' built-in shape, Width=>5 means:
+                     #   height is 2**5 lines
+                     #   width  is 2 * 2**5 characters
+                     Width           => 5,
                      Shape           => 'siertri' } );
 
 producing:
@@ -2541,7 +2571,8 @@ The attributes that HASHREF may contain are:
                   the above.
 
     Width         Ignored for .eye file shapes. For built-in shapes,
-                  specifies the shape width in characters.
+                  interpreted appropriately for the shape, typically
+                  the shape width in characters.
 
     TrapEvalDie   Boolean.
                   Add closing 'die $@ if $@' to generated program.
@@ -2624,7 +2655,6 @@ EyeDrops are:
     pony2       Picture of a Pony
     riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
-    siertri     A Sierpinksi Triangle
     simon       The inventor of parrot
     spoon       A wooden spoon
     tonick      Pictorial representation of a golf contest between Ton
@@ -2722,6 +2752,9 @@ Thanks also to Mtv Europe, Ronald J Kimball and Eugene
 van der Pijll for their help in golfing the program in
 the I<Twelve Thousand and Thirty Two Camels> section.
 Keith Calvert Ivey also contributed some levity to this section.
+
+Ideas from Adam Antonik, Mtv Europe, Eugene van der Pijll, Ton Hospel
+and Keith Calvert Ivey were used in the I<Sierpinski Triangles> section.
 
 The C<jon> shape was derived from:
 F<http://www.spidereyeballs.com/os5/set1/small_os5_r06_9705.html>.
