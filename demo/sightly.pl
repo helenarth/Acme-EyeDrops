@@ -10,21 +10,25 @@ sub usage
    print STDERR <<'EOM';
 usage: sightly [-s shape] [-f file|-z string]
 Options:
-  -s shape      Shape/s. Can specify multiple shapes separated
-                by commas.
-                A shape is just a file with a .eye suffix,
-                so you can add new shapes yourself.
-  -f file       The file to be made sightly.
-  -z string     Specify a string instead of a file.
-  -c string     String used with -s banner above.
-  -p            Print instead of eval.
-  -r            Insert sightly into a regex (instead of eval).
-  -g gap        Gap between successive shapes.
-  -b            Binary file.
-  -w width      Width.
-  -l            List available shapes.
-  -t            Trap die within eval with 'die $@ if $@'
-  -u            Trap warnings with '$SIG{__WARN__}=sub{}'
+  -s shape        Shape/s. Can specify multiple shapes separated
+                  by commas.
+                  A shape is just a file with a .eye suffix,
+                  so you can add new shapes yourself.
+  -f file         The file to be made sightly.
+  -z string       Specify a string instead of a file.
+  -c string       String used with -s banner above.
+  -p              Print instead of eval.
+  -r              Insert sightly into a regex (instead of eval).
+  -g gap          Gap between successive shapes.
+  -o degree       Rotate shape 90, 180, 270 degrees.
+  -x bordergap    Border gap.
+  -y borderwidth  Border width.
+  -i              Invert shape.
+  -b              Binary file.
+  -w width        Width.
+  -l              List available shapes.
+  -t              Trap die within eval with 'die $@ if $@'
+  -u              Trap warnings with '$SIG{__WARN__}=sub{}'
 Examples:
   sightly -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
@@ -55,18 +59,22 @@ my %optarg = (
    c => 'BannerString',
    f => 'SourceFile',
    g => 'Gap',
+   i => 'Invert',
+   o => 'Rotate',
    p => 'Print',
    r => 'Regex',
    s => 'Shape',
    t => 'TrapEvalDie',
    u => 'TrapWarn',
    w => 'Width',
+   x => 'BorderGap',
+   y => 'BorderWidth',
    z => 'SourceString'
 );
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hblprtuc:f:g:s:w:z:", \%option) or usage();
+Getopt::Std::getopts("hbilprtuc:f:g:o:s:w:x:y:z:", \%option) or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);
 $option{z} =~ s#\\n#\n#g if $option{z};

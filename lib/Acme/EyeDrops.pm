@@ -11,9 +11,10 @@ require Exporter;
                 regex_binmode_print_sightly
                 clean_binmode_print_sightly
                 get_builtin_shapes get_eye_shapes
+                border_shape invert_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '0.05';
+$VERSION = '1.00';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -438,6 +439,81 @@ sub pour_sightly {
 # -----------------------------------------------------------------
 # This section is a little bit experimental.
 
+# Put a border around a shape.
+sub border_shape {
+   my ($tlines, $gap, $width) = @_;
+   my @a = split(/\n/, $tlines);
+   my $maxlen = 0;
+   for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+   for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                       if length($l) < $maxlen }
+   if ($gap) {
+      for my $l (@a) { $l = ' ' x $gap . $l . ' ' x $gap }
+      for my $i (1 .. $gap) { unshift(@a, ' ' x ($maxlen+2*$gap)) }
+      for my $i (1 .. $gap) { push(@a, ' ' x ($maxlen+2*$gap)) }
+   }
+   if ($width) {
+      for my $l (@a) { $l = '#' x $width . $l . '#' x $width }
+      for my $i (1 .. $width) { unshift(@a,
+                                  '#' x ($maxlen+2*$gap+2*$width)) }
+      for my $i (1 .. $width) { push(@a,
+                                   '#' x ($maxlen+2*$gap+2*$width)) }
+   }
+   return join("\n", @a) . "\n";
+}
+
+# Invert shape (i.e. convert '#' to space and vice-versa).
+sub invert_shape {
+   my ($tlines) = @_;
+   my @a = split(/\n/, $tlines);
+   my $maxlen = 0;
+   for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+   for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                       if length($l) < $maxlen }
+   my $s = join("\n", @a) . "\n";
+   $s =~ tr/ #/# /;
+   return $s;
+}
+
+# Rotate shape clockwise thru 90, 180, 270 degrees
+# (other angles are left as an exercise for the reader:-)
+sub rotate_shape {
+   my ($tlines, $degrees) = @_;
+   if ($degrees == 180) {
+      my @a = reverse split(/\n/, $tlines);
+      return join("\n", @a) . "\n";
+   }
+   if ($degrees == 90) {
+      my @a = split(/\n/, $tlines);
+      my $maxlen = 0;
+      for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+      for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                          if length($l) < $maxlen }
+      my @n = ();
+      for my $i (0 .. $maxlen-1) {
+         my $line = "";
+         for my $l (reverse @a) { $line .= substr($l, $i, 1) }
+         push(@n, $line);
+      }
+      return join("\n", @n) . "\n";
+   }
+   if ($degrees == 270) {
+      my @a = split(/\n/, $tlines);
+      my $maxlen = 0;
+      for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+      for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                          if length($l) < $maxlen }
+      my @n = ();
+      my $i;
+      for ($i = $maxlen-1; $i >= 0; --$i) {
+         my $line = "";
+         for my $l (@a) { $line .= substr($l, $i, 1) }
+         push(@n, $line);
+      }
+      return join("\n", @n) . "\n";
+   }
+}
+
 sub make_triangle {
    my $rarg = shift;
    my $width = $rarg->{Width};
@@ -528,6 +604,10 @@ my %default_arg = (
    Print         => 0,
    Binary        => 0,
    Gap           => 0,
+   Rotate        => 0,
+   Invert        => 0,
+   BorderGap     => 0,
+   BorderWidth   => 0,
    TrapEvalDie   => 0,
    TrapWarn      => 0
 );
@@ -589,6 +669,16 @@ sub sightly {
       die "invalid width $arg{Width} (must be > 3)"
          if $arg{Width} < 4;
       $shapestr = '#' x $arg{Width};
+   }
+   if ($arg{Rotate}) {
+      $shapestr = rotate_shape($shapestr, $arg{Rotate});
+   }
+   if ($arg{Invert}) {
+      $shapestr = invert_shape($shapestr);
+   }
+   if ($arg{BorderGap} or $arg{BorderWidth}) {
+      $shapestr = border_shape($shapestr, $arg{BorderGap},
+                     $arg{BorderWidth});
    }
 
    my $sightlystr = "";
@@ -702,6 +792,7 @@ If it is a Windows program, you can indicate that too, by
 combining shapes:
 
     print sightly( { Shape       => 'uml,window',
+                     Gap         => 1,
                      SourceFile  => 'helloworld.pl',
                      Regex       => 1 } );
 
@@ -764,6 +855,136 @@ producing this improved visual representation:
 This is a Visual Programming breakthrough in that you can tell
 that it is a Windows program and see its UML structure too,
 just by glancing at the code.
+
+You can improve the quality of your programs simply
+by having them impersonate the Perl 6 maestros,
+Larry Wall and Damian Conway:
+
+    print sightly( { Shape       => 'larry,damian',
+                     Gap         => 2,
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+producing the following good karma:
+
+                          ''=~('('.'?'.'{'
+                       .('`'|'%').('['^"\-").(
+                  '`'|'!').('`'|',').'"'.(('[')^
+                '+').                         ('['
+              ^')'                              ).(
+            '`'|                                  ')'
+          ).+(                                   (  '`'
+         )|((                                    (   '.'
+        ))))                                  .(  (    '['
+      )^((                                   (     (    '/'
+    )))                                    ))       .(   '{'
+   ^((                                   ((           (   '['
+  )))                                ))).              (   (((
+ (((                             '\\'                   )   )))
+ )))                         .'"'                        .   (((
+ '`'                ))|'(').(                            (   '`'
+ )|+              ((                                     (    ((
+ '%'             ))                                       )   ))
+ ).(            (                                         (   ((
+ '`'            )                                          )))|+
+ ','           )                                              .(
+ '`'           |          ',').('`'|'/').('{'^'[').('['^(',')).(
+ '`'           |'/').("\["^    "\)").(    (    (   "\`"))|     (
+ ','           )          ) .+(  '`'  |+  (    ( ((  '$'  )))  )
+ ).+           (          ( '\\')).'\\'.  (    ( '`')|('.')).  (
+ (((           (          (               (    (               (
+ ((   (((     (           (               (    ((              (
+ ((   (  '\\')             )              )     ))             )
+ ))   )                     )             )     ) )            )
+ ))   )  )))                 ))).'"'.';'.(       ( '!')^('+')).
+ ((    (                              (          (          (
+  (     (                            (          (           (
+   (     (                            ( '"'    )            )
+    )      )))                              ))             )
+     )       )                  ))).'}'.')');$:="\."^      (
+      (      (                '~')));$~='@'|'(';$^=')'     ^
+       (     (               '['));$/='`'|'.';$_=('(')^   (
+        (   (                '}'))  );$,='`'|"\!";  ($\)  =
+         ( (                 ')')  )              ^  '}' ;
+          $:                 =((   '.'))^'~';$~='@'   |((
+           (                                            (
+           (                                           (
+           (                                          (
+          (       (                                  (
+          (        (                                (
+          (          (                             (
+          (            (                          (
+         (               (                       (   (
+         (                 (                    (     (
+        (                    '('              ))       )
+       )                          )))))))))))            )
+
+
+                      )))))))))))));(
+                    $^)=')'^'[';$/="\`"|
+                  '.';$_='('^'}';$,='`'|'!'
+                ;$\=                     ')'^
+              '}';                         ($:)
+            ='.'                             ^'~'
+           ;$~=                                 '@'|
+          '(';                                   ($^)
+         =')'                                     ^'['
+        ;$/=                                       '`'|
+       '.';                                         $_=
+       '('^                                         '}';
+      ($,)                                    ="\`"| '!';
+      ($\)                                =')'     ^  '}'
+      ;$:    =((                  ('.')))^          (  '~'
+     );(     (  $~))           =((                  (  '@'
+    )))      |      '(';$^=')'^                     (  '['
+    );(      (                                      (  $/)
+    ))=      (                                      (  '`'
+    ))|      (                                       ( '.'
+    ));     (                                        ( $_)
+     )=(    (                                        ( '('
+     ))     )                                        ^ '}'
+    ; $,    =                                        ( ((
+    (  ((  (                                         ( ((
+    (   '`')       )))))))))              )|'!';     $\=
+    (    ')'    )^+         '}'        ;$:      =((  '.'
+    ) )^  ((        '~'));$~             =('@')|      ((
+    ( (   ((      ((  '(')  ))    )    )) ));(  $^    )
+    = (  ')'       )^"\[";$/=     (    '`')|'.';$_    =
+    (  (( ((                      (                  (
+     (    ((                      (                 ((
+     (    '('                     )                 ))
+      )   )))                     )                )))
+       )))^'}'                    ;                $,=
+         "\`"|              (     (    (          '!'
+         )));(              (     (    (          $\)
+         )))=((             ')'))^'}';$:         ='.'
+         ^"\~";                                  ($~)
+         =('@')|         '(';$^=')'^"\[";$/=    '`'|
+          "\.";$_=    '('^'}';$,='`'|('!');$\= ')'^
+           "\}";$:=  ((                     "\."))^
+           '~';$~="\@"|  '(';$^=')'^'[';$/=  ('`')|
+            '.';$_='('      ^'}';$,="\`"|    "\!";
+             $\=')'^'}'                    ;($:)=
+              '.'^('~');$~=            '@'|"\(";
+               $^=')'^'[';$/='`'|'.';$_='('^'}'
+               ;$,='`'|'!';$\=')'^'}';$:=('.')^
+                '~';$~='@'|'(';$^=')'^('[');$/=
+                 '`'|'.';$_='('^'}';$,='`'|'!';
+                  $\=')'^'}';$:='.'^'~';$~='@'
+                    |'(';$^=')'^'[';$/=('`')|
+                     '.';$_='('^'}';$,="\`"|
+                       '!';$\=')'^('}');$:=
+                         '.'^'~';$~=('@')|
+                            '(';$^=')';
+
+If you sincerely idolize Larry, you should put a border around
+him like this:
+
+    print sightly( { Shape       => 'larry',
+                     BorderGap   => 2,
+                     BorderWidth => 2,
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
 
 For Linux-only, you can apply its F</usr/games/banner> command
 to the program's source text like this:
@@ -1138,18 +1359,18 @@ above. Or with a banner (Linux only):
 
 But wait, there's more. You can encode binary files too.
 
-    print sightly({Shape      => 'camel,japh,camel',
+    print sightly({Shape      => 'camel,mongers',
                    SourceFile => 'some_binary_file',
                    Binary     => 1,
                    Print      => 1,
-                   Gap        => 5 } );
+                   Gap        => 3 } );
 
 This is prettier than I<uuencode/uudecode>.
 Here is how you encode/decode binary files with F<sightly.pl>.
 
 To encode:
 
-    sightly.pl -g5 -bps camel,japh,camel -f some_binary_file >eyesore
+    sightly.pl -g3 -bps camel,mongers -f some_binary_file >eyesore
 
 To decode:
 
@@ -1230,6 +1451,143 @@ Here is the original one camel program, F<t1.pl>:
                      "\!";        $\="\)"^  '}';         $:='.'^
                    '~';$~=                              '@'|'(';
                  $^="\)"^                                '[';#;
+
+Buffy fans might like to experiment with rotating her letters:
+
+    print sightly( { Shape       => 'buffy',
+                     Rotate      => 0,  # try 270, 90 and 180 too
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+while cricket fans could compare:
+
+    print sightly( { Shape       => 'cricket',
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+which produces:
+
+                     '?'
+                    =~+(
+                   "\(".
+                  "\?".
+                "\{".(
+               ('`')|
+              '%').(
+             ('[')^
+            '-').(    "\`"|
+           '!').(   '`'|',')
+      .'"'.('['    ^'+').('['
+      ^"\)").(     '`'|"\)").(
+    '`'|'.')       .('['^'/')
+    .(('{')^       '[').'\\'.
+  '"'.(('`')|       '(').('`'
+ |'%').('`'|','      ).("\`"|
+ "\,").( '`'|'/')    .('{'^'[').
+ (('[')^  ',').('`'|'/').(('[')^
+  "\)").(  '`'|',').('`'|'$').''.
+   ('\\').  '\\'.('`'|"\.").'\\'.
+     ('"').  ';'.('!'^'+').('"').
+      '}'.')');$:='.'^'~';$~='@'|
+      '(';$^=')'^'[';$/='`'|'.';$_
+       ='('^'}';$,='`'|'!';$\=')'^
+        '}';$:=   '.'^'~';$~="\@"|
+         '(';      $^=')'^"\[";$/=
+                   '`'|'.';$_='('^
+                   '}';$,='`'|"\!";
+                   $\=')'^('}');$:=
+                   '.'^'~';$~="\@"|
+                   '(';$^=')'^"\[";
+                  $/='`'|'.';$_='('
+                 ^'}';$,='`'|'!';$\=
+               ')'^'}';$:='.'^'~';$~=
+              '@'|'(';$^=')'^('[');$/=
+              '`'|'.';$_='('^'}';$,='`'
+             |'!';$\=')'^'}';$:='.'^'~';
+            $~='@'|'(';$^=')'^'[';$/='`'|
+     (     '.');$_='('^'}'   ;$,='`'|"\!";
+      $\   =')'^"\}";$:=      '.'^('~');$~=
+       '@' |'(';$^=')'^        '[';$/=('`')|
+       '.';$_=('(')^            '}';$,=('`')|
+       '!';$\=(')')^             '}';$:=('.')^
+       '~';$~='@'|'('              ;$^=')'^'[';
+        $/='`'|('.');$_=            '('^"\}";$,=
+         '`'|'!';$\=')'^'}'           ;$:='.'^'~'
+            ;$~='@'|('(');$^=          ')'^"\[";$/=
+               '`'|'.';$_='('           ^'}';$,='`'|
+                     '!';$\=              ')'^'}';$:=
+                      "\."^                 '~';$~='@'|
+                     "\(";                    $^=')'^'['
+                     ;$/=                      '`'|'.';
+                     $_=                         "\(";
+
+with:
+
+    print sightly( { Shape       => 'cricket',
+                     Invert      => 1,
+                     BorderWidth => 2,
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+which produces:
+
+ ''=~('('.'?'.'{'.('`'|'%').('['^'-').('`'|'!').('`'|(',')).
+ '"'.('['^'+').('['^')').('`'|')').('`'|'.').('['^'/').('{'^
+ '[').'\\'.'"'.('`'|'('   ).('`'|'%').('`'|',').('`'|"\,").(
+ '`'|'/').('{'^"\[").(    '['^',').('`'|'/').('['^')').('`'|
+ ',').('`'|'$').'\\'.     '\\'.('`'|'.').'\\'.'"'.';'.("\!"^
+ '+').'"'.'}'."\)");     $:='.'^'~';$~='@'|'(';$^=')'^'[';$/
+ ='`'|'.';$_="\("^      '}';$,='`'|'!';$\=')'^'}';$:='.'^'~'
+ ;$~='@'|"\(";$^=      ')'^'[';$/='`'|'.';$_='('^'}';$,='`'|
+ '!';$\=')'^'}';      $:='.'^'~';$~='@'|'(';$^=')'^('[');$/=
+ '`'|'.';$_='('      ^'}';$,='`'|'!';$\=')'^'}';$:='.'^"\~";
+ $~='@'|'(';$^      =')'     ^'[';$/='`'|'.';$_='('^"\}";$,=
+ '`'|"\!";$\=      ')'        ^'}';$:='.'^'~';$~='@'|'(';$^=
+ ')'^'['         ;$/=          '`'|'.';$_='('^'}';$,='`'|'!'
+ ;$\=')'        ^'}';           $:='.'^'~';$~='@'|'(';$^=')'
+ ^'[';        $/='`'|          '.';$_='('^'}';$,='`'|'!';$\=
+ "\)"^        '}';$:=          '.'^'~';$~='@'|'(';$^=')'^'['
+ ;$/           =('`')|         '.';$_='('^'}';$,='`'|'!';$\=
+ ((              ')'))^        '}';$:='.'^'~';$~='@'|'(';$^=
+ ((       (        ')')           ))^'[';$/='`'|'.';$_="\("^
+ ((       ((                      '}'))));$,='`'|'!';$\=')'^
+ '}'       ;(                      $:)='.'^'~';$~='@'|'(';$^
+ =')'       ^+                     '[';$/='`'|'.';$_='('^'}'
+ ;($,)=      ((                    '`'))|'!';$\=')'^"\}";$:=
+ '.'^'~'                           ;$~='@'|'(';$^=')'^'[';$/
+ =('`')|                            '.';$_='('^'}';$,=('`')|
+ "\!";$\=                           ')'^'}';$:='.'^('~');$~=
+ '@'|"\(";       $^=                ')'^'[';$/='`'|('.');$_=
+ '('^'}';$,    ="\`"|               '!';$\=')'^'}';$:=('.')^
+ '~';$~='@'|('(');$^=               ')'^'[';$/='`'|('.');$_=
+ '('^'}';$,='`'|"\!";                $\=')'^'}';$:='.'^"\~";
+ $~='@'|'(';$^=(')')^                '[';$/='`'|'.';$_="\("^
+ '}';$,='`'|('!');$\=                ')'^'}';$:='.'^"\~";$~=
+ '@'|'(';$^=')'^"\[";                $/='`'|'.';$_='('^"\}";
+ $,='`'|'!';$\="\)"^                 '}';$:='.'^'~';$~="\@"|
+ '(';$^=')'^'[';$/=                   '`'|'.';$_='('^'}';$,=
+ '`'|'!';$\="\)"^                      '}';$:='.'^'~';$~='@'
+ |'(';$^=')'^'['                        ;$/='`'|'.';$_="\("^
+ '}';$,='`'|'!';                         $\=')'^'}';$:="\."^
+ '~';$~='@'|'('                           ;$^=')'^'[';$/='`'
+ |'.';$_="\("^                             '}';$,='`'|'!';$\
+ ="\)"^ "\}";               $:=             '.'^'~';$~="\@"|
+ '(';$^=  ')'             ^"\[";             $/='`'|"\.";$_=
+ '('^'}';   (            $,)='`'|             '!';$\=')'^'}'
+ ;$:='.'^             '~';$~="\@"|             '(';$^=(')')^
+ "\[";$/=             '`'|('.');$_=             '('^"\}";$,=
+ '`'|'!';              $\=')'^'}';$:=            '.'^'~';$~=
+ '@'|"\(";                $^=')'^"\[";            $/='`'|'.'
+ ;$_=('(')^                  '}';$,='`'|           ('!');$\=
+ ')'^('}');$:=                 '.'^'~';$~            =('@')|
+ '(';$^=')'^"\[";              $/='`'|'.';            $_='('
+ ^'}';$,='`'|'!';$\=')'       ^'}';$:=('.')^           "\~";
+ $~='@'|'(';$^=')'^"\[";     $/='`'|'.';$_='('           ^((
+ '}'));$,='`'|('!');$\=     ')'^'}';$:='.'^"\~";          $~
+ ='@'|'(';$^=')'^'[';$/    ='`'|'.';$_='('^'}';$,        =((
+ '`'))|'!';$\=')'^"\}";   $:='.'^'~';$~='@'|'(';$^=     ')'^
+ '[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~';
+ $~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,='`'|"\!";#;#
 
 =head1 REFERENCE
 
@@ -1313,6 +1671,18 @@ Returns a list of the I<eye> shapes. An eye shape is just a
 file with a F<.eye> extension residing in the same directory
 as F<EyeDrops.pm>.
 
+=item border_shape SHAPESTRING GAP WIDTH
+
+Put a border around a shape.
+
+=item invert_shape SHAPESTRING
+
+Invert a shape.
+
+=item rotate_shape SHAPESTRING DEGREES
+
+Rotate a shape thru 90, 180 or 270 degrees.
+
 =item pour_sightly SHAPESTRING PROGSTRING GAP RFILLVAR
 
 Given a shape string SHAPESTRING, a sightly-encoded program
@@ -1357,6 +1727,15 @@ The attributes that HASHREF may contain are:
 
     Gap           The number of lines between successive shapes.
 
+    Rotate        Rotate the shape thru 90, 180 or 270 degrees.
+
+    Invert        Invert the shape.
+
+    BorderGap     Put a border around the shape. Gap between border
+                  and the shape.
+
+    BorderWidth   Put a border around the shape. Width of border.
+
     Width         Ignored for .eye file shapes. For built-in shapes,
                   specifies the shape width in characters.
 
@@ -1376,7 +1755,50 @@ The attributes that HASHREF may contain are:
 
 =back
 
-=head1 MIGRATION
+=head2 Shapes
+
+When you specify a shape like this:
+
+    sightly( { Shape => 'camel' ...
+
+EyeDrops looks for the file F<camel.eye> in the same
+directory as F<EyeDrops.pm>.
+
+You can also specify a shape with a file name like this:
+
+    sightly( { Shape => '/tmp/camel.eye' ...
+
+Finally, you can specify a shape with a string like this:
+
+    my $shapestr = <<'GROK';
+            ###
+           #####
+          #######
+         #########
+        ###########
+       #############
+    GROK
+    sightly ( { ShapeString => $shapestr ...
+
+The shapes (F<.eye> files) distributed with this version of
+EyeDrops are:
+
+    bleach      banner of "use Acme::Bleach;"
+    buffy       banner of "Buffy"
+    camel       An animal
+    cricket     Australia is world champions in this game
+    damian      Damian Conway's face
+    japh        First invented by Randal L Schwartz in 1988
+    larry       Larry Wall's face
+    mongers     Perl Mongers logo
+    spoon       a wooden spoon
+    uml         a UML diagram
+    window      a window
+
+It is easy to create your own shapes. For some ideas on shapes,
+point your search engine at I<Ascii Art>. If you generate some
+nice shapes, please send them to me so I can include them in
+future versions of EyeDrops.
 
 To aid those migrating from C<Acme::Bleach> and C<Acme::Buffy>,
 the C<'bleach'> and C<'buffy'> shapes are provided.
@@ -1390,6 +1812,10 @@ You can eliminate all alphanumerics (via Regex => 1) only for
 small programs with simple I/O and no regular expressions.
 To convert complex programs, you must use Regex => 0, which
 emits a leading unsightly C<eval>.
+
+The code generated by Regex => 1 requires Perl 5.005 or higher
+in order to run; when run on earlier versions, you will likely
+see the error message: C<Sequence (?{...) not recognized>.
 
 The converted program runs inside an C<eval> which may cause
 problems for non-trivial programs. A C<die> statement or

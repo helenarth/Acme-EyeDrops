@@ -33,3 +33,10 @@ Revision history for Perl extension EyeDrops
 	- minor fixes to demo/sightly.pl
 	- new shape file, spoon.eye
 	- minor improvements to documentation
+
+1.00	Sat Nov 10 15:12:11 2001
+
+	- new shapes: larry, damian, cricket, mongers
+	- new functions: border_shape, invert_shape, rotate_shape
+	- new attributes: Rotate, Invert, BorderGap, BorderWidth
+	- minor improvements to documentation
