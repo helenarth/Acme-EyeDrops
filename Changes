@@ -189,3 +189,12 @@ Revision history for Perl extension EyeDrops
 	- new shape: acme
 	- code: minor changes
 	- documentation: minor changes
+
+1.16	Sun Nov 3 19:31:14 2002
+
+	- new shape: schwern
+	- new shape: naw
+	- new shape: gelly
+	- minor change to shape: acme
+	- documentation: minor changes
+	- documentation: added 'Naked Arm Wrestling' section

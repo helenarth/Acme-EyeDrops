@@ -20,6 +20,7 @@ lib/Acme/damian.eye
 lib/Acme/dipsy.eye
 lib/Acme/eugene.eye
 lib/Acme/eye.eye
+lib/Acme/gelly.eye
 lib/Acme/golfer.eye
 lib/Acme/japh.eye
 lib/Acme/jon.eye
@@ -31,12 +32,14 @@ lib/Acme/london.eye
 lib/Acme/merlyn.eye
 lib/Acme/mongers.eye
 lib/Acme/mosquito.eye
+lib/Acme/naw.eye
 lib/Acme/parrot.eye
 lib/Acme/pgolf.eye
 lib/Acme/pony.eye
 lib/Acme/pony2.eye
 lib/Acme/riding.eye
 lib/Acme/santa.eye
+lib/Acme/schwern.eye
 lib/Acme/simon.eye
 lib/Acme/spoon.eye
 lib/Acme/tonick.eye

@@ -14,7 +14,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 reduce_shape expand_shape
                 pour_sightly sightly);
-$VERSION = '1.15';
+$VERSION = '1.16';
 
 my @C = map {"'" . chr() . "'"} 0..255; $C[39]  = q#"'"#;
 my $q;
@@ -759,17 +759,13 @@ my %default_arg = (
    FillerVar         => []
 );
 
-sub get_builtin_shapes {
-   sort keys %builtin_shapes;
-}
-
+sub get_builtin_shapes { sort keys %builtin_shapes }
 sub get_eye_shapes {
-   my $dir = $this_dir ? $this_dir : '.';
    local *DD;
-   opendir(DD, $dir) or return ();
+   opendir(DD, $this_dir || '.') or return ();
    my @eye = sort map { /(.+)\.eye$/ } readdir(DD);
    closedir(DD);
-   return @eye;
+   @eye;
 }
 
 sub sightly {
@@ -787,9 +783,7 @@ sub sightly {
       open(SSS, $arg{SourceFile}) or
          die "open '$arg{SourceFile}': $!";
       binmode(SSS) if $arg{Binary};
-      {
-         local $/ = undef; $arg{SourceString} = <SSS>;
-      }
+      local $/ = undef; $arg{SourceString} = <SSS>;
       close(SSS);
    }
 
@@ -798,21 +792,19 @@ sub sightly {
       $shapestr = $arg{ShapeString};
    } elsif ($arg{Shape}) {
       my @shapes = split(/,/, $arg{Shape});
-      {
-         local $/ = undef;
-         for my $s (@shapes) {
-            if (exists($builtin_shapes{$s})) {
-               $shapestr .= $builtin_shapes{$s}->(\%arg);
-            } else {
-               my $f = $s =~ m#[./]# ? $s :
-                          $this_dir . $s . $sightly_suffix;
-               local *SSS;
-               open(SSS, $f) or die "open '$f': $!";
-               $shapestr .= <SSS>;
-               close(SSS);
-            }
-            $shapestr .= "\n" x $arg{Gap} if $arg{Gap};
+      local *SSS;
+      local $/ = undef;
+      for my $s (@shapes) {
+         if (exists($builtin_shapes{$s})) {
+            $shapestr .= $builtin_shapes{$s}->(\%arg);
+         } else {
+            my $f = $s =~ m#[./]# ? $s :
+                       $this_dir . $s . $sightly_suffix;
+            open(SSS, $f) or die "open '$f': $!";
+            $shapestr .= <SSS>;
+            close(SSS);
          }
+         $shapestr .= "\n" x $arg{Gap} if $arg{Gap};
       }
    } elsif ($arg{Width}) {
       die "invalid width $arg{Width} (must be > 3)"
@@ -820,22 +812,12 @@ sub sightly {
       $shapestr = '#' x $arg{Width};
    }
    if ($shapestr) {
-      if ($arg{Rotate}) {
-         $shapestr = rotate_shape($shapestr, $arg{Rotate},
-                        $arg{RotateType}, $arg{RotateFlip});
-      }
-      if ($arg{Reflect}) {
-         $shapestr = reflect_shape($shapestr);
-      }
-      if ($arg{Reduce}) {
-         $shapestr = reduce_shape($shapestr, $arg{Reduce});
-      }
-      if ($arg{Expand}) {
-         $shapestr = expand_shape($shapestr, $arg{Expand});
-      }
-      if ($arg{Invert}) {
-         $shapestr = invert_shape($shapestr);
-      }
+      $arg{Rotate} and $shapestr = rotate_shape($shapestr, $arg{Rotate},
+                                   $arg{RotateType}, $arg{RotateFlip});
+      $arg{Reflect} and $shapestr = reflect_shape($shapestr);
+      $arg{Reduce} and $shapestr = reduce_shape($shapestr, $arg{Reduce});
+      $arg{Expand} and $shapestr = expand_shape($shapestr, $arg{Expand});
+      $arg{Invert} and $shapestr = invert_shape($shapestr);
       if ($arg{BorderGap}       or $arg{BorderWidth}       or
           $arg{BorderGapLeft}   or $arg{BorderWidthLeft}   or
           $arg{BorderGapRight}  or $arg{BorderWidthRight}  or
@@ -1408,14 +1390,14 @@ where the shape C<larry2> is a caricature contributed by Ryan King:
 
 Let's get more ambitious and create a big self-printing I<JAPH>.
 
-    my $src = <<'PROG';
+    my $src = <<'FLAMING_OSTRICHES';
     open 0;
     $/ = undef;
     $x = <0>;
     close 0;
     $x =~ tr/!-~/#/;
     print $x;
-    PROG
+    FLAMING_OSTRICHES
     print sightly( { Shape         => 'japh',
                      SourceString  => $src,
                      Regex         => 1 } );
@@ -1617,6 +1599,10 @@ and easier still for a self-printing shape:
 
     open$%;print<0>
 
+or self-printing replacing non white space with C<'#'>:
+
+    open$%;print+map{y;!-~;#;;$_}<0>
+
 =head2 A Somersaulting Camel
 
 Let's extend the Buffy example of the previous section to produce
@@ -1776,6 +1762,21 @@ Why 12,032 camels? Combining the main options q, m, i, u, r, h, v
 can produce 128 different camels. And there are 94 printable
 characters available for the second argument, making a total
 of 128 * 94 = 12,032 camels.
+
+=head2 Naked Arm Wrestling
+
+The final auction at Y::E 2002 in Munich featured an epic athletic
+contest which you can remember with:
+
+    print sightly( { Regex         => 1,
+                     Shape         => 'naw',
+                     Indent        => 1,
+                     SourceString  => <<'NAKED_ARM_WRESTLING' } );
+    $/='';open$%;$x=<0>;$y=<0>;
+    substr($y,428,$%)='     AAAAARRRGGGHHH!!!';
+    map{system$^O=~Win?CLS:'clear';
+    print$_&1?$y:$x;sleep!$%+($_&1)}$%..9
+    NAKED_ARM_WRESTLING
 
 =head2 Sierpinski Triangles
 
@@ -2556,7 +2557,7 @@ The attributes that HASHREF may contain are:
     Width         Ignored for .eye file shapes. For built-in shapes,
                   interpreted appropriately for the shape, typically the
                   shape width in characters. If no shape is specified,
-                  a block of Width characters is generated.
+                  a rectangular block of Width characters is generated.
 
     TrapEvalDie   Boolean.
                   Add closing 'die $@ if $@' to generated program.
@@ -2587,39 +2588,43 @@ When you specify a shape like this:
 
 first a built-in C<fred> shape is looked for, then EyeDrops looks
 for the file F<fred.eye> in the same directory as F<EyeDrops.pm>.
-If you specify a C</> or C<.> in the Shape attribute, a file
-with that name is looked for instead. For example:
+If you specify a C<'/'> or C<'.'> in the Shape attribute, a file
+with that name is looked for instead, for example:
 
     sightly( { Shape => '/tmp/fred.eye' ...
 
-Finally, you may specify a shape with a string. For example:
+Finally, you may specify a shape with a string, for example:
 
-    my $shapestr = <<'GROK';
+    my $shapestr = <<'FLAMING_OSTRICHES';
              #####
     #######################
-    GROK
+    FLAMING_OSTRICHES
     sightly ( { ShapeString => $shapestr ...
 
 If you specify a shape without a source file:
 
     print sightly( { Shape => 'camel' } );
 
-a no-op filler is used to fill the shape.
+a I<no-op> filler is used to fill the shape.
 
 If you specify a source file without a shape:
 
     print sightly( { SourceFile => 'helloworld.pl' } );
 
-a string without any shape (or newlines) is generated.
-You can break this string into fixed width lines via the
-Width attribute:
+a shapeless sightly string without any spaces or newlines is
+generated. You can break this string into fixed width lines
+via the Width attribute:
 
     print sightly( { SourceFile => 'helloworld.pl',
                      Width      => 40 } );
 
+Generally, you should specify the Width attribute of I<built-in>
+shapes. Notice that the Width attribute is ignored for F<.eye>
+file shapes.
+
 =head2 Shape Reference
 
-The built-in shapes are:
+The I<built-in> shapes are:
 
     banner      Linux banner command (/usr/games/banner -w Width)
                 of text in BannerString attribute
@@ -2648,6 +2653,7 @@ The F<.eye> file shapes distributed with this version of EyeDrops are:
     dipsy       Teletubbies Dipsy (also london.pm infobot name)
     eugene      Champion Perl golfer, Eugene van der Pijll
     eye         An eye
+    gelly       Featured speaker at every session of Y::E 2003, Paris
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
     jon         Kick-started the Perl 6 development effort by smashing
@@ -2662,6 +2668,7 @@ The F<.eye> file shapes distributed with this version of EyeDrops are:
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
     mosquito    A mosquito
+    naw         Naked Arm Wrestling (Y::E 2002, Munich)
     parrot      Originally an April fool's joke, the joke was that
                 it was not a joke
     pgolf       Perl Golf logo (inspired by `/anick)
@@ -2669,6 +2676,7 @@ The F<.eye> file shapes distributed with this version of EyeDrops are:
     pony2       Picture of a Pony
     riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
+    schwern     is my bitch
     simon       The inventor of parrot
     spoon       A wooden spoon
     tonick      Pictorial representation of a golf contest between Ton
@@ -2724,6 +2732,9 @@ in place of the Linux banner command.
 Andrew Savige <asavige@cpan.org>
 
 =head1 SEE ALSO
+
+Acme's Y::E 2002 naked arm wrestling movie at
+F<http://astray.com/tmp/yapcbits3.mov>.
 
 Perl Obfuscation Engines, for example, yaoe by Perl Monk mtve,
 at F<http://www.perlmonks.com/index.pl?node_id=161087>
