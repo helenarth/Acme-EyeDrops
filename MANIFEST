@@ -1,0 +1,15 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+lib/Acme/EyeDrops.pm
+lib/Acme/bleach.eye
+lib/Acme/buffy.eye
+lib/Acme/camel.eye
+lib/Acme/japh.eye
+lib/Acme/uml.eye
+lib/Acme/window.eye
+t/sightly.t
+demo/sightly.pl
+demo/helloworld.pl
+demo/examples.pl
