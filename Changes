@@ -283,4 +283,21 @@ Revision history for Perl extension EyeDrops
 	- new shape: heart (thanks `/anick)
 	- new shape: rose
 	- test vshape.t: fixed Linux-only banner test
-	- Build.PL: simplified for Module::Build v0.19
+	- Build.PL: fixed for Module::Build v0.19
+
+1.40	Sun June 29 11:19:33 2003
+
+	- There were getting to be too many .eye files cluttering the
+	  vitally important Acme root directory, so I moved them from
+	  Acme directory to Acme/EyeDrops directory (if you have installed
+	  a previous version of Acme::EyeDrops, suggest you delete old
+	  .eye files in the Acme root directory)
+	- new shape: flag_canada (to mark Canada day, thanks `/anick)
+	- new shape: map_australia
+	- new shape: hipowls
+	- new built-in shape: all
+	- minor change to shape: rose
+	- removed demo/helloworld.pl from distribution
+	- removed demo/hellotest.pl from distribution
+	- removed demo/examples.pl from distribution
+	- updated test programs to not rely on demo directory

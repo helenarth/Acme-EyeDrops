@@ -7,6 +7,9 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 print "1..6\n";
 
+my $hellostr = <<'HELLO';
+print "hello world\n";
+HELLO
 my $camelstr = get_eye_string('camel');
 $camelstr .= get_eye_string('window');
 my $tmpf = 'bill.tmp';
@@ -14,7 +17,7 @@ my $tmpf = 'bill.tmp';
 # Run camel,window helloworld.pl on itself twice ---
 
 my $prog = sightly({ Shape         => 'camel,window',
-                     SourceFile    => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Regex         => 1 } );
 my $progorig = $prog;
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";

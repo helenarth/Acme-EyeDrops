@@ -5,12 +5,6 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 # Test program for module bug raised by Mark Puttman.
 
-sub build_file {
-   my ($f, $d) = @_;
-   local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
-}
-
 # --------------------------------------------------
 
 print "1..4\n";
@@ -45,9 +39,6 @@ my $obj=MyEye->new("mark");
 $obj->printName();
 GROK
 
-build_file('t/eye.tmp', $module_str);
-build_file('t/myeye.pl', $main_str);
-
 my $camelstr = get_eye_string('camel');
 my $japhstr = get_eye_string('japh');
 my $tmpf = 'bill.tmp';
@@ -55,24 +46,20 @@ my $tmpf = 'bill.tmp';
 # JAPH  MyEye.pm -----------------------------------
 
 my $prog = sightly({ Shape         => 'japh',
-                     SourceFile    => 't/eye.tmp',
+                     SourceString  => $module_str,
                      Regex         => 1 } );
-unlink('t/eye.tmp');
-chdir('t') or die "chdir: $!";
 open(TT, '>MyEye.pm') or die "open MyEye.pm: $!";
 print TT $prog;
 close(TT);
 $prog =~ tr/!-~/#/;
 $prog eq $japhstr or print "not ";
 print "ok 1\n";
-chdir('..') or die "chdir: $!";
 
 # Camel myeye.pl -----------------------------------
 
 $prog = sightly({ Shape         => 'camel',
-                  SourceFile    => 't/myeye.pl',
+                  SourceString  => $main_str,
                   Regex         => 1 } );
-chdir('t') or die "chdir: $!";
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
@@ -85,10 +72,10 @@ print "ok 3\n";
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
 print "ok 4\n";
-unlink $tmpf;
 
 # --------------------------------------------------
 
-chdir('..') or die "chdir: $!";
+unlink $tmpf;
+unlink 'MyEye.pm';
 
 exit 0;

@@ -7,13 +7,16 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 print "1..27\n";
 
+my $hellostr = <<'HELLO';
+print "hello world\n";
+HELLO
 my $camelstr = get_eye_string('camel');
 my $tmpf = 'bill.tmp';
 
 # -------------------------------------------------
 
 my $bigprog = sightly({ Shape         => 'camel',
-                        SourceFile    => 'demo/helloworld.pl',
+                        SourceString  => $hellostr,
                         Expand        => 1,
                         Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -32,7 +35,7 @@ print "ok 3\n";
 # -------------------------------------------------
 
 my $prog = sightly({ ShapeString   => $bigprog,
-                     SourceFile    => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Reduce        => 1,
                      Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -51,7 +54,7 @@ print "ok 6\n";
 # -------------------------------------------------
 
 my $rotprog = sightly({ Shape         => 'camel',
-                        SourceFile    => 'demo/helloworld.pl',
+                        SourceString  => $hellostr,
                         Rotate        => 90,
                         Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -70,7 +73,7 @@ print "ok 9\n";
 # -------------------------------------------------
 
 $rotprog = sightly({ Shape          => 'camel',
-                     SourceFile     => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Rotate         => 90,
                      TrailingSpaces => 1,
                      Regex          => 1 } );
@@ -90,7 +93,7 @@ print "ok 12\n";
 # -------------------------------------------------
 
 $prog = sightly({ ShapeString   => $rotprog,
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   Rotate        => 270,
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -109,7 +112,7 @@ print "ok 15\n";
 # -------------------------------------------------
 
 $rotprog = sightly({ Shape         => 'camel',
-                     SourceFile    => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Rotate        => 90,
                      RotateType    => 1,
                      Regex         => 1 } );
@@ -129,7 +132,7 @@ print "ok 18\n";
 # -------------------------------------------------
 
 $prog = sightly({ Shape         => 'camel',
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   Rotate        => 90,
                   RotateType    => 0,
                   Reduce        => 1,
@@ -150,7 +153,7 @@ print "ok 21\n";
 # -------------------------------------------------
 
 $rotprog = sightly({ Shape         => 'camel',
-                     SourceFile    => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Rotate        => 180,
                      Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -169,7 +172,7 @@ print "ok 24\n";
 # -------------------------------------------------
 
 $prog = sightly({ ShapeString   => $rotprog,
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   Rotate        => 180,
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";

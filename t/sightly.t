@@ -7,6 +7,16 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 print "1..35\n";
 
+my $hellostr = <<'HELLO';
+print "hello world\n";
+HELLO
+my $helloteststr = <<'HELLOTEST';
+# Just a test.
+use strict;
+for my $i (0..3) {
+   print "hello test $i\n";
+}
+HELLOTEST
 my $camelstr = get_eye_string('camel');
 my $umlstr = get_eye_string('uml');
 my $windowstr = get_eye_string('window');
@@ -18,7 +28,7 @@ my $tmpf = 'bill.tmp';
 # Camel helloworld.pl ------------------------------
 
 my $prog = sightly({ Shape         => 'camel',
-                     SourceFile    => 'demo/helloworld.pl',
+                     SourceString  => $hellostr,
                      Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
@@ -36,7 +46,7 @@ print "ok 3\n";
 # uml/window helloworld.pl -------------------------
 
 $prog = sightly({ Shape         => 'uml,window',
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
@@ -132,7 +142,7 @@ print "ok 14\n";
 # Camel helloworld.pl (FillerVar=';')---------------
 
 $prog = sightly({ Shape         => 'camel',
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   FillerVar     => ';',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -151,7 +161,7 @@ print "ok 17\n";
 # Camel helloworld.pl (FillerVar=';#')--------------
 
 $prog = sightly({ Shape         => 'camel',
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   FillerVar     => ';#',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -170,7 +180,7 @@ print "ok 20\n";
 # Camel helloworld.pl (FillerVar='')----------------
 
 $prog = sightly({ Shape         => 'camel',
-                  SourceFile    => 'demo/helloworld.pl',
+                  SourceString  => $hellostr,
                   FillerVar     => '',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -188,7 +198,7 @@ print "ok 23\n";
 # Yanick4 hellotest.pl -----------------(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
-                  SourceFile    => 'demo/hellotest.pl',
+                  SourceString  => $helloteststr,
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
@@ -207,7 +217,7 @@ print "ok 26\n";
 # Yanick4 hellotest.pl (FillerVar=';')--(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
-                  SourceFile    => 'demo/hellotest.pl',
+                  SourceString  => $helloteststr,
                   FillerVar     => ';',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -227,7 +237,7 @@ print "ok 29\n";
 # Yanick4 hellotest.pl (FillerVar='')---(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
-                  SourceFile    => 'demo/hellotest.pl',
+                  SourceString  => $helloteststr,
                   FillerVar     => '',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
@@ -248,7 +258,7 @@ print "ok 32\n";
 
 $prog = sightly({ Shape         => 'siertri',
                   Width         => 5,
-                  SourceFile    => 'demo/hellotest.pl',
+                  SourceString  => $helloteststr,
                   FillerVar     => ';',
                   Regex         => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
