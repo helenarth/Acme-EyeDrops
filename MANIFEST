@@ -6,6 +6,7 @@ lib/Acme/EyeDrops.pm
 lib/Acme/a.eye
 lib/Acme/acme.eye
 lib/Acme/alien.eye
+lib/Acme/beer.eye
 lib/Acme/bleach.eye
 lib/Acme/buffy.eye
 lib/Acme/buffy2.eye
@@ -14,6 +15,7 @@ lib/Acme/buffy4.eye
 lib/Acme/camel.eye
 lib/Acme/camel2.eye
 lib/Acme/camel3.eye
+lib/Acme/campm.eye
 lib/Acme/candle.eye
 lib/Acme/china1.eye
 lib/Acme/coffee.eye
