@@ -277,3 +277,10 @@ Revision history for Perl extension EyeDrops
 	- function make_banner: strip leading spaces if any
 	- new test: vshape.t
 	- reshape.t, sightly2.t: new test cases added
+
+1.35	Sun June 15 09:09:59 2003
+
+	- new shape: heart (thanks `/anick)
+	- new shape: rose
+	- test vshape.t: fixed Linux-only banner test
+	- Build.PL: simplified for Module::Build v0.19

@@ -31,6 +31,7 @@ lib/Acme/eugene.eye
 lib/Acme/eye.eye
 lib/Acme/gelly.eye
 lib/Acme/golfer.eye
+lib/Acme/heart.eye
 lib/Acme/japh.eye
 lib/Acme/jon.eye
 lib/Acme/kansai_pm.eye
@@ -49,6 +50,7 @@ lib/Acme/pgolf.eye
 lib/Acme/pony.eye
 lib/Acme/pony2.eye
 lib/Acme/riding.eye
+lib/Acme/rose.eye
 lib/Acme/santa.eye
 lib/Acme/santa2.eye
 lib/Acme/schwern.eye

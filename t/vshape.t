@@ -18,9 +18,12 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 # --------------------------------------------------
 
+# make_banner is linux only (also requires /usr/games/banner executable)
+my $have_banner = $^O eq 'linux' && -x '/usr/games/banner';
+
 my @eye_shapes = get_eye_shapes();
 my $n_tests = @eye_shapes * 6 + 12 * 6;
-$n_tests += 6 if $^O eq 'linux';    # make_banner is linux only
+$n_tests += 6 if $have_banner;
 
 print "1..$n_tests\n";
 
@@ -62,6 +65,6 @@ my $p = sightly( { SourceString  => "knob\n",
                    Gap           => 3 } );
 $p =~ tr/!-~/#/;
 test_one_shape('multiple_shapes', $p);
-test_one_shape('make_banner', make_banner(70, "a bc")) if $^O eq 'linux';
+test_one_shape('make_banner', make_banner(70, "a bc")) if $have_banner;
 
 exit 0;
