@@ -44,6 +44,7 @@ sub BuildFile {
 
 sub get_shape_str {
    my $sfile = "lib/Acme/$_[0].eye";
+   local *TT;
    open(TT, $sfile) or die "open '$sfile': $!";
    local $/ = undef;
    my $str = <TT>;
@@ -82,7 +83,7 @@ chdir('t') or die "chdir: $!";
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-my $outstr = `$^X -w $tmpf`;
+my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 2\n";

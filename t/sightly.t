@@ -5,6 +5,7 @@ print "1..14\n";
 
 sub get_shape_str {
    my $sfile = "lib/Acme/$_[0].eye";
+   local *TT;
    open(TT, $sfile) or die "open '$sfile': $!";
    local $/ = undef;
    my $str = <TT>;
@@ -26,7 +27,7 @@ my $prog = sightly({ Shape         => 'camel',
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-my $outstr = `$^X -w $tmpf`;
+my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 1\n";
@@ -44,7 +45,7 @@ $prog = sightly({ Shape         => 'uml,window',
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-$outstr = `$^X -w $tmpf`;
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 4\n";
@@ -64,7 +65,7 @@ $prog = sightly({ Shape         => 'window',
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-$outstr = `$^X -w $tmpf`;
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 7\n";
@@ -90,10 +91,10 @@ print TT $prog;
 close(TT);
 # This seems to stop on CTRL-Z on Windows!
 # Something to do with binmode ??
-#   $outstr = `$^X -w $tmpf`;
+#   $outstr = `$^X -w -Mstrict $tmpf`;
 # so use a temporary file instead.
 my $tmpf2 = 'bill2.tmp';
-system("$^X -w $tmpf >$tmpf2");
+system("$^X -w -Mstrict $tmpf >$tmpf2");
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 10\n";
@@ -129,9 +130,13 @@ $prog = sightly({ Shape         => 'japh',
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-$outstr = `$^X -w $tmpf`;
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 13\n";
 $outstr eq $japhstr or print "not ";
 print "ok 14\n";
+
+# --------------------------------------------------
+
+unlink $tmpf;

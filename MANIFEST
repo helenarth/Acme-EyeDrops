@@ -18,11 +18,13 @@ lib/Acme/dipsy.eye
 lib/Acme/eugene.eye
 lib/Acme/golfer.eye
 lib/Acme/japh.eye
+lib/Acme/kermit.eye
 lib/Acme/larry.eye
 lib/Acme/larry2.eye
 lib/Acme/london.eye
 lib/Acme/merlyn.eye
 lib/Acme/mongers.eye
+lib/Acme/pgolf.eye
 lib/Acme/pony.eye
 lib/Acme/pony2.eye
 lib/Acme/riding.eye
@@ -33,10 +35,12 @@ lib/Acme/uml.eye
 lib/Acme/window.eye
 t/convert.t
 t/limit.t
+t/limit2.t
 t/module.t
 t/nasty.t
 t/recur.t
 t/sightly.t
+t/sightly2.t
 demo/sightly.pl
 demo/helloworld.pl
 demo/examples.pl

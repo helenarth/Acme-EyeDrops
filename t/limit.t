@@ -21,7 +21,7 @@ my $prog = sightly({ Width         => $exact,
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-my $outstr = `$^X -w $tmpf`;
+my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 2\n";
@@ -49,7 +49,7 @@ $prog = sightly({ Width         => $exact+1,
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-$outstr = `$^X -w $tmpf`;
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 9\n";
@@ -77,7 +77,7 @@ $prog = sightly({ Width         => $exact-1,
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
 print TT $prog;
 close(TT);
-$outstr = `$^X -w $tmpf`;
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 print "ok 16\n";

@@ -94,3 +94,25 @@ Revision history for Perl extension EyeDrops
 	- new shape: pony2
 	- new shape: eugene
 	- new shape: tpr
+
+1.07	Sun Mar 31 25:12:17 2002
+
+	- improved documentation, added Buffy looking in the mirror
+	- fixed EyeDrops.pm to work with Perl 5.7.3
+	  only needed to change:
+	   $src =~ tr#\\[]{}<>^_|~'`#/()()()H-!T""#;
+	  to:
+	   $src =~ tr#_\\[]{}<>^|~'`#-/()()()H!T""#;
+	  due to 'invalid range' H-! error
+	- minor change to shapes: damian, camel
+	- new shape: kermit (thanks Jason)
+	- new shape: pgolf (thanks `/anick)
+	- fixed bug where EyeDrops sometimes generated an
+	  invalid program or more shapes than it needed to
+	- new test: tlimit2.t to verify above bug fixed
+	- new test: tsightly2.t
+	- made sure test programs clean up all .tmp files
+	- added -Mstrict to all test programs to ensure
+	  they work with -w and 'use strict' too
+	- localised file globals appropriately in all test programs
+	- tested under Win98 and adjusted nasty.t accordingly
