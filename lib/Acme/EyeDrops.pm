@@ -16,7 +16,7 @@ require Exporter;
                 reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -158,6 +158,58 @@ sub _guess_ntok {
    return $slen;
 }
 
+# Return the largest number of compact tokens with combined
+# length less than $slen.
+sub _guess_compact_ntok {
+   my ($rtok, $sidx, $slen, $rexact, $fcompact) = @_;
+   my $eidx = $sidx + $slen + $slen;
+   my $tlen = 0; my $ntok = 0;
+   ${$rexact} = 0; ${$fcompact} = 0;
+   for my $i ($sidx .. $eidx) {
+      my $l = length($rtok->[$i]);
+      if ($i > $sidx+1 && $rtok->[$i-1] eq '.'
+      && substr($rtok->[$i],   0, 1) eq "'"
+      && substr($rtok->[$i-2], 0, 1) eq "'") {
+         ${$fcompact} = 1;
+         $l -= 3;    # 'a'.'b' to 'ab' saves 3 chars
+      }
+      $tlen += $l;
+      if ($tlen == $slen) {
+         ${$rexact} = 1;
+         if ($i > $sidx && $rtok->[$i] eq '.'
+         && substr($rtok->[$i-1], 0, 1) eq "'"
+         && substr($rtok->[$i+1], 0, 1) eq "'"
+         && length($rtok->[$i+1]) == 3) {
+            ${$fcompact} = 1;
+            return $ntok+2;
+         } else {
+            return $ntok+1;
+         }
+      } elsif ($tlen > $slen) {
+         return $ntok;
+      }
+      ++$ntok;
+   }
+   die "oops, slen=$slen, ntok=$ntok";
+}
+
+sub _compact_join {
+   my ($rtok, $sidx, $n) = @_;
+   my $eidx = $sidx + $n - 1;
+   my $s = "";
+   for my $i ($sidx .. $eidx) {
+      if ($i > $sidx+1 && $rtok->[$i-1] eq '.'
+      && substr($rtok->[$i],   0, 1) eq "'"
+      && substr($rtok->[$i-2], 0, 1) eq "'") {
+         # 'a'.'b' to 'ab'
+         substr($s, -2) = substr($rtok->[$i], 1);
+      } else {
+         $s .= $rtok->[$i];
+      }
+   }
+   $s;
+}
+
 # Pour $n tokens from @{$rtok} (starting at index $sidx)
 # into string ${$rstr) of length $slen.
 # Return 1 if successful, else 0.
@@ -184,9 +236,6 @@ sub _pour_line {
       ${$rstr} = join("", @{$rtok}[$sidx .. $eidx]);
       return 1;
    }
-   # ajs: it is possible to reduce number of tokens in some
-   # cases, e.g. 'a'.'b' -> 'ab'
-   # Leave for now. Do later if required.
    return 0 if $tlen > $slen;
 
    my $diff = $slen - $tlen;
@@ -203,7 +252,6 @@ sub _pour_line {
    }
 
    my $i2 = int($diff/2);
-   # my $r2 = $diff % 2;
    my $r2 = $diff & 1;
    if ($r2 == 0 and ($iquote >= 0 or $idollar >= 0)) {
       $iquote = $idollar if $iquote < 0;
@@ -249,9 +297,32 @@ sub _pour_line {
    return 0;
 }
 
+# Pour $n tokens from @{$rtok} (starting at index $sidx)
+# into string ${$rstr) of length $slen.
+# Return 1 if successful, else 0.
+sub _pour_compact_line {
+   my ($rtok, $sidx, $n, $slen, $rstr) = @_;
+   my $eidx = $sidx + $n - 1;
+   my @mytok = ();
+   for my $i ($sidx .. $eidx) {
+      if ($i > $sidx+1 && $rtok->[$i-1] eq '.'
+      && substr($rtok->[$i],   0, 1) eq "'"
+      && substr($rtok->[$i-2], 0, 1) eq "'") {
+         # 'a'.'b' to 'ab'
+         pop(@mytok);
+         my $qtok = pop(@mytok);
+         push(@mytok, substr($qtok, 0, -1) . substr($rtok->[$i], 1));
+      } else {
+         push(@mytok, $rtok->[$i]);
+      }
+   }
+   push(@mytok, $rtok->[$sidx+$n]);  # pour_line checks next token
+   _pour_line(\@mytok, 0, scalar(@mytok)-1, $slen, $rstr);
+}
+
 # Pour program $prog into shape defined by string $tlines.
 sub pour_sightly {
-   my ($tlines, $prog, $gap, $rfillvar) = @_;
+   my ($tlines, $prog, $gap, $rfillvar, $compact) = @_;
 
    $tlines =~ s/ +$//mg;
    my @tnlines = ();
@@ -351,7 +422,6 @@ sub pour_sightly {
             $outstr .= "\n"; next;
          }
          for my $it (0 .. $#{$rline}) {
-            # if ($it % 2 == 0) {
             unless ($it & 1) {
                $outstr .= ' ' x $rline->[$it]; next;
             }
@@ -365,14 +435,26 @@ sub pour_sightly {
                splice(@ptok, $sidx+1, 0, @itok);
                $iendprog += $tlen if $sidx < $iendprog;
             } else {
-               my $n = _guess_ntok(\@ptok, $sidx, $tlen, \$exactfit);
+               my $fcompact = 0;
+               my $n = $compact ?
+               _guess_compact_ntok(\@ptok, $sidx, $tlen,
+                  \$exactfit, \$fcompact) :
+               _guess_ntok(\@ptok, $sidx, $tlen, \$exactfit);
                if ($exactfit) {
-                  $outstr .= join("", @ptok[$sidx .. $sidx+$n-1]);
+                  if ($fcompact) {
+                     $outstr .= _compact_join(\@ptok, $sidx, $n);
+                  } else {
+                     $outstr .= join("", @ptok[$sidx .. $sidx+$n-1]);
+                  }
                   $sidx += $n;
                } else {
                   my $str = "";
                   while ($n > 0) {
-                     if (_pour_line(\@ptok,$sidx,$n,$tlen,\$str)) {
+                     my $b = $fcompact ?
+                     _pour_compact_line(\@ptok, $sidx, $n, $tlen,
+                        \$str) :
+                     _pour_line(\@ptok, $sidx, $n, $tlen, \$str);
+                     if ($b) {
                         # warn "line $linenum: ok, n=$n\n";
                         last;
                      } else {
@@ -569,7 +651,6 @@ sub rotate_shape {
 sub make_triangle {
    my $rarg = shift;
    my $width = $rarg->{Width};
-   # ++$width if $width % 2 == 0;
    ++$width unless $width & 1;
    $width < 9 and $width = 9;
    my $height = int($width/2) + 1;
@@ -653,6 +734,7 @@ my %default_arg = (
    SourceString      => "",
    BannerString      => "",
    Regex             => 0,
+   Compact           => 0,
    Print             => 0,
    Binary            => 0,
    Gap               => 0,
@@ -825,21 +907,24 @@ sub sightly {
       $danger and @fill = ( '$:', '$~', '$^' );
    }
 
-   return pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill)
-      unless ($arg{TrapEvalDie} or $arg{TrapWarn});
+   return pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill,
+      $arg{Compact}) unless ($arg{TrapEvalDie} or $arg{TrapWarn});
 
    if ($arg{TrapEvalDie}) {
       if ($arg{TrapWarn}) {
          return 'local $SIG{__WARN__}=sub{};' .
-            pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill) .
+            pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill,
+            $arg{Compact}) .
             "\n\n\n;die \$\@ if \$\@\n";
       } else {
          return pour_sightly($shapestr, $sightlystr, $arg{Gap},
-                \@fill) .  "\n\n\n;die \$\@ if \$\@\n";
+                \@fill, $arg{Compact}) .
+                "\n\n\n;die \$\@ if \$\@\n";
       }
    } else {
       return 'local $SIG{__WARN__}=sub{};' .
-         pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill);
+         pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill,
+         $arg{Compact});
    }
 }
 
@@ -1284,10 +1369,8 @@ Buffy looking in the mirror can now be created with:
     perl b.pl       (should show Buffy looking in the mirror)
 
 Drat. This requires two I<buffy2> shapes. What to do?
-Since significantly shortening F<k.pl> above seems unlikely
-(but if you do, please let me know!), we resort to writing
-a post processor program, F<pp.pl>, to append the required
-number of spaces to each line:
+Well, you could write a post processor program, F<pp.pl>,
+to append the required number of spaces to each line:
 
     chop,$==y===c,$=<$-or$-=$=for@a=<>;
     print$_.($"x($--length)).$/for@a
@@ -1300,8 +1383,71 @@ and finally produce I<Buffy looking in the mirror> with:
 
     sightly.pl -r -f kk.pl -s buffy2 >b.pl
     perl pp.pl b.pl >bb.pl
-    cat bb.pl        (should show Buffy's face)
-    perl bb.pl       (should show Buffy looking in the mirror)
+
+For this example, however, the Compact attribute provides a
+more direct solution, without requiring any trailing spaces:
+
+    sightly.pl -mr -f k.pl -s buffy2 >buffy.pl
+    cat buffy.pl     (should show Buffy's face)
+    perl buffy.pl    (should show Buffy looking in the mirror)
+
+producing F<buffy.pl>:
+
+                    ''=~('(?{'.(
+                 '`'|'%').('['^'-'
+               ).('`'|'!').('`'|','
+              ).+               ( '"'
+             ).(                (  '`'
+            )|+                 (   '/'
+           )).                  (   '['
+          ^((                  (     '+'
+         )))              ).('`'      |((
+         '%'          ))).      (     '`'
+        |((       '.')           )     ).+
+        (((     ((                (     (((
+        (((    (                   (    (((
+        (((   (                     '\\')))
+       )))    )                      ) )  )
+       )   )))) ))))))      .'$[;'     .  (
+       (  (  ((                        (  (
+       (  (      ( (( (     ( (( (     (   (
+       (  (       '`')       ))))      )   )
+       )   )                        )))    )
+       )    )))                     )      )
+       )|      (       (   (        (     ((
+       '#'      )        )          )    )))
+        ).(('`')|                   ('(')).(
+        '`'|'/').    ('['^'+')     .',(\\$'
+        .'=='.('['     ^'"')     . '==='.+(
+        '`'|'#').')'            .  '>\\$-'
+        .'&&(\\$-=\\'          .   '$=)'.(
+        '`'|'&').('`' |      (     '/')).(
+        '['^')').'\\'     .        '@:=<' .
+        ('^'^(('`')|              "\.")).   (
+        '>').(';').(              '!'^'+'     )
+         .('['^'+').             ('['^')'     ).('`'|
+         ')').("\`"|             "\.").(      (      ('['))^
+   "\/").'\\$\\"'.(            ( "\[")^       (             (
+  (    ( "\#"))))). (        (   '-'))        .              (
+ (     ( ('(')))).(   (   (     '['))         ^              (
+ (     '"'))).'--'       .     '-'.           (              (
+ (    '`'))|'#').        (                    (               (
+ (     '-')))).          (                    (               (
+ (     ( '\\'                                 )               )
+ )     )                                      )               .
+ (     (                                      (               (
+ (     (                                      (      (         (
+ (     (                                      (      (         (
+ (     (                                      (     (          (
+ (     (                                      (     (          (
+ (     '$'))))))))))))))))))))))))).'-).'.('['^    (           (
+ (    ')')))).('`'|'%').('['^'-').('`'|'%').(('[')^            (
+ (    ')'))).('['^'(').('`'|'%').'.\\$/'.('`'|'&').(           (
+ (   '`'))|'/').('['^')').'\\@:'.('!'^'+').'"})');$:=          (
+ (   '.'))^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('         ;
+
+This is perhaps a cleaner solution, though some people
+find the plain sightly encoding more pleasing to the eye.
 
 Interestingly, showing the face upside down, rather than
 reflected, is more easily solved with:
@@ -1312,89 +1458,24 @@ and easier still for a self-printing shape:
 
     open$%;print<0>
 
-To combine I<Buffy looking in the mirror> with a (cheating) I<quine>,
-we create F<m.pl>:
-
-    $:=pop||'';open$[;print+map$:eq'mirror'?chop&&reverse.$/:$_,<0>
-
-and:
-
-    sightly.pl -r -f m.pl -s buffy2 >b.pl
-    perl pp.pl b.pl >buffy.pl
-    cat buffy.pl           (should show Buffy's face)
-    perl buffy.pl          (should show Buffy's face again)
-    perl buffy.pl mirror   (should show Buffy looking in the mirror)
-
-producing F<buffy.pl>:
-
-                    ''=~('('.'?'                                
-                 .'{'.('`'|"\%").(                              
-               '['^'-').('`'|'!').(                             
-              '`'               | ','                           
-             ).+                (  '"'                          
-            ).+                 (   (((                         
-           (((                  (   (((                         
-          (((                  (     (((                        
-         (((              '\\'))      )))                       
-         )))          ))))      )     )))                       
-        )))       )).+           (     '$'                      
-        ).+     ((                (     ':'                     
-        )))    .                   (    '='                     
-        ).(   (                     ('['))^                     
-       '+'    )                      . (  (                     
-       (   '`') )|'/')      .('['^     (  (                     
-       (  (  ((                        (  (                     
-       (  (      ( (( (     ( (( (     (   (                    
-       (  (       '+')       ))))      )   )                    
-       )   )                        )))    )                    
-       )    )))                     )      )                    
-       ))      )       )   .        (     ((                    
-       '|'      )        )          )    .((                    
-        '|'))."'"                   ."'".';'                    
-        .('`'|'/'    ).(('[')^     ('+')).(                     
-        '`'|'%').(     "\`"|     ( ('.'))).                     
-        '\\'.'$'.'['            .  (';').(                      
-        '['^'+').('['          ^   "\)").(                      
-        '`'|')').('`' |      (     '.')).(                      
-        '['^'/').'+'.     (        ('`')| (                     
-        '-')).("\`"|              "\!").(   (                   
-        '[')^('+')).              ('\\').     (                 
-         '$')."\:".(             '`'|'%')     .("\["^           
-         '*')."\'".(             '`'|'-'      )      .("\`"|    
-   ')').('['^')').(            ( "\[")^       (             (   
-  (    ( ')'))))).( (        (   '`'))        |              (  
- (     ( "\/")))).(   (   (     '['))         ^              (  
- (     ')')))."'".       (     '?')           .              (  
- (    '`')|'#').(        (                    (               ( 
- (     '`'))))|          (                    (               ( 
- (     ( '(')                                 )               ) 
- )     )                                      )               . 
- (     (                                      (               ( 
- (     (                                      (      (         (
- (     (                                      (      (         (
- (     (                                      (     (          (
- (     (                                      (     (          (
- (     '`'))))))))))))))))))))))))|'/').(('[')^    (           (
- (    '+')))).'&'.'&'.('['^')').('`'|'%').('['^'-')            .
- (    '`'|'%').('['^')').('['^'(').('`'|'%').'.'.''.           (
- (   '\\')).'$'.'/'.':'.'\\'.'$'.'_'.','.'<'.(('^')^(          (
- (   '`'))|'.')).'>'.('!'^'+').'"'.'}'.')');$:='.'^'~'         ;
-
-=head2 Thirty Two Camels
+=head2 Twelve Thousand and Thirty Two Camels
 
 Let's extend the Buffy example of the previous section to produce
-a camel-shaped program capable of emitting thirty two different
-camels when run.
+a camel-shaped program capable of emitting twelve thousand and
+thirty two different camels when run.
 
 We start with a generator program, F<gencamel.pl>:
 
     my $src = <<'END_SRC_STR';
-    $~=uc pop;open$%;chop(@~=<0>);$~=~R&&(@~=map{$-=$_+$_;join'',
-    map/.{$-}(.)/,@~}$%..$~[8]=~y~~~c/2);$~!~Q&&y,!-~,#,,$~=~I&&
-    y~ #~# ~,print$~=~M?~~reverse:$_,$/for$~=~U?reverse@~:@~
+    $~=uc shift;$:=pop||'#';open$%;chop(@~=<0>);$~=~R&&
+    (@~=map{$-=$_+$_;join'',map/.{$-}(.)/,@~}$%..33);
+    $|--&$~=~H&&next,$~!~Q&&eval"y, ,\Q$:\E,c",$~=~I&&
+    eval"y, \Q$:\E,\Q$:\E ,",$~=~M&&($_=reverse),
+    print$~=~V?/(.).?/g:$_,$/for$~=~U?reverse@~:@~
     END_SRC_STR
     $src =~ tr/\n//d;
     my $prog = sightly( { Regex         => 1,
+                          Compact       => 1,
                           Shape         => 'camel',
                           SourceString  => $src } );
     my @a = split(/\n/, $prog);
@@ -1402,87 +1483,96 @@ We start with a generator program, F<gencamel.pl>:
     $_ .= ' ' x ($max - length) for @a; $\ = "\n";
     print ' ' x ($max+2); print " $_ " for @a; print ' ' x ($max+2);
 
+Note the use of the Compact attribute, necessary here to
+squeeze the above program into a single camel shape.
+
 Running this program:
 
     perl gencamel.pl >camel.pl
 
 produces F<camel.pl>:
 
-                                       ''=~('('.'?'                
-            .'{'.(                   '`'|'%').("\["^               
-         '-').('`'|                '!').('`'|',').'"'              
-  .'\\'.'$'.  ('~').              '='.('['^'.').("\`"|             
- '#').('{'^'[').('['^            '+').('`'|'/').(('[')^            
- '+').';'.('`'|"\/").(          '['^'+').('`'|'%').('`'            
-   |'.').'\\'.'$'.'%'.        ';'.('`'|'#').('`'|"\(").(           
-        '`'|'/').('['^      '+').'('.'\\'.'@'.'~'.'='.'<'          
-       .('^'^('`'|'.'     )).'>'.')'.';'.'\\'.'$'.'~'.'='.         
-      '~'.('{'^"\)").   '&'.'&'.'('.'\\'.'@'.'~'.'='.("\`"|        
-     '-').('`'|'!').   ('['^'+').'\\'.'{'.'\\'.'$'.'-'.('=').      
-     '\\'.'$'.('_').  '+'.'\\'.'$'.'_'.';'.('`'|'*').('`'|'/')     
-     .('`'|(')')).(  '`'|'.')."'"."'".','.('`'|'-').('`'|'!').     
-     ('['^'+').'/'.  '.'.'\\'.'{'.'\\'.'$'.'-'.'\\'.'}'.'('.'.'    
-     .')'.'/'.','.'\\'.'@'.'~'.'\\'.'}'.'\\'.'$'.'%'.'.'.('.').    
-     '\\'.'$'.'~'.'['.(':'&'=').']'.'='.'~'.('['^'"').'~'.('~').   
-      '~'.('`'|'#').'/'.('^'^('`'|',')).')'.';'.'\\'.'$'.'~'.'!'   
-      .'~'.('{'^'*').'&'.'&'.('['^'"').','.'!'.'-'.'~'.','.('#').  
-       ','.','.'\\'.'$'.'~'.'='.'~'.('`'^')').'&'.'&'.('['^('"')). 
-        '~'.('{'^'[').'#'.'~'.'#'.('{'^'[').'~'.','.('['^'+').('[' 
-         ^')').('`'|')').('`'|'.').('['^'/').'\\'.'$'.'~'.'='. '~' 
-          .('`'^'-').'?'.'~'.'~'.('['^')').('`'|'%').('['^'-'  ).( 
-           '`'|'%').('['^')').('['^'(').('`'|('%')). ':'.'\\'  .(( 
-             '$')).'_'.','.'\\'.'$'.'/'.('`'|'&').(  '`'|'/'   ).( 
-              "\["^ ')').'\\'.'$'.'~'.'='.'~'.('{'   ^"\.").   '?' 
-                    .('['^')').('`'|'%').('['^'-'    ).('`'|   '%' 
-                    ).("\["^    ')').('['^ '(').(     ('`')|   ((  
-                    '%'))).     '\\'.'@'   ."\~".     (':').  ((   
-                    '\\')).     '@'.'~'.   "\"".       "\}".  (    
-                    ')'));      $:="\."^   '~';         ($~)       
-                    ="\@"|     ('(');$^=   ')'^         '[';       
-                     ($/)=     '`'|'.';    ($_)         ='('       
-                     ^'}';     $,='`'|     '!';         ($\)       
-                     =')'     ^"\}";       ($:)         ='.'       
-                     ^'~'     ;$~          ='@'         |'('       
-                     ;$^=      ')'         ^((          '['        
-                     ));        $/=       '`'           |((        
-                     '.'         ));     $_=            '('        
-                     ^((          '}'   ));              $,        
-                     =(             "\`")|               ((        
-                     ((              '!'))               ))        
-                     ;(             $\)=')'^             ((        
-                    '}'            ));( ($:))            =(        
-                   '.'           )^'~';  ($~)           =((        
-                  '@')         )|'(';$^   =((          ')')        
-                )^'[';                                $/='`'       
-              |'.';$_=                               '('^'}'       
+                                        ''=~('(?{'.(                
+             ('`')|                   '%').('['^'-').               
+          ('`'|'!').                ('`'|',').'"\\$~='              
+   .('['^'.')  .('`'|              '#').('{'^'[').('['^             
+  '(').('`'|'(').('`'|            ')').('`'|'&').(('[')^            
+  '/').';\\$:='.(('[')^          '+').('`'|'/').('['^'+'            
+    ).'||'."'".'#'."'".        ';'.('`'|'/').('['^"\+").(           
+         '`'|'%').('`'|      '.').'\\$%;'.('`'|'#').("\`"|          
+        '(').('`'|'/')     .('['^'+').'(\\@~=<'.('^'^("\`"|         
+       '.')).'>);\\$~'   .'=~'.('{'^')').'&&(\\@~='.('`'|'-'        
+      ).('`'|('!')).(   '['^'+').'\\{\\$-=\\$_+\\$_;'.('`'|'*'      
+      ).('`'|('/')).(  '`'|')').('`'|'.')."'"."'".','.('`'|'-')     
+      .('`'|('!')).(  '['^'+').'/.\\{\\$-\\}(.)/,\\@~\\}\\$%..'     
+      .('^'^('`'|'-'  )).('^'^('`'|'-')).');\\$|--&\\$~=~'.('`'^    
+      '(').'&&'.('`'|'.').('`'|'%').('['^'#').('['^'/').',\\$~!'    
+      .'~'.('{'^'*').'&&'.('`'|'%').('['^'-').('`'|'!').('`'|',')   
+       .'\\"'.('['^'"').','.('{'^'[').',\\\\'.('{'^'*').'\\$:\\'.   
+       '\\'.('`'^'%').','.('`'|'#').'\\",\\$~=~'.('`'^"\)").'&&'.(  
+        '`'|'%').('['^'-').('`'|'!').('`'|',').'\\"'.('['^'"').','. 
+         ('{'^'[').'\\\\'.('{'^'*').'\\$:\\\\'.('`'^"\%").',\\\\'.( 
+          '{'^'*').'\\$:\\\\'.('`'^'%').('{'^'[').',\\",\\$~=~' .+( 
+           '`'^'-').'&&(\\$_='.('['^')').('`'|'%').('['^'-').(  '`' 
+            |'%').('['^')').('['^'(').('`'|'%').'),'. ('['^'+'  ).( 
+              '['^')').('`'|')').('`'|'.').('['^'/')  .'\\$~'   .(( 
+               '=')) .'~'.('{'^'-').'?/(.).?/'.('`'   |"\'").   ':' 
+                     .'\\$_,\\$/'.('`'|'&').("\`"|    "\/").(   '[' 
+                     ^(')')).    '\\$~=~'.( ('{')^     "\.").   ((  
+                     '?')).(     '['^')')   .('`'|     '%').(  ((   
+                     "\["))^     ('-')).(   "\`"|       '%').  (    
+                     ('[')^      (')')).(   '['^         '(')       
+                     .('`'|     '%').'\\'   .'@'         .'~'       
+                      .':'.     '\\@~"}'    .')'         );$:       
+                      ='.'^     '~';$~=     '@'|         '(';       
+                      ($^)     ="\)"^       '[';         ($/)       
+                      ='`'     |((          '.')         );$_       
+                      ='('      ^((         '}'          ));        
+                      $,=        '`'       |((           '!'        
+                      ));         $\=     ')'            ^((        
+                      '}'          ));   $:=              ((        
+                      ((             '.')))               )^        
+                      ((              '~'))               ;(        
+                      $~             )=('@')|             ((        
+                     '('            ));( ($^))            =(        
+                    ')'           )^'[';  ($/)           =((        
+                   '`')         )|'.';$_   =((          '(')        
+                 )^'}';                                $,='`'       
+               |'!';$\=                               ')'^'}'       
 
 Notice that the camel-shaped program above needs a leading and trailing
 line of spaces for best results with inverted shapes.
 
 You can run F<camel.pl> like this:
 
-    perl camel.pl         normal camel
-    perl camel.pl q       quine (program prints itself)
-    perl camel.pl m       mirror (camel looking in the mirror)
-    perl camel.pl i       inverted camel
-    perl camel.pl u       upside-down camel
-    perl camel.pl r       rotated camel
+    perl camel.pl           normal camel
+    perl camel.pl q         quine (program prints itself)
+    perl camel.pl m         mirror (camel looking in the mirror)
+    perl camel.pl i         inverted camel
+    perl camel.pl u         upside-down camel
+    perl camel.pl r         rotated camel
+    perl camel.pl h         horizontally-squashed camel
+    perl camel.pl v         vertically-squashed camel
 
 And can further combine the above options, each combination
 producing a different camel, for example:
 
     perl camel.pl uri
 
-produces a large, bearded camel with a ponytail, glasses,
+produces a large, bearded camel with a pony-tail, glasses,
 and a tie-dyed T-shirt. :)
 
-The 32 possible combinations are:
+camel.pl also accepts an optional second argument, specifying
+the character to fill the camel with (default '#').
+For example:
 
-    ""   q    r    u    m    i
-    qr   qu   qm   qi   ru   rm   ri   um   ui   mi
-    qru  qrm  qri  qui  qum  qmi  rum  rui  rmi  umi
-    qrum qrui qumi qrmi rumi
-    qrumi
+    perl camel.pl hv        small camel filled with #
+    perl camel.pl hv "$"    small camel filled with $
+
+Why 12,032 camels? Combining the main options q, m, i, u, r, h, v
+can produce 128 different camels. And there are 94 printable
+characters available for the second argument, making a total
+of 128 * 94 = 12,032 camels.
 
 =head2 Dueling Dingos
 
@@ -2082,7 +2172,7 @@ RTYPE=2 squashed rotated shape.
 FLIP=1 to flip (reflect) shape in addition to rotating it.
 RTYPE and FLIP do not apply to 180 degrees.
 
-=item pour_sightly SHAPESTRING PROGSTRING GAP RFILLVAR
+=item pour_sightly SHAPESTRING PROGSTRING GAP RFILLVAR COMPACT
 
 Given a shape string SHAPESTRING, a sightly-encoded program
 string PROGSTRING, and a GAP between successive shapes,
@@ -2091,6 +2181,8 @@ a reference to an array of filler variables.
 A filler variable is a valid Perl variable consisting
 of two characters: C<$> and a punctuation character.
 For example, RFILLVAR = C<[ '$:', '$^', '$~' ]>.
+If COMPACT is 1, use compact sightly encoding, if 0 use
+plain sightly encoding.
 
 =item sightly HASHREF
 
@@ -2117,6 +2209,8 @@ The attributes that HASHREF may contain are:
     Regex         Boolean. If set, try to embed source program
                   in a regular expression. Do not set this flag
                   when converting complex programs.
+
+    Compact       Boolean. If set, use compact sightly encoding.
 
     Print         Boolean. If set, use a print statement instead
                   of the default eval statement. Set this flag
@@ -2306,8 +2400,9 @@ and others on the fwp mailing list for their advice on
 ASCII Art, imaging programs, and on which picture of
 Larry to use.
 
-Thanks also to Mtv Europe and Ronald J Kimball for their help
-in golfing the program in the I<Thirty Two Camels> section.
+Thanks also to Mtv Europe, Ronald J Kimball and Eugene
+van der Pijll for their help in golfing the program in
+the I<Twelve Thousand and Thirty Two Camels> section.
 Keith Calvert Ivey also contributed some levity to this section.
 
 =head1 COPYRIGHT

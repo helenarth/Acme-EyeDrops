@@ -19,6 +19,7 @@ Options:
   -c string       String used with -s banner above.
   -p              Print instead of eval.
   -r              Insert sightly into a regex (instead of eval).
+  -m              Use compact sightly encoding.
   -g gap          Gap between successive shapes.
   -o degree       Rotate shape 90, 180, 270 degrees.
   -a rtype        Rotate type (0, 1 or 2).
@@ -70,6 +71,7 @@ my %optarg = (
    g => 'Gap',
    i => 'Invert',
    k => 'RotateFlip',
+   m => 'Compact',
    n => 'Indent',
    o => 'Rotate',
    p => 'Print',
@@ -86,7 +88,7 @@ my %optarg = (
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbeiklprtua:c:d:f:g:n:o:s:v:w:x:y:z:", \%option)
+Getopt::Std::getopts("hbeiklmprtua:c:d:f:g:n:o:s:v:w:x:y:z:", \%option)
    or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);

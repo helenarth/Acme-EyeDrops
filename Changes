@@ -60,7 +60,7 @@ Revision history for Perl extension EyeDrops
 	- new attribute: FillerVar
 	- new shape: merlyn
 	- fixed module bug raised by Mark Puttnam
-	- added new test program tmodule.t to test Mark's bug
+	- added new test program module.t to test Mark's bug
 
 1.03	Sat Dec 15 18:42:09 2001
 
@@ -109,8 +109,8 @@ Revision history for Perl extension EyeDrops
 	- new shape: pgolf (thanks `/anick)
 	- fixed bug where EyeDrops sometimes generated an
 	  invalid program or more shapes than it needed to
-	- new test: tlimit2.t to verify above bug fixed
-	- new test: tsightly2.t
+	- new test: limit2.t to verify above bug fixed
+	- new test: sightly2.t
 	- made sure test programs clean up all .tmp files
 	- added -Mstrict to all test programs to ensure
 	  they work with -w and 'use strict' too
@@ -141,3 +141,13 @@ Revision history for Perl extension EyeDrops
 	- new test: camel.t
 	- documentation: added 'Thirty Two Camels' sub-section
 	- minor change to shape yanick (identical dimensions to camel now)
+
+1.10	Wed May 29 19:08:11 2002
+
+	- new attribute: Compact
+	- function pour_sightly: added new compact parameter
+	- added support for Compact attribute to demo/sightly.pl
+	- test camel.t: enhanced with Compact tests
+	- documentation: increased from 'Thirty Two Camels'
+	  to 'Twelve Thousand and Thirty Two Camels'
+	- documentation: improved 'Buffy Looking in the Mirror'

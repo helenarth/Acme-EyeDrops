@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
    NAME     => 'Acme::EyeDrops',
-   VERSION  => '1.09'
+   VERSION  => '1.10'
 );
