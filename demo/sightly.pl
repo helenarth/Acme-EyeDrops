@@ -8,7 +8,7 @@ use Acme::EyeDrops qw(sightly);
 sub usage
 {
    print STDERR <<'EOM';
-usage: sightly.pl [-s shape] [-f file|-t string]
+usage: sightly [-s shape] [-f file|-t string]
 Options:
   -s shape      Shape/s. Can specify multiple shapes separated
                 by commas. Six shape files are provided in the
@@ -32,14 +32,14 @@ Options:
   -t            Trap die within eval with 'die $@ if $@'
   -u            Trap warnings with '$SIG{__WARN__}=sub{}'
 Examples:
-  sightly.pl -s camel -f myprog.pl >myprog2.pl
+  sightly -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
      myprog.pl, but prettier and shaped like a camel.
-  sightly.pl -pr -s window -t "Bill Gates is a pest!\n" >bill.pl
+  sightly -pr -s window -t "Bill Gates is a pest!\n" >bill.pl
      This creates bill.pl, a program that prints the above string.
-  sightly.pl -g 5 -bps camel,japh,camel -f some_binary_file >sightly
-     This creates sightly, a sightly-encoded file.
-     To decode it:   perl sightly > f.tmp
+  sightly -g 5 -bps camel,japh,camel -f some_binary_file >eyesore
+     This creates eyesore, a sightly-encoded file.
+     To decode it:   perl eyesore > f.tmp
      To check it worked: cmp f.tmp some_binary_file
 Notes:
   If no shape is specified, a single (very long) line will be output.

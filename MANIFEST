@@ -10,7 +10,9 @@ lib/Acme/japh.eye
 lib/Acme/uml.eye
 lib/Acme/window.eye
 t/convert.t
+t/limit.t
 t/nasty.t
+t/recur.t
 t/sightly.t
 demo/sightly.pl
 demo/helloworld.pl

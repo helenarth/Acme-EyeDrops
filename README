@@ -1,5 +1,5 @@
 ===========================================================================
-                 Release of version 0.02 of Acme::EyeDrops
+                 Release of version 0.04 of Acme::EyeDrops
 ===========================================================================
 
 NAME
@@ -9,7 +9,7 @@ SYNOPSIS
     use Acme::EyeDrops qw(sightly);
 
     print sightly( { Shape       => 'camel',
-                     SourceFile  => 'myprog.pl' } );
+                     SourceFile  => 'eyesore.pl' } );
 
 DESCRIPTION
     Acme::EyeDrops converts a Perl program into an equivalent one,
