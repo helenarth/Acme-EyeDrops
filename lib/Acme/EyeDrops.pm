@@ -16,7 +16,7 @@ require Exporter;
                 reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.12';
+$VERSION = '1.13';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1287,32 +1287,32 @@ producing:
       =  ')'                         ^          (
       (                              (          (
       (                              (          (
-       (    (                        (          (
+       (    (                                   (
         ( ( (                   (     (  (      (
             (                  (      (  (      (
-            (                  (      (  (      (
+            (                  (      (  (
             (                                  (
-         (   (                                (
+         (   (
          (    (                   '}'))))))   )
-         )     )             )))))))))))))   )
-         )      )               ))))))))     )
-         )       ;                 $:='.'^'~';$~
-         =         (           (                 (
+         )     )             )))))))))))))
+         )      )               ))))))))     ;
+         (       (                 $:))='.'^'~';
+         (         (           (                 (
          (             (     (                    (
           (                (                       (
-           (              (          (  (  (        (
-           (                     (                  (
-            (            (                           (
-             (                (                       (
+                          (          (  (  (        (
+           (                     (
+                         (                           (
+                              (                       (
                         (    (                         (
-              (             (                           (
+                            (                           (
                        ( ( (                             (
 
 
 
-                                          '@'))))))
+                                          $~)))))))
                                        ))))))))))))))
-                                    )))))))))))))))|'(';
+                                    ))))))))))='@'|"\(";
                                 $^=')'^'[';$/='`'|'.';$_=
                               '('^'}';$,=('`')|   '!';$\=
                           ')'^'}';$:='.'^'~';$~   ='@'|'('
@@ -1546,7 +1546,7 @@ and finally produce I<Buffy looking in the mirror> with:
     sightly.pl -r -f kk.pl -s buffy2 >b.pl
     perl pp.pl b.pl >bb.pl
 
-For this example, however, the Compact attribute (C<-m> switch
+For this example, however, the C<Compact> attribute (C<-m> switch
 to F<sightly.pl>) provides a more direct solution,
 without requiring any trailing spaces:
 
@@ -1722,12 +1722,13 @@ this header line.
 
 =head2 Twelve Thousand and Thirty Two Camels
 
-In similar way to the somersaulting camel described above,
+In a similar way to the somersaulting camel described above,
 we create a camel-shaped program capable of emitting
 twelve thousand and thirty two different camels when run.
 
 As usual, we start with a generator program, F<gencamel.pl>:
 
+    use Acme::EyeDrops qw(sightly);
     my $src = <<'END_SRC_STR';
     $~=uc shift;$:=pop||'#';open$%;chop(@~=<0>);$~=~R&&
     (@~=map{$-=$_+$_;join'',map/.{$-}(.)/,@~}$%..33);
@@ -1779,6 +1780,87 @@ Why 12,032 camels? Combining the main options q, m, i, u, r, h, v
 can produce 128 different camels. And there are 94 printable
 characters available for the second argument, making a total
 of 128 * 94 = 12,032 camels.
+
+=head2 Sierpinski Triangles
+
+Sierpinski triangle generators have proved popular on various
+Perl mailing lists and at Perl monks too.
+
+The shortest known Sierpinski triangle generator, F<siertri.pl>, is:
+
+    #!perl -l
+    $x=2**pop;print$"x--$x,map$x&$_?$"x2:"/\\",0..$y++while$x
+
+which was posted by Mtv Europe to golf@perl.org on 14-sep-2002
+as a one stroke improvement on Adam Antonik's original program.
+Running this program:
+
+    perl siertri.pl 4
+
+displays a Sierpinski triangle with 2**4 lines.
+
+An interesting obfuscated Sierpinski triangle generator is:
+
+    #!perl -l
+    s--(G^g)x(1<<pop)-ge,s-.-s,,,,s,$,(G^'/').(E^'|')^Ge,ge,
+    print,s,(?<=/[^ge])[^g][^e],$&^(G^'/').(E^'|')^gE,ge-ge
+
+As an alternative obfu, you can produce a Sierpinski triangle-shaped
+Sierpinski triangle generator based on Mtv's program like this:
+
+    use Acme::EyeDrops qw(sightly);
+    my $src = <<'END_SRC';
+    $-=!$%<<(pop||4);print$"x$-,map($-&$_?'  ':'/\\',$%..$.++),$/while$---
+    END_SRC
+    $src =~ tr/\n//d;
+    print sightly( { SourceString    => $src,
+                     Regex           => 1,
+                     Compact         => 1,
+                     Indent          => 1,
+                     BorderGap       => 1,
+                     BorderWidth     => 2,
+                     Shape           => 'siertri' } );
+
+producing:
+
+ ''=~('(?{'.('`'|'%').('['^'-').('`'|'!').('`'|"\,").'"\\$-=!\\$%<<('.(
+ '['^'+').('`'|'/').('['^'+').'||'.('^'^('`'|'*')).');'.('['^'+').('['^
+ ((                                                                  ((
+ ((                                ((                                ((
+ ((                               ')')                               ))
+ ))                              ))  ))                              ))
+ ))                             .(('`')|                             ((
+ ((                            ((      ((                            ((
+ ((                           ')')    ))))                           ))
+ ))                          ))  ))  .(  ((                          ((
+ ((                         '`'))))))|'.').(                         ((
+ ((                        ((              ((                        ((
+ ((                       '[')            ))))                       ))
+ ))                      ))  )^          ((  ((                      ((
+ ((                     '/')))))        )))).''.                     ((
+ ((                    ((      ((      ((      ((                    ((
+ ((                   '\\'    ))))    ))))    ))))                   ))
+ ))                  .+  ((  ((  ((  ((  ((  ((  ((                  ((
+ ((                 '$')))))))))))))))))).'\\"'.('['                 ^+
+ ((                ((                              ((                ((
+ ((               '#')                            ))))               ))
+ ))              ))  .+                          ((  ((              ((
+ ((             '\\'))))                        )))).'$'             .+
+ ((            ((      ((                      ((      ((            ((
+ ((           '-')    ))))                    ))))    ))))           ).
+ ((          ((  ((  ((  ((                  ((  ((  ((  ((          ((
+ ((         ',')))))))))))))                ))))))))).("\`"|         ((
+ ((        ((              ((              ((              ((        ((
+ ((       '-')            ))))            ))))            ))))       ))
+ ))      .(  ((          ((  ((          ((  ((          ((  ((      ((
+ ((     '`')))))        ))))))))        )))))|((        '!'))).(     ((
+ ((    ((      ((      ((      ((      ((      ((      ((      ((    ((
+ ((   '[')    ))))    ))))    ))))    ))))    ))))    )))^    '+')   .+
+ ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((  ((
+ (( '(')))))))))))))))))))))))))))))))))))))).'\\$-&\\$_?'."'".('{'^ ((
+ ((                                                                  ((
+ '['))))))).('{'^'[')."'".':'."'".'/\\\\\\\\'."'".',\\$%..\\$.++),\\$/'
+ .('['^',').('`'|'(').('`'|')').('`'|',').('`'|'%').'\\$---"})');$:='.'
 
 =head2 Dueling Dingos
 
@@ -2542,12 +2624,14 @@ EyeDrops are:
     pony2       Picture of a Pony
     riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
+    siertri     A Sierpinksi Triangle
     simon       The inventor of parrot
     spoon       A wooden spoon
     tonick      Pictorial representation of a golf contest between Ton
                 Hospel and `/anick; colourful but not very suspenseful
     tpr         Vertical banner of "The Perl Review"
     uml         A UML diagram
+    undies      A pair of underpants
     window      A window
     yanick      Caricature of `/anick's noggin
     yanick2     Uttered by `/anick during TPR02
@@ -2605,7 +2689,9 @@ Perl Monks Obfuscation section, especially:
 F<http://www.perlmonks.com/index.pl?node_id=45213>
 (Erudil's camel code) and
 F<http://www.perlmonks.com/index.pl?node_id=176043>
-(Len's Spiralling quine).
+(Len's Spiralling quine) and
+F<http://www.perlmonks.com/index.pl?node_id=188405>
+(Sierpinski Triangle).
 
 The definitive I<Perl Golf> reference is
 F<http://perlgolf.sourceforge.net/>.
@@ -2639,7 +2725,7 @@ Keith Calvert Ivey also contributed some levity to this section.
 
 The C<jon> shape was derived from:
 F<http://www.spidereyeballs.com/os5/set1/small_os5_r06_9705.html>.
-Thanks to Elaine -HFB- Ashton for showing me this.
+Kudos to Elaine -HFB- Ashton for showing me this.
 
 =head1 COPYRIGHT
 

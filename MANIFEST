@@ -36,11 +36,13 @@ lib/Acme/pony.eye
 lib/Acme/pony2.eye
 lib/Acme/riding.eye
 lib/Acme/santa.eye
+lib/Acme/siertri.eye
 lib/Acme/simon.eye
 lib/Acme/spoon.eye
 lib/Acme/tonick.eye
 lib/Acme/tpr.eye
 lib/Acme/uml.eye
+lib/Acme/undies.eye
 lib/Acme/window.eye
 lib/Acme/yanick.eye
 lib/Acme/yanick2.eye

@@ -168,3 +168,11 @@ Revision history for Perl extension EyeDrops
 	- new shape: tonick
 	- documentation: minor changes
 	- documentation: added 'Abbreviated History of Perl 6' section
+
+1.13	Sun Sep 15 17:05:09 2002
+
+	- new shape: siertri
+	- new shape: undies
+	- minor change to shape: simon
+	- documentation: minor changes
+	- documentation: added 'Sierpinski Triangles' section
