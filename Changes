@@ -157,3 +157,14 @@ Revision history for Perl extension EyeDrops
 	- new shape: alien
 	- documentation: minor improvements
 	- documentation: added 'Somersaulting Camels' section
+
+1.12	Sun Aug 4 14:17:01 2002
+
+	- new shape: llama
+	- new shape: parrot
+	- new shape: simon
+	- new shape: jon
+	- new shape: yanick4
+	- new shape: tonick
+	- documentation: minor changes
+	- documentation: added 'Abbreviated History of Perl 6' section

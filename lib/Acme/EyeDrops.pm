@@ -16,7 +16,7 @@ require Exporter;
                 reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1070,59 +1070,121 @@ to the program's source text:
 The generated program is easier to understand than the
 original because its characters are bigger and easier to read.
 
-=head2 Converting from Perl 5 to Perl 6
+=head2 An Abbreviated History of Perl 6
 
-You can convert Perl 5 programs to Perl 6 simply by arranging
-for them to impersonate the Perl 6 maestros,
-I<Larry Wall> and I<Damian Conway>:
+Here is a summary of the Perl 6 development effort so far:
 
-    print sightly( { Shape       => 'larry,damian',
-                     Gap         => 2,
-                     SourceFile  => 'helloworld.pl',
-                     Regex       => 1 } );
+    print sightly( { Shape        => 'jon,larry,damian,simon,parrot',
+                     Gap          => 3,
+                     Regex        => 1,
+                     Print        => 1,
+                     SourceString => <<'END_HAIKU' } );
+    Coffee mug shatters
+    Larry Apocalyptic
+    Parrot not a hoax
+    END_HAIKU
 
 producing:
 
-                          ''=~('('.'?'.'{'
-                       .('`'|'%').('['^"\-").(
-                  '`'|'!').('`'|',').'"'.(('[')^
-                '+').                         ('['
-              ^')'                              ).(
-            '`'|                                  ')'
-          ).+(                                   (  '`'
-         )|((                                    (   '.'
-        ))))                                  .(  (    '['
-      )^((                                   (     (    '/'
-    )))                                    ))       .(   '{'
-   ^((                                   ((           (   '['
-  )))                                ))).              (   (((
- (((                             '\\'                   )   )))
- )))                         .'"'                        .   (((
- '`'                ))|'(').(                            (   '`'
- )|+              ((                                     (    ((
- '%'             ))                                       )   ))
- ).(            (                                         (   ((
- '`'            )                                          )))|+
- ','           )                                              .(
- '`'           |          ',').('`'|'/').('{'^'[').('['^(',')).(
- '`'           |'/').("\["^    "\)").(    (    (   "\`"))|     (
- ','           )          ) .+(  '`'  |+  (    ( ((  '$'  )))  )
- ).+           (          ( '\\')).'\\'.  (    ( '`')|('.')).  (
- (((           (          (               (    (               (
- ((   (((     (           (               (    ((              (
- ((   (  '\\')            )               )     ))             )
- ))   )                   )               )     ) )            )
- ))   )  )))               ))).'"'.(';').(       ( '!')^('+')).
+                     ''=~(
+                   '('."\?".
+                  '{'.('['^'+'
+                 ).('['^"\)").(
+                 '`'|')').('`'|
+                 '.').('['^'/').
+                 '"'.('`'^'#').(
+                 '`'|'/').(('`')|
+                 '&').('`'|'&').(
+                  '`'|'%').("\`"|
+                  '%').('{'^'[').
+                   ('`'|('-')).(
+                     '['^"\.").(
+                     '`'|"'").(
+                    '{'^'[').('['^'(')
+                   .('`'|'(').('`'|'!')
+                   .('['^'/').('['^"\/").(
+                   '`'|'%').('['^')').('['^"\(").(
+                  '!'^'+').('`'^',').('`'|'!').('['^')').(
+                 '['^')').('['^'"').('{'^'[').('`'^'!').('['^'+')
+                .('`'|'/').('`'|'#').('`'|'!').('`'|',').('['^'"').
+                ('['^'+').('['^'/').('`'|')').("\`"|        "\#").(
+               '!'^'+').('{'^'+').('`'|('!')).(                 '['
+               ^')').('['^')').('`'|"\/").(
+               '['^'/').('{'^'[').('`'|'.')
+               .('`'|'/').('['^'/').(('{')^
+               '[').('`'|'!').('{'^'[').('`'
+               |'(').('`'|'/').('`'|('!')).(
+               '['^'#').('!'^'+').'"'.'}'.')'
+               );$:='.'^'~';$~='@'|'(';$^=')'
+               ^'[';$/='`'|'.';$_='('^'}';$,=
+               '`'|'!';$\=')'^'}';$:='.'^'~';
+               $~='@'|'(';$^=')'^'[';$/=('`')|
+               '.';$_='('^'}';$,='`'|'!';$\=')'
+      ^((      '}'));$:='.'^'~';$~='@'|"\(";$^=
+ ')'^'[';$/    ='`'|'.';$_='('^'}';$,='`'|"\!";
+ $\=')'^'}';$: ='.'^'~';$~='@'|'(';$^=')'^"\[";             $/
+  ='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^"\}";$:=           (  (
+  '.'))^'~';$~='@'|'(';$^=')'^'[';$/='`'|('.');$_=         (  (
+ '('))^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~';$~="\@"|    '(';$^=
+ ')'^'[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}'; $:='.'^'~'
+  ;$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^
+   '}';$:='.'^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^"\}";$,=
+    '`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^'[';$/='`'|"\.";
+      $_='('^   "\}"; $,='`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'(';$^
+                  =(  ')')^'[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=
+                      ')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^'[';$/=
+                      '`'|'.';$_='('^'}';$,='`'|('!');$\=   "\)"^
+                     '}';$:='.'^'~';$~='@'|'(';$^=')'^'[';
+                     $/='`'|'.';$_='('^'}';$,='`'|('!');$\=
+                    ')'^'}';$:='.'^'~';$~='@'|'(';$^=(')')^
+                   '[';$/='`'|'.';$_='('^'}';$,='`'|"\!";$\=
+                   ')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^'[';
+                  $/='`'|'.';$_='('^'}'  ;$,='`'|'!';$\="\)"^
+                 '}';$:='.'^'~';$~='@'    |'(';$^=')'^'[';$/=
+                '`'|'.';$_='('^'}';$,      ='`'|'!';$\=(')')^
+
+
+
+                          '}';$:='.'^"\~";
+                       $~='@'|'(';$^=')'^"\[";
+                  $/='`'|'.';$_='('^'}';$,="\`"|
+                "\!";                         ($\)
+              =')'                              ^((
+            '}')                                  );(
+          $:)=                                   (  '.'
+         )^((                                    (   '~'
+        )));                                  $~  =    '@'
+      |'('                                   ;     (    $^)
+    =((                                    ((       ((   ')'
+   )))                                   ))           )   ^((
+  '['                                ));(              (   $/)
+ )=(                             '`')                   |   '.'
+ ;$_                         ='('                        ^   '}'
+ ;$,                ='`'|'!';                            (   $\)
+ =((              ((                                     (    ((
+ ')'             ))                                       )   ))
+ ))^            (                                         (   ((
+ '}'            )                                          )));(
+ $:)           =                                              ((
+ '.'           )          )^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.'
+ ;$_           ='('^'}';$,=    '`'|'!'    ;    (   $\)=')'     ^
+ '}'           ;          ( $:)  =((  ((  (    ( ((  '.'  )))  )
+ )))           )          ^ '~';$~="\@"|  (    ( '('));$^=')'  ^
+ '['           ;          (               (    (               (
+ $/   )))     )           =               (    ((              (
+ ((   (  '`'))            )               )     ))             )
+ |+   (                   (               (     ( (            (
+ ((   (  '.'               )))))))));($_)=       ( '(')^'}';$,=
  ((    (                              (          (          (
   (     (                            (          (           (
-   (     (                            ( '"'    )            )
+   (     (                            ( '`'    )            )
     )      )))                              ))             )
-     )       )                  ))).'}'.')');$:="\."^      (
-      (      (                '~')));$~='@'|'(';$^=')'     ^
-       (     (               '['));$/='`'|'.';$_=('(')^   (
-        (   (                '}'))  );$,='`'|"\!";  ($\)  =
-         ( (                 ')')  )              ^  '}' ;
-          $:                 =((   '.'))^'~';$~='@'   |((
+     )       )                  )))|'!';$\=')'^'}';$:      =
+      (      (                '.'))^'~';$~='@'|'(';$^=     (
+       (     (               ')')))^'[';$/='`'|"\.";$_=   (
+        (   (                '('))  )^'}';$,="\`"|  '!';  (
+         ( (                 $\))  )              =  ')' ^
+          ((                 '}'   ));$:='.'^'~';$~   =((
            (                                            (
            (                                           (
            (                                          (
@@ -1132,66 +1194,167 @@ producing:
           (            (                          (
          (               (                       (   (
          (                 (                    (     (
-        (                    '('              ))       )
+        (                    '@'              ))       )
        )                          )))))))))))            )
 
 
-                   )))))))))))));(
-                 $^)=')'^'[';$/="\`"|
-               '.';$_='('^'}';$,='`'|'!'
-             ;$\=                     ')'^
-           '}';                         ($:)
-         ='.'                             ^'~'
-        ;$~=                                 '@'|
-       '(';                                   ($^)
-      =')'                                     ^'['
-     ;$/=                                       '`'|
-    '.';                                         $_=
-    '('^                                         '}';
-   ($,)                                    ="\`"| '!';
-   ($\)                                =')'     ^  '}'
-   ;$:    =((                  ('.')))^          (  '~'
-  );(     (  $~))           =((                  (  '@'
- )))      |      '(';$^=')'^                     (  '['
- );(      (                                      (  $/)
- ))=      (                                      (  '`'
- ))|      (                                       ( '.'
- ));     (                                        ( $_)
-  )=(    (                                        ( '('
-  ))     )                                        ^ '}'
- ; $,    =                                        ( ((
+
+                   )))))))))))))|+
+                 '(';$^=')'^('[');$/=
+               '`'|'.';$_='('^'}';$,='`'
+             |'!'                     ;$\=
+           ')'^                         '}';
+         ($:)                             ='.'
+        ^'~'                                 ;$~=
+       '@'|                                   '(';
+      ($^)                                     =')'
+     ^'['                                       ;$/=
+    '`'|                                         '.'
+    ;$_=                                         '('^
+   '}';                                    $,='`' |'!'
+   ;$\=                                ')'^     (  '}'
+   );(    $:)                  ='.'^'~'          ;  $~=
+  '@'     |  '(';           $^=                  (  ')'
+ )^+      (      '[');$/='`'                     |  '.'
+ ;$_      =                                      (  '('
+ )^+      (                                      (  '}'
+ ));      (                                       ( $,)
+ )=(     (                                        ( '`'
+  )))    |                                        ( '!'
+  );     (                                        ( $\)
+ ) =(    (                                        ( ((
  (  ((  (                                         ( ((
- (   '`')       )))))))))              )|'!';     $\=
- (    ')'    )^+         '}'        ;$:      =((  '.'
- ) )^  ((        '~'));$~             =('@')|      ((
- ( (   ((      ((  '(')  ))    )    )) ));(  $^    )
- = (  ')'       )^"\[";$/=     (    '`')|'.';$_    =
- (  (  ((                      (                  (
-  (    ((                      (                 ((
-  (    '('                     )                 ))
-   )   )))                     )                )))
-    ))^'}';                    (                $,)
-      ='`'|              (     (    (          '!'
-      )));(              (     (    (          $\)
-      )))=((             ')'))^'}';$:         ='.'
-      ^"\~";                                  ($~)
-      =('@')|         '(';$^=')'^"\[";$/=    '`'|
-       "\.";$_=    '('^'}';$,='`'|('!');$\= ')'^
-        "\}";$:=  ((                     "\."))^
-        '~';$~="\@"|  '(';$^=')'^'[';$/=  ('`')|
-         '.';$_='('      ^'}';$,="\`"|    "\!";
-          $\=')'^'}'                    ;($:)=
-           '.'^('~');$~=            '@'|"\(";
-            $^=')'^'[';$/='`'|'.';$_='('^'}'
-            ;$,='`'|'!';$\=')'^'}';$:=('.')^
-             '~';$~='@'|'(';$^=')'^('[');$/=
-              '`'|'.';$_='('^'}';$,='`'|'!';
-               $\=')'^'}';$:='.'^'~';$~='@'
-                 |'(';$^=')'^'[';$/=('`')|
-                  '.';$_='('^'}';$,="\`"|
-                    '!';$\=')'^('}');$:=
-                      '.'^'~';$~=('@')|
-                         '(';$^=')';
+ (   ')')       )))))))))              )))^((     '}'
+ )    );(    $:)         =((        '.'      ))^  '~'
+ ; $~  =(        '@')|'('             ;$^=')'      ^+
+ ( (   ((      ((  '[')  ))    )    )) ;$/=  ((    (
+ ( (  '`'       )))))|'.';     (    $_)='('^'}'    ;
+ (  (  $,                      )                  )
+  =    ((                      (                 ((
+  (    '`'                     )                 ))
+   )   ))|                     (                '!'
+    );($\)=                    (                ')'
+      )^'}'              ;     (    (          $:)
+      )='.'              ^     (    (          '~'
+      ));$~=             '@'|"\(";$^=         ')'^
+      '[';$/                                  ='`'
+      |'.';$_         ='('^'}';$,='`'|'!'    ;$\=
+       ')'^'}';    $:='.'^'~';$~='@'|'(';$^ =')'
+        ^'[';$/=  ((                     "\`"))|
+        '.';$_="\("^  '}';$,='`'|'!';$\=  (')')^
+         '}';$:='.'      ^'~';$~="\@"|    "\(";
+          $^=')'^'['                    ;($/)=
+           '`'|('.');$_=            '('^"\}";
+            $,='`'|'!';$\=')'^'}';$:='.'^'~'
+            ;$~='@'|'(';$^=')'^'[';$/=('`')|
+             '.';$_='('^'}';$,='`'|('!');$\=
+              ')'^'}';$:='.'^'~';$~='@'|'(';
+               $^=')'^'[';$/='`'|'.';$_='('
+                 ^'}';$,='`'|'!';$\=(')')^
+                  '}';$:='.'^'~';$~="\@"|
+                    '(';$^=')'^('[');$/=
+                      '`'|'.';$_=('(')^
+                         '}';$,='`'|
+
+
+
+                     '!';$\=')'^"\}";
+                  $:='.'^'~'; $~=('@')|
+                '(';$^=')'^'[' ;$/='`'|'.'
+               ;$_='('^"\}";$,= '`'|"\!";$\=
+             ')'^'}';$:='.'^'~' ;$~='@'|"\(";
+           $^=')'^'[';$/='`'|'.' ;$_='('^"\}";
+          $,='`'|'!';$\=')'^"\}"; $:='.'^'~';$~
+         ='@'|'(';$^=')'^"\[";$/= '`'|'.';$_='('
+        ^'}';$,='`'|'!';$\=')'^'}' ;$:='.'^'~';$~
+       ='@'|'(';$^=')'^'[';$/='`'| '.';$_='('^'}';
+      $,='`'|'!';$\=(')')^     '}' ;$:     ='.'^'~'
+      ;$~='@'|'(';$^=')'                    ^'[';$/
+     ='`'|'.';$_=('(')^                      '}';$,=
+     '`'|'!';$\=')'^'}'                       ;($:)=
+    '.'^'~';$~='@'|'(';                       $^=')'
+    ^'[';$/='`'|'.';$_=                        "\("^
+   '}';$,='`'|"\!";$\= (                       ')')
+   ^'}';$:='.'^'~';$~  =                        '@'
+   |'(';$^=')'^'[';$/  =                        ((
+   '`'))|'.';$_="\("^  (                        ((
+   '}')));$,='`'|'!'; (   ( ( (          (   (  (
+   $\)))))))=')'^"\}"; (        (      (        (     (
+   $:)))))='.'^'~';$~    ='@'|            '('  ;      (
+ (   $^))=')'^'[';$/    ='`'|'.'         ;($_) =     (
+   (  '('))^'}';$,                             =    (
+     '`')|"\!";                      (          $\)
+      =  ')'                         ^          (
+      (                              (          (
+      (                              (          (
+       (    (                        (          (
+        ( ( (                   (     (  (      (
+            (                  (      (  (      (
+            (                  (      (  (      (
+            (                                  (
+         (   (                                (
+         (    (                   '}'))))))   )
+         )     )             )))))))))))))   )
+         )      )               ))))))))     )
+         )       ;                 $:='.'^'~';$~
+         =         (           (                 (
+         (             (     (                    (
+          (                (                       (
+           (              (          (  (  (        (
+           (                     (                  (
+            (            (                           (
+             (                (                       (
+                        (    (                         (
+              (             (                           (
+                       ( ( (                             (
+
+
+
+                                          '@'))))))
+                                       ))))))))))))))
+                                    )))))))))))))))|'(';
+                                $^=')'^'[';$/='`'|'.';$_=
+                              '('^'}';$,=('`')|   '!';$\=
+                          ')'^'}';$:='.'^'~';$~   ='@'|'('
+                      ;$^=')'^'[';$/='`'|'.';$_='('^'}';$,
+                   ='`'|'!';$\=')'^'}';$:='.'^'~';$~="\@"|
+                '(';$^=')'^'[';$/='`'|'.';$_='('^('}');$,=
+              '`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'(';$^=
+            ')'^'[';$/='`'|'.';$_='('^'}';$,='`'|"\!";$\=
+           ')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^     '['
+          ;$/='`'|'.';$_='('^'}';$,='`'|'!';$\=    ')'
+         ^'}';$:='.'^'~';$~='@'|'(';$^=')'^'['
+        ;$/='`'|'.';$_='('^'}';$,='`'|'!';$\=
+       ')'^'}';$:='.'^'~';$~='@'|'(';$^="\)"^
+      '[';$/='`'|'.';$_='('^'}';$,='`'|"\!";
+      $\=')'^'}';$:='.'^'~';$~='@'|('(');$^=
+     ')'^'[';$/='`'|'.';$_='('^'}';$,="\`"|
+     '!';$\=')'^'}';$:='.'^'~';$~='@'|'(';
+    $^=')'^'[';$/='`'|'.';$_='('^"\}";$,=
+    '`'|'!';$\=')'^'}';$:='.'^('~');$~=
+   '@'|'(';$^=')'^'[';$/='`'|"\.";$_=
+   '('^'}';$,='`'|'!';$\=')'^"\}";$:=
+  '.'^'~';$~='@'|'(';$^=')'^('[');$/=
+  '`'|'.';$_='('^'}';$,='`'|"\!";$\=
+ ')'^'}';$:='.'^'~';$~='@'|('(');$^=
+ ')'^'[';$/='`'|'.';$_='('^"\}";$,=
+ '`'|'!';$\=')'^'}';$:='.'^"\~";$~= '@'
+ |'(';$^=')'^'[';$/='`'|'.';$_='('^     (
+ '}');$,='`'|'!';$\=')'^('}');$:=     '.'^
+ '~';$~='@'|'(';$^=')'^('[');$/=    '`'|'.'
+ ;$_='('^'}';$,='`'|'!';$\=')'^   '}';$:='.'^
+ '~';$~='@'|'(';$^=')'^'[';$/=   '`'|'.';$_='('
+ ^'}';$,='`'|"\!";$\=       ((  ')'))^'}';$:='.'^
+ '~';$~='@'|('(');$^=        (  ')')^'[';$/='`'|'.'
+ ;$_='('^'}';$,="\`"|         ( ( '!'));$\=')'^'}';
+ $:='.'^'~';$~='@'|'('         ;     $^=')'^'[';$/=
+ '`'|'.';$_='('^'}';$,                  ='`'|"\!";
+ ($\)  =')'^'}';$:='.'                     ^'~';$~
+ =((   '@'))|('(');$^=                        ')'
+ ^+    '[';$/='`'|"\.";
+ (     $_)='('^"\}";$,=
+       '`'|'!';$\="\)"^
+       '}';$:='.'^"\~";
 
 If you sincerely idolize Larry, you might put a picture frame
 around him:
@@ -1383,7 +1546,7 @@ and finally produce I<Buffy looking in the mirror> with:
     sightly.pl -r -f kk.pl -s buffy2 >b.pl
     perl pp.pl b.pl >bb.pl
 
-For this example, however, the Compact attribute (-m switch
+For this example, however, the Compact attribute (C<-m> switch
 to F<sightly.pl>) provides a more direct solution,
 without requiring any trailing spaces:
 
@@ -1586,9 +1749,7 @@ Running this program:
 
     perl gencamel.pl >camel.pl
 
-produces F<camel.pl>.
-
-You can run F<camel.pl> like this:
+produces F<camel.pl>, which you can run like this:
 
     perl camel.pl           normal camel
     perl camel.pl q         quine (program prints itself)
@@ -1624,7 +1785,7 @@ of 128 * 94 = 12,032 camels.
 During the TPR02 Perl Golf tournament, I<`/anick> composed a poem
 describing his experience, entitled I<Dueling Dingos>.
 
-You can produce a program that emits his eloquent poem like this:
+You can produce a program that emits his moving poem like this:
 
     print sightly( { Shape        => 'yanick3',
                      Regex        => 1,
@@ -1713,7 +1874,7 @@ You can produce a program that emits his eloquent poem like this:
     END_DINGO
 
 The generated program, being 2577 lines long, is not reproduced here.
-To generate a shorter program summarising `/anick's TPR02 anguish:
+To generate a shorter program summarising I<`/anick>'s TPR02 anguish:
 
     print sightly( { Shape        => 'yanick,eye,mosquito,coffee',
                      Gap          => 3,
@@ -2363,25 +2524,35 @@ EyeDrops are:
     eye         An eye
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
+    jon         Kick-started the Perl 6 development effort by smashing
+                a standard-issue white coffee mug against a hotel wall
     kermit      Kermit the frog
     larry       Larry Wall's face
     larry2      Caricature of Larry contributed by Ryan King
+    llama       Llamas are so closely related to camels they can
+                breed with them (their progeny are called camas)
     london      Haiku "A Day in The Life of a London Perl Monger"
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
     mosquito    A mosquito
+    parrot      Originally an April fool's joke, the joke was that
+                it was not a joke
     pgolf       Perl Golf logo (inspired by `/anick)
     pony        Horizontal banner of "Pony"
     pony2       Picture of a Pony
     riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
+    simon       The inventor of parrot
     spoon       A wooden spoon
+    tonick      Pictorial representation of a golf contest between Ton
+                Hospel and `/anick; colourful but not very suspenseful
     tpr         Vertical banner of "The Perl Review"
     uml         A UML diagram
     window      A window
     yanick      Caricature of `/anick's noggin
     yanick2     Uttered by `/anick during TPR02
     yanick3     Pictorial version of yanick2
+    yanick4     Abbreviated version of shape yanick
 
 It is easy to create your own shapes. For some ideas on shapes,
 point your search engine at I<Ascii Art> or I<Clip Art>.
@@ -2427,13 +2598,21 @@ Andrew Savige <asavige@cpan.org>
 =head1 SEE ALSO
 
 Perl Obfuscation Engines, for example, yaoe by Perl Monk mtve,
-at http://www.frox25.dhs.org/~mtve/code/eso/perl/yaoe/.
+at F<http://www.perlmonks.com/index.pl?node_id=161087>
+and F<http://www.frox25.dhs.org/~mtve/code/eso/perl/yaoe/>.
 
 Perl Monks Obfuscation section, especially:
-http://www.perlmonks.com/index.pl?node_id=45213
+F<http://www.perlmonks.com/index.pl?node_id=45213>
 (Erudil's camel code) and
-http://www.perlmonks.com/index.pl?node_id=176043
+F<http://www.perlmonks.com/index.pl?node_id=176043>
 (Len's Spiralling quine).
+
+The definitive I<Perl Golf> reference is
+F<http://perlgolf.sourceforge.net/>.
+
+The C<$|--> idiom (exploited in the I<A Somersaulting Camel>
+section) is "explained" in this thread:
+F<http://archive.develooper.com/fwp@perl.org/msg01360.html>.
 
 L<Acme::Bleach>
 L<Acme::Smirch>
@@ -2457,6 +2636,10 @@ Thanks also to Mtv Europe, Ronald J Kimball and Eugene
 van der Pijll for their help in golfing the program in
 the I<Twelve Thousand and Thirty Two Camels> section.
 Keith Calvert Ivey also contributed some levity to this section.
+
+The C<jon> shape was derived from:
+F<http://www.spidereyeballs.com/os5/set1/small_os5_r06_9705.html>.
+Thanks to Elaine -HFB- Ashton for showing me this.
 
 =head1 COPYRIGHT
 
