@@ -183,3 +183,9 @@ Revision history for Perl extension EyeDrops
 	- documentation: retracted claim that Mtv's Sierpinski program
 	  is the shortest (thankyou Adam and Eugene)
 	- documentation: minor changes
+
+1.15	Sun Oct 6 19:31:14 2002
+
+	- new shape: acme
+	- code: minor changes
+	- documentation: minor changes

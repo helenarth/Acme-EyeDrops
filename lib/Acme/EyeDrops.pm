@@ -1,7 +1,6 @@
 package Acme::EyeDrops;
 require 5.005;
 use strict;
-
 use vars qw($VERSION @ISA @EXPORT_OK);
 require Exporter;
 @ISA = qw(Exporter);
@@ -15,14 +14,12 @@ require Exporter;
                 reflect_shape rotate_shape
                 reduce_shape expand_shape
                 pour_sightly sightly);
+$VERSION = '1.15';
 
-$VERSION = '1.14';
-
-my @C = map {"'" . chr() . "'"} 0..255;
-$C[39]  = q#"'"#;
+my @C = map {"'" . chr() . "'"} 0..255; $C[39]  = q#"'"#;
+my $q;
 
 # 'a'..'o' (97..111)
-my $q;
 for (33..47) {
    $C[$_+64] = q#('`'|#.($q=$_==39?'"':"'").chr()."$q)";
 }
@@ -84,8 +81,6 @@ $C[31]  = q#('%'^':')#;
 $C[32]  = q#('{'^'[')#;      # space
 $C[127] = q#('!'^'^')#;
 
-# $C[10]  = join('.', q#'\\\\'#, $C[110]);   # newline \n
-
 # Special escaped characters.
 $C[92]  = q#'\\\\'.'\\\\'#;
 $C[34]  = q#'\\\\'.'"'#;
@@ -97,7 +92,6 @@ $C[125] = q#'\\\\'.'}'#;
 # 128..255
 for my $i (128..255) {
    $C[$i] = join('.', q#'\\\\'#,
-      # map($C[$_], unpack('C*', sprintf('%o', $i))));
       $C[120], map($C[$_], unpack('C*', sprintf('%x', $i))));
 }
 
@@ -148,8 +142,7 @@ sub _guess_ntok {
    for my $i ($sidx .. $eidx) {
       $tlen += length($rtok->[$i]);
       if ($tlen == $slen) {
-         ${$rexact} = 1;
-         return $ntok+1;
+         ${$rexact} = 1; return $ntok+1;
       } elsif ($tlen > $slen) {
          return $ntok;
       }
@@ -180,8 +173,7 @@ sub _guess_compact_ntok {
          && substr($rtok->[$i-1], 0, 1) eq "'"
          && substr($rtok->[$i+1], 0, 1) eq "'"
          && length($rtok->[$i+1]) == 3) {
-            ${$fcompact} = 1;
-            return $ntok+2;
+            ${$fcompact} = 1; return $ntok+2;
          } else {
             return $ntok+1;
          }
@@ -289,7 +281,6 @@ sub _pour_line {
    # next line also adds '+'
    if ($rtok->[$eidx] ne '=' and
       ($nexttok eq '"' or $nexttok eq "'")) {
-   # if ($nexttok eq '"' or $nexttok eq "'") {
       ${$rstr} = join("", @{$rtok}[$sidx .. $eidx], '+');
       return 1;
    }
@@ -393,8 +384,6 @@ sub pour_sightly {
                     # [ q#'}'#, '&', q^'{'^ ],
                     # [ q#']'#, '&', q^'['^ ],
                   );
-   # for my $c (@filleqto) {
-   # my $z=join("",@{$c});my $x=eval $z;print "z=$z eqto=$x:\n" }
    scalar(@{$rfillvar}) > scalar(@filleqto) and
       die "oops: too many rfillvar";
    my $modo = scalar(@filleqto) % scalar(@{$rfillvar});
@@ -403,8 +392,7 @@ sub pour_sightly {
    my $vi = 0;
    for my $e (@filleqto) {
       push(@filler, ';', $rfillvar->[$vi], '=', @{$e});
-      ++$vi;
-      $vi = 0 if $vi > $#{$rfillvar};
+      ++$vi; $vi = 0 if $vi > $#{$rfillvar};
    }
    my $filllen = 0;
    for my $t (@filler) { $filllen += length($t) }
@@ -464,7 +452,6 @@ sub pour_sightly {
                   }
                   if ($n == 0) {
                      # warn "line $linenum: failed\n";
-                     # $outstr .= $ptok[$sidx++];
                      my $zlen = 0;
                      while (1) {
                         last if substr($ptok[$sidx], 0, 1) =~ /['"]/;
@@ -480,8 +467,7 @@ sub pour_sightly {
                      splice(@ptok, $sidx+1, 0, @itok);
                      $iendprog += $nleft if $sidx < $iendprog;
                   } else {
-                     $outstr .= $str;
-                     $sidx += $n;
+                     $outstr .= $str; $sidx += $n;
                   }
                }
             }
@@ -494,7 +480,6 @@ sub pour_sightly {
       $outstr .= "\n" x $gap;
    }
 
-   # $outstr =~ s/\s+$/\n/;
    if ($sidx != $iendprog) {
       my $lastchar = substr($outstr, -2, 1);
       my $lc2 = substr($outstr, -3, 1);
@@ -517,7 +502,7 @@ sub pour_sightly {
          }
       }
    }
-   return $outstr;
+   $outstr;
 }
 
 # -----------------------------------------------------------------
@@ -704,8 +689,7 @@ sub _make_banner {
       $rc == 0 or die "<$cmd> failed: rc=$rc";
       $i += 512;
    }
-   $str =~ s/\s+$/\n/;
-   $str =~ s/ +$//mg;
+   $str =~ s/\s+$/\n/; $str =~ s/ +$//mg;
    my $blen = length($str);
    warn "$len chars bannerised (bannerlen=$blen)\n";
    $str;
@@ -783,8 +767,7 @@ sub get_eye_shapes {
    my $dir = $this_dir ? $this_dir : '.';
    local *DD;
    opendir(DD, $dir) or return ();
-   my @eye = sort map { substr($_, 0, length($_)-4) }
-                grep { /\.eye$/ } readdir(DD);
+   my @eye = sort map { /(.+)\.eye$/ } readdir(DD);
    closedir(DD);
    return @eye;
 }
@@ -881,8 +864,7 @@ sub sightly {
                    $widthleft, $widthright, $widthtop, $widthbottom);
       }
       if ($arg{Indent}) {
-         my $s = ' ' x $arg{Indent};
-         $shapestr =~ s/^/$s/mg;
+         my $s = ' ' x $arg{Indent}; $shapestr =~ s/^/$s/mg;
       }
    }
 
@@ -1073,7 +1055,7 @@ This is a Visual Programming breakthrough in that you can tell
 it is a Windows program and see its UML structure too,
 just by glancing at the code.
 
-For Linux-only, you can apply its F</usr/games/banner> command
+For Linux only, you can apply its F</usr/games/banner> command
 to the program's source text:
 
     print sightly( { Shape       => 'srcbanner',
@@ -1807,7 +1789,7 @@ A simple and concise Sierpinski triangle generator, F<siertri.pl>, is:
 
 which was posted by Mtv Europe to golf@perl.org on 14-sep-2002
 as a one stroke improvement on Adam Antonik's original program.
-Running this program:
+Running:
 
     perl siertri.pl 4
 
@@ -1827,9 +1809,10 @@ examples below:
 
 An interesting obfuscated Sierpinski triangle generator is:
 
-    #!perl -l
-    s--(G^g)x(1<<pop)-ge,s-.-s,,,,s,$,(G^'/').(E^'|')^Ge,ge,
-    print,s,(?<=/[^ge])[^g][^e],$&^(G^'/').(E^'|')^gE,ge-ge
+    #!/usr/bin/perl -l
+    s--@{[(gE^Ge)=~/[^g^e]/g]}[g^e]x((!!+~~g^e^g^e)<<pop).!gE-ge,
+    s-[^ge^ge]-s,,,,s,@{[(g^';').(e^'?')]},(G^'/').(E^'|')^Ge,ge,
+    print,s,(?<=/[^g^e])[^g^e][^g^e],$&^(G^'/').(E^'|')^gE,ge-ge
 
 As an alternative obfu, you can produce a Sierpinski triangle-shaped
 Sierpinski triangle generator based on Mtv's program like this:
@@ -2571,8 +2554,9 @@ The attributes that HASHREF may contain are:
                   the above.
 
     Width         Ignored for .eye file shapes. For built-in shapes,
-                  interpreted appropriately for the shape, typically
-                  the shape width in characters.
+                  interpreted appropriately for the shape, typically the
+                  shape width in characters. If no shape is specified,
+                  a block of Width characters is generated.
 
     TrapEvalDie   Boolean.
                   Add closing 'die $@ if $@' to generated program.
@@ -2595,19 +2579,20 @@ The attributes that HASHREF may contain are:
 
 =back
 
-=head2 Shape Reference
+=head2 Specifying a Shape
 
 When you specify a shape like this:
 
-    sightly( { Shape => 'camel' ...
+    sightly( { Shape => 'fred' ...
 
-EyeDrops looks for the file F<camel.eye> in the same
-directory as F<EyeDrops.pm>.
-You can also specify a shape with a file name:
+first a built-in C<fred> shape is looked for, then EyeDrops looks
+for the file F<fred.eye> in the same directory as F<EyeDrops.pm>.
+If you specify a C</> or C<.> in the Shape attribute, a file
+with that name is looked for instead. For example:
 
-    sightly( { Shape => '/tmp/camel.eye' ...
+    sightly( { Shape => '/tmp/fred.eye' ...
 
-or with a string, for example:
+Finally, you may specify a shape with a string. For example:
 
     my $shapestr = <<'GROK';
              #####
@@ -2615,10 +2600,38 @@ or with a string, for example:
     GROK
     sightly ( { ShapeString => $shapestr ...
 
-The shapes (F<.eye> files) distributed with this version of
-EyeDrops are:
+If you specify a shape without a source file:
+
+    print sightly( { Shape => 'camel' } );
+
+a no-op filler is used to fill the shape.
+
+If you specify a source file without a shape:
+
+    print sightly( { SourceFile => 'helloworld.pl' } );
+
+a string without any shape (or newlines) is generated.
+You can break this string into fixed width lines via the
+Width attribute:
+
+    print sightly( { SourceFile => 'helloworld.pl',
+                     Width      => 40 } );
+
+=head2 Shape Reference
+
+The built-in shapes are:
+
+    banner      Linux banner command (/usr/games/banner -w Width)
+                of text in BannerString attribute
+    srcbanner   Linux banner command (/usr/games/banner -w Width)
+                of source text
+    siertri     A Sierpinski triangle (2**Width lines)
+    triangle    A triangle (width Width characters)
+
+The F<.eye> file shapes distributed with this version of EyeDrops are:
 
     a           Horizontal banner of "a"
+    acme        Perl/Parrot Euro-hacker who likes the colour orange
     alien       An alien (rumoured to be Ton Hospel, from the
                 Roswell archives circa 1974)
     bleach      Vertical banner of "use Acme::Bleach;"
@@ -2631,7 +2644,7 @@ EyeDrops are:
     camel3      London.pm's bactrian camel at London zoo
     coffee      A cup of coffee
     cricket     Australia are world champions in this game
-    damian      Damian Conway's face
+    damian      The Acme namespace is all his fault
     dipsy       Teletubbies Dipsy (also london.pm infobot name)
     eugene      Champion Perl golfer, Eugene van der Pijll
     eye         An eye
@@ -2640,7 +2653,8 @@ EyeDrops are:
     jon         Kick-started the Perl 6 development effort by smashing
                 a standard-issue white coffee mug against a hotel wall
     kermit      Kermit the frog
-    larry       Larry Wall's face
+    larry       Wall, Larry (as opposed to Russell Wall who is
+                Wall, Russ)
     larry2      Caricature of Larry contributed by Ryan King
     llama       Llamas are so closely related to camels they can
                 breed with them (their progeny are called camas)
