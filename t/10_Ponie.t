@@ -1,6 +1,9 @@
-#!/usr/bin/perl -Tw
+#!/usr/bin/perl
 # 10_Ponie.t (was text.t)
 # Currently the only taint-safe test, mainly due to backticks.
+# This tests OK as taint-safe (i.e. with -Tw added to first line above)
+# with recent versions of Perl, but not with Perl 5.005, which complains
+# it cannot locate Acme/EyeDrops.pm in @INC.
 
 use strict;
 use Acme::EyeDrops qw(sightly hjoin_shapes get_eye_string pour_text);

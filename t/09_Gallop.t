@@ -50,6 +50,9 @@ $prog eq $camelstr or print "not ";
 
 # Prior to Acme::EyeDrops v1.42, test 4 fails on Perl 5.8.1
 # with the error: panic: pad_free curpad (Perl bug #23143).
+# And you can make it fail again, by adding the attribute:
+#   FillerVar  => [ '$_' ],
+# to all sightly() calls in this test program.
 
 $prog = sightly({ Shape         => 'camel,window',
                   SourceString  => $progorig,
@@ -72,3 +75,27 @@ $prog eq $teststr or print "not ";
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;
+
+# --------------------------------------------------
+# Original Perl bug report #23143 follows:
+# The following program works under Perl 5.8.0 but fails under
+# 5.8.1 with the error: "panic: pad_free curpad".
+#
+# ''=~m<(?{eval'print 4;$_=9'})>;($_)=9;
+#
+# If you change it to:
+#
+# ''=~m<(?{eval'print 4;$_=9'})>;$_=9;
+#
+# it works fine. Take out the eval:
+#
+# ''=~m<(?{print 4;$_=9})>;($_)=9;
+#
+# and it fails with "Modification of a read-only value attempted"
+# on all Perl versions that I tested on. However, Perl 5.8.1
+# then goes on to further fail with: "panic: pad_free curpad".
+#
+# BTW, the next two work fine on all versions that I tested:
+#
+# ''=~m<(?{print 4;local $_=9})>;($_)=9;
+# ''=~m<(?{eval'print 4;local $_=9'})>;($_)=9;

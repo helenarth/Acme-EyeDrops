@@ -1,15 +1,13 @@
 #!/usr/bin/perl
 # 11_bold.t (was vshape.t)
-# The only non-taint safe code is the backticks in make_banner.
-# TODO: fix by removing make_banner from this test and adding -Tr
-# or by making backticks taint-safe (fork/exec ?).
+# This tests OK as taint-safe (i.e. with -Tw added to first line above)
+# with recent versions of Perl, but not with Perl 5.005, which complains
+# it cannot locate Acme/EyeDrops.pm in @INC.
 
 use strict;
-use Cwd ();
-use Acme::EyeDrops qw(get_eye_dir set_eye_dir
-                      get_eye_string get_eye_shapes
-                      get_builtin_shapes add_builtin_shape del_builtin_shape
-                      make_triangle make_siertri make_banner
+use Acme::EyeDrops qw(get_eye_string get_eye_shapes
+                      get_builtin_shapes
+                      make_triangle make_siertri
                       border_shape invert_shape reflect_shape
                       hjoin_shapes sightly
                       reduce_shape expand_shape rotate_shape);
@@ -17,15 +15,6 @@ use Acme::EyeDrops qw(get_eye_dir set_eye_dir
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 # --------------------------------------------------
-
-sub build_file {
-   my ($f, $d) = @_;
-   local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
-}
-
-# --------------------------------------------------
-
 # A valid shape should:
 #  1) contain only ' ' '#' and "\n"
 #  2) be left-justified
@@ -34,17 +23,11 @@ sub build_file {
 #  5) contain no leading or trailing newlines
 # This test verifies that is the case for all .eye shapes
 # and for all subroutines that generate shapes.
-
 # --------------------------------------------------
-
-# make_banner is linux only (also requires /usr/games/banner executable)
-my $have_banner = $^O eq 'linux' && -x '/usr/games/banner';
 
 my @eye_shapes = get_eye_shapes();
 my $n_tests = @eye_shapes * 6 + 12 * 6;
-$n_tests += 7;   # plus 7 builtin shape tests
-$n_tests += 6;   # plus 6 banner tests
-$n_tests += 14;  # get_eye_dir/set_eye_dir
+$n_tests += 2;   # plus builtin shape tests
 
 print "1..$n_tests\n";
 
@@ -94,104 +77,36 @@ my @oldb = get_builtin_shapes();
 "@oldb" eq 'all banner siertri srcbanner triangle' or print "not ";
 ++$itest; print "ok $itest - get_builtin_shape v\n";
 
-add_builtin_shape('knobsiertri', sub { make_siertri($_[0]->{Width}) } );
+# Old tests -- add_builtin_shape/del_builtin_shape have been removed.
 
-my @newb = get_builtin_shapes();
-@newb == 6 or print "not ";
-++$itest; print "ok $itest - get_builtin_shape n\n";
-"@newb" eq 'all banner knobsiertri siertri srcbanner triangle' or print "not ";
-++$itest; print "ok $itest - get_builtin_shape v\n";
+# add_builtin_shape('knobsiertri', sub { make_siertri($_[0]->{Width}) } );
 
-my $ksier = sightly( { SourceString  => "knob\n",
-                       Print         => 1,
-                       Regex         => 1,
-                       Shape         => 'knobsiertri',
-                       Gap           => 3 } );
-my $osier = sightly( { SourceString  => "knob\n",
-                       Print         => 1,
-                       Regex         => 1,
-                       Shape         => 'siertri',
-                       Gap           => 3 } );
-$ksier eq $osier or print "not ";
-++$itest; print "ok $itest - siertr eq knobsiertri\n";
+# my @newb = get_builtin_shapes();
+# @newb == 6 or print "not ";
+# ++$itest; print "ok $itest - get_builtin_shape n\n";
+# "@newb" eq 'all banner knobsiertri siertri srcbanner triangle' or print "not ";
+# ++$itest; print "ok $itest - get_builtin_shape v\n";
 
-del_builtin_shape('knobsiertri');
-@oldb = get_builtin_shapes();
-@oldb == 5 or print "not ";
-++$itest; print "ok $itest - get_builtin_shape n\n";
-"@oldb" eq 'all banner siertri srcbanner triangle' or print "not ";
-++$itest; print "ok $itest - get_builtin_shape v\n";
+# my $ksier = sightly( { SourceString  => "knob\n",
+#                        Print         => 1,
+#                        Regex         => 1,
+#                        Shape         => 'knobsiertri',
+#                        Gap           => 3 } );
+# my $osier = sightly( { SourceString  => "knob\n",
+#                        Print         => 1,
+#                        Regex         => 1,
+#                        Shape         => 'siertri',
+#                        Gap           => 3 } );
+# $ksier eq $osier or print "not ";
+# ++$itest; print "ok $itest - siertr eq knobsiertri\n";
 
-if ($have_banner) {
-   test_one_shape('make_banner', make_banner(70, "a bc"));
-} else {
-   for (1..6) {
-      ++$itest; print "ok $itest # skip Linux /usr/games/banner not available\n";
-   }
-}
+# del_builtin_shape('knobsiertri');
+# @oldb = get_builtin_shapes();
+# @oldb == 5 or print "not ";
+# ++$itest; print "ok $itest - get_builtin_shape n\n";
+# "@oldb" eq 'all banner siertri srcbanner triangle' or print "not ";
+# ++$itest; print "ok $itest - get_builtin_shape v\n";
 
 # -----------------------------------------------------------------------
-
-my $mypwd =  Cwd::cwd();
-my $mytesteyedir  =  "$mypwd/eyedir.tmp";
-my $mytesteyefile =  "$mytesteyedir/tmp.eye";
-
-my $mytestshapestr = <<'UNDIES';
-########################################################
-########################################################
-########################################################
-########################################################
-########################################################
-########################################################
-   ##################################################
-      ############################################
-         ######################################
-           ##################################
-             ##############################
-               ##########################
-                ########################
-                 ######################
-                  ####################
-                   ##################
-                    ################
-                     ##############
-                     ##############
-                      ############
-                      ############
-UNDIES
-
--d $mytesteyedir or (mkdir($mytesteyedir, 0777) or die "error: mkdir '$mytesteyedir': $!");
-build_file($mytesteyefile, $mytestshapestr);
-
-my $eyedir = get_eye_dir();
-$eyedir or print "not ";
-++$itest; print "ok $itest - get_eye_dir sane\n";
--d $eyedir or print "not ";
-++$itest; print "ok $itest - get_eye_dir dir\n";
--f "$eyedir/camel.eye" or print "not ";
-++$itest; print "ok $itest - get_eye_dir camel.eye\n";
-
-set_eye_dir($mytesteyedir);
-get_eye_dir() eq $mytesteyedir or print "not ";
-++$itest; print "ok $itest - set_eye_dir sane\n";
-my @eyes = get_eye_shapes();
-@eyes==1 or print "not ";
-++$itest; print "ok $itest - set_eye_dir number\n";
-$eyes[0] eq 'tmp' or print "not ";
-++$itest; print "ok $itest - set_eye_dir filename\n";
-test_one_shape('tmp', get_eye_string('tmp'));
-
-# This is just a simple example of testing die inside EyeDrops.pm.
-eval { set_eye_dir($mytesteyefile) };
-$@ or print "not ";
-++$itest; print "ok $itest - set_eye_dir eval die\n";
-$@ eq "error set_eye_dir '" . $mytesteyefile . "': no such directory\n"
-   or print "not ";
-++$itest; print "ok $itest - set_eye_dir eval die string\n";
-
-# -----------------------------------------------------------------------
-
-unlink($mytesteyefile) or die "error: unlink '$mytesteyefile': $!";
-rmdir($mytesteyedir) or die "error: rmdir '$mytesteyedir': $!";
 
 exit 0;

@@ -8,8 +8,10 @@ lib/Acme/EyeDrops.pm
 lib/Acme/EyeDrops/a.eye
 lib/Acme/EyeDrops/acme.eye
 lib/Acme/EyeDrops/alien.eye
+lib/Acme/EyeDrops/alpaca.eye
 lib/Acme/EyeDrops/baghdad.eye
 lib/Acme/EyeDrops/beer.eye
+lib/Acme/EyeDrops/bighorn.eye
 lib/Acme/EyeDrops/bleach.eye
 lib/Acme/EyeDrops/bottle.eye
 lib/Acme/EyeDrops/bottle2.eye
@@ -43,6 +45,7 @@ lib/Acme/EyeDrops/larry2.eye
 lib/Acme/EyeDrops/llama.eye
 lib/Acme/EyeDrops/london.eye
 lib/Acme/EyeDrops/map_australia.eye
+lib/Acme/EyeDrops/map_italy.eye
 lib/Acme/EyeDrops/merlyn.eye
 lib/Acme/EyeDrops/mongers.eye
 lib/Acme/EyeDrops/mosquito.eye

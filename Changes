@@ -335,3 +335,16 @@ Revision history for Perl extension EyeDrops
 	- tests: new long running test 13_to.t
 	- documentation: added "Getting Started" section
 	- documentation: fixed program in "Naked Arm Wrestling" section
+	- documentation: updated 'Abbreviated History of Perl 6' section
+
+1.43	Sun Aug 31 17:12:55 2003
+
+	- new shapes: alpaca, bighorn, map_italy
+	- removed functions set_eye_dir, add_builtin_shape, del_builtin_shape
+	  which were mistakenly added to version 1.41 (these are not really
+	  necessary and change module state, which is a Bad Thing)
+	- documentation: added 'twang bra-strap' to acme shape description
+	- tests: merged old 13_to.t, old 12_Beer.t to new 19_surrounds.t
+	         new Test::Pod test, 18_sky.t
+	         11_bold.t now tested in taint mode (no banner test)
+	         12_Beer.t now banner test only (not taint safe)
