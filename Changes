@@ -151,3 +151,9 @@ Revision history for Perl extension EyeDrops
 	- documentation: increased from 'Thirty Two Camels'
 	  to 'Twelve Thousand and Thirty Two Camels'
 	- documentation: improved 'Buffy Looking in the Mirror'
+
+1.11	Sun Jun 30 11:02:09 2002
+
+	- new shape: alien
+	- documentation: minor improvements
+	- documentation: added 'Somersaulting Camels' section

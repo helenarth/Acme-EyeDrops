@@ -4,6 +4,7 @@ Makefile.PL
 README
 lib/Acme/EyeDrops.pm
 lib/Acme/a.eye
+lib/Acme/alien.eye
 lib/Acme/bleach.eye
 lib/Acme/buffy.eye
 lib/Acme/buffy2.eye

@@ -16,7 +16,7 @@ require Exporter;
                 reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.10';
+$VERSION = '1.11';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1056,7 +1056,7 @@ producing this improved visual representation:
  '`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.';
 
 This is a Visual Programming breakthrough in that you can tell
-that it is a Windows program and see its UML structure too,
+it is a Windows program and see its UML structure too,
 just by glancing at the code.
 
 For Linux-only, you can apply its F</usr/games/banner> command
@@ -1278,9 +1278,8 @@ is not reentrant. In this case, we must resort to:
                    Regex        => 0 } );
 
 which runs the generated sightly program via C<eval> instead.
-If you want to use Regex => 1, ensure that the program to be
-converted does not use any regular expressions (and is careful
-with use of C<$_>).
+If you want to use Regex => 1, ensure the program to be converted
+is careful with its use of regular expressions and C<$_>.
 
 To produce a I<JAPH> that resembles the original
 I<Just another Perl hacker,> aka I<Randal L Schwartz>, try this:
@@ -1384,8 +1383,9 @@ and finally produce I<Buffy looking in the mirror> with:
     sightly.pl -r -f kk.pl -s buffy2 >b.pl
     perl pp.pl b.pl >bb.pl
 
-For this example, however, the Compact attribute provides a
-more direct solution, without requiring any trailing spaces:
+For this example, however, the Compact attribute (-m switch
+to F<sightly.pl>) provides a more direct solution,
+without requiring any trailing spaces:
 
     sightly.pl -mr -f k.pl -s buffy2 >buffy.pl
     cat buffy.pl     (should show Buffy's face)
@@ -1458,13 +1458,112 @@ and easier still for a self-printing shape:
 
     open$%;print<0>
 
-=head2 Twelve Thousand and Thirty Two Camels
+=head2 A Somersaulting Camel
 
 Let's extend the Buffy example of the previous section to produce
-a camel-shaped program capable of emitting twelve thousand and
-thirty two different camels when run.
+a camel-shaped program capable of somersaulting across the screen
+when run.
 
 We start with a generator program, F<gencamel.pl>:
+
+    use Acme::EyeDrops qw(sightly);
+    my $src = <<'END_SRC_STR';
+    $~=pop||'';open$%;
+    y,!-~,#,,s,(.).,$+,gs,$~&&($_=reverse)for@~=grep$|--,('')x18,<0>;
+    @;=map~~reverse,reverse@~;
+    map{system$^O=~Win?CLS:'clear';
+    ($-=$_%3)||(--$|,map$_=reverse,@~,@;);
+    print$"x($=/3*abs$|*2-$-),$_,$/for$-&1?@;:@~;
+    sleep!$%}$%..11
+    END_SRC_STR
+    $src =~ tr/\n//d;
+    my $prog = sightly( { Regex         => 1,
+                          Compact       => 1,
+                          Shape         => 'camel',
+                          SourceString  => $src } );
+    my @a = split(/\n/, $prog);
+    my $max = 0; length > $max and $max = length for @a;
+    $_ .= ' ' x ($max - length) for @a;
+    print " $_ \n" for @a;
+
+Note the use of the Compact attribute, necessary here to
+squeeze the above program into a single camel shape.
+
+Running this program:
+
+    perl gencamel.pl >camel.pl
+
+produces F<camel.pl>:
+
+                                       ''=~('(?{'.(                
+            ('`')|                   '%').('['^'-').               
+         ('`'|'!').                ('`'|',').'"\\$~='              
+  .('['^'+')  .('`'|              '/').('['^'+').'||'.             
+ "'"."'".';'.('`'|'/'            ).('['^'+').('`'|'%').            
+ ('`'|'.').('\\$%;').(          '['^'"').(',!-~,#,,').(            
+   '['^'(').',(.).,\\'        .'$+,'.('`'|"'").('['^'(')           
+        .',\\$~&&(\\$'      .'_='.('['^')').('`'|('%')).(          
+       '['^'-').('`'|     '%').('['^')').('['^'(').(('`')|         
+      '%').')'.("\`"|   '&').('`'|'/').('['^"\)").'\\@~='.(        
+     '`'|"'").("\["^   ')').('`'|'%').('['^'+').('\\$|--,(').      
+     "'"."'".(')').(  '['^'#').('^'^('`'|'/')).(':'&'=').',<'.     
+     ('^'^('`'|'.')  ).'>;\\@;='.('`'|'-').('`'|'!').('['^'+')     
+     .'~~'.('['^')'  ).('`'|'%').('['^'-').('`'|'%').('['^')').    
+     ('['^'(').('`'|'%').','.('['^')').('`'|'%').('['^'-').('`'    
+     |'%').('['^')').('['^'(').('`'|'%').'\\@~;'.('`'|'-').('`'|   
+      '!').('['^'+').'\\{'.('['^'(').('['^'"').('['^'(').(('[')^   
+      '/').('`'|'%').('`'|'-').'\\$^'.('`'^'/').'=~'.('{'^"\,").(  
+       '`'|')').('`'|'.').'?'.('`'^'#').('`'^',').('{'^'(').(':'). 
+        "'".('`'|'#').('`'|',').('`'|'%').('`'|'!').('['^')')."'". 
+         ';(\\$-=\\$_%'.('^'^('`'|'-')).')||(--\\$|,'.('`'|'-' ).( 
+          '`'|'!').('['^'+').'\\$_='.('['^')').('`'|'%').('['  ^(( 
+           '-'))).('`'|'%').('['^')').('['^'(').('`' |('%')).  ',' 
+             .'\\@~,\\@;);'.('['^'+').('['^(')')).(  '`'|')'   ).( 
+              "\`"| '.').('['^'/').'\\$\\"'.("\["^   ('#')).   '(' 
+                    .'\\$=/'.('^'^('`'|'-')).'*'.    (('`')|   '!' 
+                    ).("\`"|    '"').('['^ "\(").     '\\$|'   .+  
+                    ('*').(     '^'^('`'   |','))     .'-\\'  .+   
+                    '$-),'.     '\\$_,'.   '\\$'       .'/'.  (    
+                    ('`')|      ('&')).(   '`'|         '/')       
+                    .('['^     ')').'\\'   .'$'         .'-'       
+                     .'&'.     (('^')^(    '`'|         '/')       
+                     ).'?'     .'\\@;'     .':'         .''.       
+                     '\\'     .'@~;'       .''.         ('['       
+                     ^'('     ).(          '`'|         ',')       
+                     .''.      (((         '`'          ))|        
+                     '%'        ).(       '`'           |((        
+                     '%'         )))     .+(            '['        
+                     ^((          '+'   )))              .+        
+                     ((             '!')).               ((        
+                     ((              '\\')               ))        
+                     ).             '$%\\}'.             ((        
+                    (((            '\\' )))))            .+        
+                   '$'           .'%..'  .''.           (((        
+                  '^')         )^("\`"|   '/'          )).(        
+                "\^"^(                                ('`')|       
+              ('/'))).                               '"})');       
+
+I<Note: The use of a camel image in association with Perl is a
+trademark of O'Reilly & Associates, Inc. Used with permission>.
+
+You can run F<camel.pl> like this:
+
+    perl camel.pl           normal forward somersaulting camel
+    perl camel.pl b         camel somersaults backwards
+    perl camel.pl please do a backward somersault
+                            same thing
+
+You are free to add a leading C<#!/usr/bin/perl -w> line to
+F<camel.pl>, so long as you also add a blank line after
+this header line.
+
+=head2 Twelve Thousand and Thirty Two Camels
+
+In similar way to the somersaulting camel described above,
+we create a camel-shaped program capable of emitting
+twelve thousand and thirty two different camels when run.
+
+As usual, we start with a generator program, F<gencamel.pl>:
 
     my $src = <<'END_SRC_STR';
     $~=uc shift;$:=pop||'#';open$%;chop(@~=<0>);$~=~R&&
@@ -1483,65 +1582,11 @@ We start with a generator program, F<gencamel.pl>:
     $_ .= ' ' x ($max - length) for @a; $\ = "\n";
     print ' ' x ($max+2); print " $_ " for @a; print ' ' x ($max+2);
 
-Note the use of the Compact attribute, necessary here to
-squeeze the above program into a single camel shape.
-
 Running this program:
 
     perl gencamel.pl >camel.pl
 
-produces F<camel.pl>:
-
-                                        ''=~('(?{'.(                
-             ('`')|                   '%').('['^'-').               
-          ('`'|'!').                ('`'|',').'"\\$~='              
-   .('['^'.')  .('`'|              '#').('{'^'[').('['^             
-  '(').('`'|'(').('`'|            ')').('`'|'&').(('[')^            
-  '/').';\\$:='.(('[')^          '+').('`'|'/').('['^'+'            
-    ).'||'."'".'#'."'".        ';'.('`'|'/').('['^"\+").(           
-         '`'|'%').('`'|      '.').'\\$%;'.('`'|'#').("\`"|          
-        '(').('`'|'/')     .('['^'+').'(\\@~=<'.('^'^("\`"|         
-       '.')).'>);\\$~'   .'=~'.('{'^')').'&&(\\@~='.('`'|'-'        
-      ).('`'|('!')).(   '['^'+').'\\{\\$-=\\$_+\\$_;'.('`'|'*'      
-      ).('`'|('/')).(  '`'|')').('`'|'.')."'"."'".','.('`'|'-')     
-      .('`'|('!')).(  '['^'+').'/.\\{\\$-\\}(.)/,\\@~\\}\\$%..'     
-      .('^'^('`'|'-'  )).('^'^('`'|'-')).');\\$|--&\\$~=~'.('`'^    
-      '(').'&&'.('`'|'.').('`'|'%').('['^'#').('['^'/').',\\$~!'    
-      .'~'.('{'^'*').'&&'.('`'|'%').('['^'-').('`'|'!').('`'|',')   
-       .'\\"'.('['^'"').','.('{'^'[').',\\\\'.('{'^'*').'\\$:\\'.   
-       '\\'.('`'^'%').','.('`'|'#').'\\",\\$~=~'.('`'^"\)").'&&'.(  
-        '`'|'%').('['^'-').('`'|'!').('`'|',').'\\"'.('['^'"').','. 
-         ('{'^'[').'\\\\'.('{'^'*').'\\$:\\\\'.('`'^"\%").',\\\\'.( 
-          '{'^'*').'\\$:\\\\'.('`'^'%').('{'^'[').',\\",\\$~=~' .+( 
-           '`'^'-').'&&(\\$_='.('['^')').('`'|'%').('['^'-').(  '`' 
-            |'%').('['^')').('['^'(').('`'|'%').'),'. ('['^'+'  ).( 
-              '['^')').('`'|')').('`'|'.').('['^'/')  .'\\$~'   .(( 
-               '=')) .'~'.('{'^'-').'?/(.).?/'.('`'   |"\'").   ':' 
-                     .'\\$_,\\$/'.('`'|'&').("\`"|    "\/").(   '[' 
-                     ^(')')).    '\\$~=~'.( ('{')^     "\.").   ((  
-                     '?')).(     '['^')')   .('`'|     '%').(  ((   
-                     "\["))^     ('-')).(   "\`"|       '%').  (    
-                     ('[')^      (')')).(   '['^         '(')       
-                     .('`'|     '%').'\\'   .'@'         .'~'       
-                      .':'.     '\\@~"}'    .')'         );$:       
-                      ='.'^     '~';$~=     '@'|         '(';       
-                      ($^)     ="\)"^       '[';         ($/)       
-                      ='`'     |((          '.')         );$_       
-                      ='('      ^((         '}'          ));        
-                      $,=        '`'       |((           '!'        
-                      ));         $\=     ')'            ^((        
-                      '}'          ));   $:=              ((        
-                      ((             '.')))               )^        
-                      ((              '~'))               ;(        
-                      $~             )=('@')|             ((        
-                     '('            ));( ($^))            =(        
-                    ')'           )^'[';  ($/)           =((        
-                   '`')         )|'.';$_   =((          '(')        
-                 )^'}';                                $,='`'       
-               |'!';$\=                               ')'^'}'       
-
-Notice that the camel-shaped program above needs a leading and trailing
-line of spaces for best results with inverted shapes.
+produces F<camel.pl>.
 
 You can run F<camel.pl> like this:
 
@@ -1562,8 +1607,8 @@ producing a different camel, for example:
 produces a large, bearded camel with a pony-tail, glasses,
 and a tie-dyed T-shirt. :)
 
-camel.pl also accepts an optional second argument, specifying
-the character to fill the camel with (default '#').
+F<camel.pl> also accepts an optional second argument, specifying
+the character to fill the camel with (default C<#>).
 For example:
 
     perl camel.pl hv        small camel filled with #
@@ -1579,7 +1624,7 @@ of 128 * 94 = 12,032 camels.
 During the TPR02 Perl Golf tournament, I<`/anick> composed a poem
 describing his experience, entitled I<Dueling Dingos>.
 
-You can produce a program that emits his superb poem like this:
+You can produce a program that emits his eloquent poem like this:
 
     print sightly( { Shape        => 'yanick3',
                      Regex        => 1,
@@ -2300,6 +2345,8 @@ The shapes (F<.eye> files) distributed with this version of
 EyeDrops are:
 
     a           Horizontal banner of "a"
+    alien       An alien (rumoured to be Ton Hospel, from the
+                Roswell archives circa 1974)
     bleach      Vertical banner of "use Acme::Bleach;"
     buffy       Vertical banner of "Buffy"
     buffy2      Buffy's angelic face
@@ -2347,8 +2394,8 @@ A really diabolical shape with lots of single character lines
 will defeat the shape-pouring algorithm.
 
 You can eliminate all alphanumerics (via Regex => 1) only if the
-program to be converted does not use regular expressions and is
-careful with use of C<$_>.
+program to be converted is careful with its use of regular
+expressions and C<$_>.
 To convert complex programs, you must use Regex => 0, which
 emits a leading unsightly C<eval>.
 
@@ -2381,6 +2428,12 @@ Andrew Savige <asavige@cpan.org>
 
 Perl Obfuscation Engines, for example, yaoe by Perl Monk mtve,
 at http://www.frox25.dhs.org/~mtve/code/eso/perl/yaoe/.
+
+Perl Monks Obfuscation section, especially:
+http://www.perlmonks.com/index.pl?node_id=45213
+(Erudil's camel code) and
+http://www.perlmonks.com/index.pl?node_id=176043
+(Len's Spiralling quine).
 
 L<Acme::Bleach>
 L<Acme::Smirch>
