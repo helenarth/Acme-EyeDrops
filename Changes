@@ -218,11 +218,16 @@ Revision history for Perl extension EyeDrops
 	- new shape derived from Yanni's Ascii Art collection: santa2
 	- minor code improvements
 
-1.19	Sun Jan 7 15:09:04 2003
+1.19	Sun Jan 5 15:09:04 2003
 
 	- new shape from cam.pm: beer
 	- new shape: campm
 	- minor change to shape: candle
 	- minor change to shape: china1
 	- documentation: minor changes
+	- minor code improvements
+
+1.20	Sun Jan 12 12:21:55 2003
+
+	- documentation: added 'EyeDropping EyeDrops.pm' section
 	- minor code improvements
