@@ -8,18 +8,12 @@ use Acme::EyeDrops qw(sightly);
 sub usage
 {
    print STDERR <<'EOM';
-usage: sightly [-s shape] [-f file|-t string]
+usage: sightly [-s shape] [-f file|-z string]
 Options:
   -s shape      Shape/s. Can specify multiple shapes separated
-                by commas. Six shape files are provided in the
-                same directory as EyeDrops.pm, namely:
-                   camel, japh, buffy, bleach, uml, window.
-                A shape is just a file with an .eye suffix,
+                by commas.
+                A shape is just a file with a .eye suffix,
                 so you can add new shapes yourself.
-                In addition, the following built-in shapes are
-                provided for Linux only (/usr/games/banner):
-                   banner (make banner from -c switch)
-                   srcbanner (make banner from source)
   -f file       The file to be made sightly.
   -z string     Specify a string instead of a file.
   -c string     String used with -s banner above.
@@ -35,7 +29,7 @@ Examples:
   sightly -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
      myprog.pl, but prettier and shaped like a camel.
-  sightly -pr -s window -t "Bill Gates is a pest!\n" >bill.pl
+  sightly -pr -s window -z "Bill Gates is a pest!\n" >bill.pl
      This creates bill.pl, a program that prints the above string.
   sightly -g 5 -bps camel,japh,camel -f some_binary_file >eyesore
      This creates eyesore, a sightly-encoded file.

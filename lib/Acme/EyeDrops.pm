@@ -13,7 +13,7 @@ require Exporter;
                 get_builtin_shapes get_eye_shapes
                 pour_sightly sightly);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1097,9 +1097,9 @@ Let's get more ambitious and create a big JAPH.
     $x =~ tr/!-~/#/;
     print $x;
     PROG
-    print sightly({ Shape         => 'japh',
-                    SourceString  => $src,
-                    Regex         => 1 } );
+    print sightly( { Shape         => 'japh',
+                     SourceString  => $src,
+                     Regex         => 1 } );
 
 This works. However, if we were to change:
 
@@ -1113,29 +1113,36 @@ the generated program would malfunction in strange ways because
 it is running inside a regular expression and Perl's regex engine
 is not reentrant. In this case, we must resort to:
 
-    print sightly({ Shape         => 'japh',
-                    SourceString  => $src,
-                    Regex         => 0 } );
+    print sightly({Shape        => 'japh',
+                   SourceString => $src,
+                   Regex        => 0 } );
 
 which runs the generated sightly program via C<eval> instead.
 
 EyeDrops can also convert plain text:
 
-    print sightly({ Shape         => 'window',
-                    SourceString  => "A pop-up paperclip! Wow!\n",
-                    Regex         => 1,
-                    Print         => 1 } );
+    print sightly({Shape        => 'spoon',
+                   SourceString => "Ankur will get the wooden spoon!\n",
+                   Regex        => 1,
+                   Print        => 1 } );
 
 In this example, the generated program will print the C<SourceString>
-above.
+above. Or with a banner (Linux only):
+
+    print sightly({Shape        => 'banner',
+                   SourceString => "Eric is supremely unorthodox!\n",
+                   BannerString => "Eric is supremely unorthodox!",
+                   Width        => 70,
+                   Regex        => 1,
+                   Print        => 1 } );
 
 But wait, there's more. You can encode binary files too.
 
-    print sightly({ Shape       => 'camel,japh,camel',
-                    SourceFile  => 'some_binary_file',
-                    Binary      => 1,
-                    Print       => 1,
-                    Gap         => 5 } );
+    print sightly({Shape      => 'camel,japh,camel',
+                   SourceFile => 'some_binary_file',
+                   Binary     => 1,
+                   Print      => 1,
+                   Gap        => 5 } );
 
 This is prettier than I<uuencode/uudecode>.
 Here is how you encode/decode binary files with F<sightly.pl>.
@@ -1343,7 +1350,8 @@ The attributes that HASHREF may contain are:
                   when converting complex programs.
 
     Print         Boolean. If set, use a print statement instead
-                  of the default eval statement.
+                  of the default eval statement. Set this flag
+                  when converting text files (not programs).
 
     Binary        Boolean. Set if encoding a binary file.
 
@@ -1389,6 +1397,13 @@ an C<INIT> block, for instance, may cause trouble.
 If desperate, give the C<TrapEvalDie> and C<TrapWarn>
 attributes a go, and see if they fix the problem.
 
+Linux F</usr/games/banner> does not support the following characters:
+
+    \ [ ] { } < > ^ _ | ~
+
+When the CPAN Text::Banner module is enhanced, it will be used
+in place of the Linux banner command.
+
 =head1 AUTHOR
 
 Andrew Savige <andrew.savige@ir.com>
@@ -1402,8 +1417,9 @@ L<Acme::Buffy>
 =head1 CREDITS
 
 I blame Japhy and Ronald J Kimball and others on the fwp
-mailing list for exposing the ''=~ trick and Jas Nagra
-for explaining his C<Acme::Smirch> module.
+mailing list for exposing the ''=~ trick, Jas Nagra for
+explaining his C<Acme::Smirch> module, and Rajah Ankur
+and Supremely Unorthodox Eric for provoking me.
 
 =head1 COPYRIGHT
 

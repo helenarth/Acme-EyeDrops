@@ -27,3 +27,9 @@ Revision history for Perl extension EyeDrops
 	- minor improvements to documentation
 	- new tests t/recur.t and t/limit.t
 	- crude test for END block added
+
+0.05	Sun Oct 14 17:19:42 2001
+
+	- minor fixes to demo/sightly.pl
+	- new shape file, spoon.eye
+	- minor improvements to documentation
