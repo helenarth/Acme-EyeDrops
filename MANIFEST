@@ -39,12 +39,14 @@ lib/Acme/window.eye
 lib/Acme/yanick.eye
 lib/Acme/yanick2.eye
 lib/Acme/yanick3.eye
+t/camel.t
 t/convert.t
 t/limit.t
 t/limit2.t
 t/module.t
 t/nasty.t
 t/recur.t
+t/reshape.t
 t/sightly.t
 t/sightly2.t
 demo/sightly.pl

@@ -13,9 +13,10 @@ require Exporter;
                 get_builtin_shapes get_eye_shapes
                 border_shape invert_shape
                 reflect_shape rotate_shape
+                reduce_shape expand_shape
                 pour_sightly sightly);
 
-$VERSION = '1.08';
+$VERSION = '1.09';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -496,43 +497,73 @@ sub reflect_shape {
    join("\n", @a, "");
 }
 
+# Reduce shape by a factor of $fact
+sub reduce_shape {
+   my ($tlines, $fact) = @_;
+   ++$fact;
+   my @a = split(/\n/, $tlines);
+   my @n = ();
+   my $i; my $j; my $l;
+   for ($j = 0; $j < @a; $j += $fact) {
+      $l = $a[$j]; my $s = "";
+      for ($i = 0; $i < length($l); $i += $fact) {
+         $s .= substr($l, $i, 1);
+      }
+      push(@n, $s);
+   }
+   join("\n", @n, "");
+}
+
+# Expand shape by a factor of $fact
+sub expand_shape {
+   my ($tlines, $fact) = @_;
+   ++$fact;
+   my @a = split(/\n/, $tlines);
+   my @n = ();
+   for my $l (@a) {
+      my $s = join("", map { $_ x $fact } split("", $l));
+      for (1 .. $fact) { push(@n, $s) }
+   }
+   join("\n", @n, "");
+}
+
 # Rotate shape clockwise: 90, 180 or 270 degrees
 # (other angles are left as an exercise for the reader:-)
+# rotate type $rtype = 0  big rotated shape
+#             $rtype = 1  small rotated shape
+#             $rtype = 2  squashed rotated
+# flip = 1 to flip (reflect) shape in addition to rotating it
 sub rotate_shape {
-   my ($tlines, $degrees) = @_;
+   my ($tlines, $degrees, $rtype, $flip) = @_;
    if ($degrees == 180) {
-      my @a = reverse split(/\n/, $tlines);
-      return join("\n", @a, "");
+      return join("\n", reverse(split(/\n/, $tlines)), "");
    }
+   my $mult = ($rtype == 0) ? 2 : 1;
+   my $inc  = ($rtype == 1) ? 2 : 1;
+   my @a = split(/\n/, $tlines);
+   my $maxlen = 0;
+   for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+   for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                       if length($l) < $maxlen }
+   my @n = ();
    if ($degrees == 90) {
-      my @a = split(/\n/, $tlines);
-      my $maxlen = 0;
-      for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
-      for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
-                          if length($l) < $maxlen }
-      my @n = ();
-      for my $i (0 .. $maxlen-1) {
-         my $line = "";
-         for my $l (reverse @a) { $line .= substr($l, $i, 1) }
-         push(@n, $line);
-      }
-      return join("\n", @n, "");
-   }
-   if ($degrees == 270) {
-      my @a = split(/\n/, $tlines);
-      my $maxlen = 0;
-      for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
-      for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
-                          if length($l) < $maxlen }
-      my @n = ();
+      @a = reverse(@a) unless $flip;
       my $i;
-      for ($i = $maxlen-1; $i >= 0; --$i) {
+      for ($i = 0; $i < $maxlen; $i += $inc) {
          my $line = "";
-         for my $l (@a) { $line .= substr($l, $i, 1) }
+         for my $l (@a) { $line .= substr($l, $i, 1) x $mult }
          push(@n, $line);
       }
-      return join("\n", @n, "");
+   } elsif ($degrees == 270) {
+      @a = reverse(@a) if $flip;
+      my $i;
+      for ($i = $maxlen-1; $i >= 0; $i -= $inc) {
+         my $line = "";
+         for my $l (@a) { $line .= substr($l, $i, 1) x $mult }
+         push(@n, $line);
+      }
    }
+   return join("\n", @n, "");
 }
 
 sub make_triangle {
@@ -626,7 +657,11 @@ my %default_arg = (
    Binary            => 0,
    Gap               => 0,
    Rotate            => 0,
+   RotateType        => 0,
+   RotateFlip        => 0,
    Reflect           => 0,
+   Reduce            => 0,
+   Expand            => 0,
    Invert            => 0,
    Indent            => 0,
    BorderGap         => 0,
@@ -707,10 +742,17 @@ sub sightly {
    }
    if ($shapestr) {
       if ($arg{Rotate}) {
-         $shapestr = rotate_shape($shapestr, $arg{Rotate});
+         $shapestr = rotate_shape($shapestr, $arg{Rotate},
+                        $arg{RotateType}, $arg{RotateFlip});
       }
       if ($arg{Reflect}) {
          $shapestr = reflect_shape($shapestr);
+      }
+      if ($arg{Reduce}) {
+         $shapestr = reduce_shape($shapestr, $arg{Reduce});
+      }
+      if ($arg{Expand}) {
+         $shapestr = expand_shape($shapestr, $arg{Expand});
       }
       if ($arg{Invert}) {
          $shapestr = invert_shape($shapestr);
@@ -848,7 +890,7 @@ to use the F<sightly.pl> command in the F<demo> directory:
 
     sightly.pl -h           (for help)
     sightly.pl -s camel -f helloworld.pl -r >new.pl
-    cat new.pl
+    cat new.pl              (should look like a camel)
     perl new.pl             (should print "hello world" as before)
 
 Notice that the shape C<'camel'> is just the file F<camel.eye> in
@@ -857,7 +899,7 @@ own new shapes as required.
 
 =head2 Making Your Programs Easier to Understand
 
-If your boss demands a UML diagram describing the program, you
+If your boss demands a UML diagram describing your program, you
 can give him this:
 
     print sightly( { Shape       => 'uml',
@@ -1216,7 +1258,7 @@ producing:
 
 =head2 Buffy Looking in the Mirror
 
-Because the sightly encoding is not very compact, you sometimes
+Because the I<sightly> encoding is not very compact, you sometimes
 find yourself playing a surreal form of I<Perl Golf>, where
 the winner is the one with the smallest F<f.tmp> in:
 
@@ -1337,6 +1379,110 @@ producing F<buffy.pl>:
  (    '`'|'%').('['^')').('['^'(').('`'|'%').'.'.''.           (
  (   '\\')).'$'.'/'.':'.'\\'.'$'.'_'.','.'<'.(('^')^(          (
  (   '`'))|'.')).'>'.('!'^'+').'"'.'}'.')');$:='.'^'~'         ;
+
+=head2 Thirty Two Camels
+
+Let's extend the Buffy example of the previous section to produce
+a camel-shaped program capable of emitting thirty two different
+camels when run.
+
+We start with a generator program, F<gencamel.pl>:
+
+    my $src = <<'END_SRC_STR';
+    $~=uc pop;open$%;chop(@~=<0>);$~=~R&&(@~=map{$-=$_+$_;join'',
+    map/.{$-}(.)/,@~}$%..$~[8]=~y~~~c/2);$~!~Q&&y,!-~,#,,$~=~I&&
+    y~ #~# ~,print$~=~M?~~reverse:$_,$/for$~=~U?reverse@~:@~
+    END_SRC_STR
+    $src =~ tr/\n//d;
+    my $prog = sightly( { Regex         => 1,
+                          Shape         => 'camel',
+                          SourceString  => $src } );
+    my @a = split(/\n/, $prog);
+    my $max = 0; length > $max and $max = length for @a;
+    $_ .= ' ' x ($max - length) for @a; $\ = "\n";
+    print ' ' x ($max+2); print " $_ " for @a; print ' ' x ($max+2);
+
+Running this program:
+
+    perl gencamel.pl >camel.pl
+
+produces F<camel.pl>:
+
+                                       ''=~('('.'?'                
+            .'{'.(                   '`'|'%').("\["^               
+         '-').('`'|                '!').('`'|',').'"'              
+  .'\\'.'$'.  ('~').              '='.('['^'.').("\`"|             
+ '#').('{'^'[').('['^            '+').('`'|'/').(('[')^            
+ '+').';'.('`'|"\/").(          '['^'+').('`'|'%').('`'            
+   |'.').'\\'.'$'.'%'.        ';'.('`'|'#').('`'|"\(").(           
+        '`'|'/').('['^      '+').'('.'\\'.'@'.'~'.'='.'<'          
+       .('^'^('`'|'.'     )).'>'.')'.';'.'\\'.'$'.'~'.'='.         
+      '~'.('{'^"\)").   '&'.'&'.'('.'\\'.'@'.'~'.'='.("\`"|        
+     '-').('`'|'!').   ('['^'+').'\\'.'{'.'\\'.'$'.'-'.('=').      
+     '\\'.'$'.('_').  '+'.'\\'.'$'.'_'.';'.('`'|'*').('`'|'/')     
+     .('`'|(')')).(  '`'|'.')."'"."'".','.('`'|'-').('`'|'!').     
+     ('['^'+').'/'.  '.'.'\\'.'{'.'\\'.'$'.'-'.'\\'.'}'.'('.'.'    
+     .')'.'/'.','.'\\'.'@'.'~'.'\\'.'}'.'\\'.'$'.'%'.'.'.('.').    
+     '\\'.'$'.'~'.'['.(':'&'=').']'.'='.'~'.('['^'"').'~'.('~').   
+      '~'.('`'|'#').'/'.('^'^('`'|',')).')'.';'.'\\'.'$'.'~'.'!'   
+      .'~'.('{'^'*').'&'.'&'.('['^'"').','.'!'.'-'.'~'.','.('#').  
+       ','.','.'\\'.'$'.'~'.'='.'~'.('`'^')').'&'.'&'.('['^('"')). 
+        '~'.('{'^'[').'#'.'~'.'#'.('{'^'[').'~'.','.('['^'+').('[' 
+         ^')').('`'|')').('`'|'.').('['^'/').'\\'.'$'.'~'.'='. '~' 
+          .('`'^'-').'?'.'~'.'~'.('['^')').('`'|'%').('['^'-'  ).( 
+           '`'|'%').('['^')').('['^'(').('`'|('%')). ':'.'\\'  .(( 
+             '$')).'_'.','.'\\'.'$'.'/'.('`'|'&').(  '`'|'/'   ).( 
+              "\["^ ')').'\\'.'$'.'~'.'='.'~'.('{'   ^"\.").   '?' 
+                    .('['^')').('`'|'%').('['^'-'    ).('`'|   '%' 
+                    ).("\["^    ')').('['^ '(').(     ('`')|   ((  
+                    '%'))).     '\\'.'@'   ."\~".     (':').  ((   
+                    '\\')).     '@'.'~'.   "\"".       "\}".  (    
+                    ')'));      $:="\."^   '~';         ($~)       
+                    ="\@"|     ('(');$^=   ')'^         '[';       
+                     ($/)=     '`'|'.';    ($_)         ='('       
+                     ^'}';     $,='`'|     '!';         ($\)       
+                     =')'     ^"\}";       ($:)         ='.'       
+                     ^'~'     ;$~          ='@'         |'('       
+                     ;$^=      ')'         ^((          '['        
+                     ));        $/=       '`'           |((        
+                     '.'         ));     $_=            '('        
+                     ^((          '}'   ));              $,        
+                     =(             "\`")|               ((        
+                     ((              '!'))               ))        
+                     ;(             $\)=')'^             ((        
+                    '}'            ));( ($:))            =(        
+                   '.'           )^'~';  ($~)           =((        
+                  '@')         )|'(';$^   =((          ')')        
+                )^'[';                                $/='`'       
+              |'.';$_=                               '('^'}'       
+
+Notice that the camel-shaped program above needs a leading and trailing
+line of spaces for best results with inverted shapes.
+
+You can run F<camel.pl> like this:
+
+    perl camel.pl         normal camel
+    perl camel.pl q       quine (program prints itself)
+    perl camel.pl m       mirror (camel looking in the mirror)
+    perl camel.pl i       inverted camel
+    perl camel.pl u       upside-down camel
+    perl camel.pl r       rotated camel
+
+And can further combine the above options, each combination
+producing a different camel, for example:
+
+    perl camel.pl uri
+
+produces a large, bearded camel with a ponytail, glasses,
+and a tie-dyed T-shirt. :)
+
+The 32 possible combinations are:
+
+    ""   q    r    u    m    i
+    qr   qu   qm   qi   ru   rm   ri   um   ui   mi
+    qru  qrm  qri  qui  qum  qmi  rum  rui  rmi  umi
+    qrum qrui qumi qrmi rumi
+    qrumi
 
 =head2 Dueling Dingos
 
@@ -1634,62 +1780,13 @@ Is this the biggest, slowest I<hello world> program ever written?
 
 2046 camels. 5,172,288 bytes. Out of memory!
 
-Here is the original one camel program, F<t1.pl>:
-
-                                       ''=~('('.'?'
-            .'{'.(                   '`'|'%').("\["^
-         '-').('`'|                '!').('`'|',').'"'
-  .('['^'+')  .('['^              ')').('`'|')').('`'|
- '.').('['^'/').('{'^            '[').'\\'.'"'.('`'|'('
- ).('`'|'%').('`'|',')          .('`'|',').('`'|"\/").(
-   '{'^'[').('['^',').        ('`'|'/').('['^')').("\`"|
-        ',').('`'|'$')      .'\\'.'\\'.('`'|'.').'\\'.'"'
-       .';'.('!'^'+')     .'"'.'}'.')');$:='.'^'~';$~='@'|
-      '(';$^=')'^'[';   $/='`'|'.';$_='('^'}';$,='`'|'!';$\
-     =')'^'}';$:='.'   ^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.';
-     $_='('^"\}";$,=  '`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'('
-     ;$^=')'^'[';$/  ='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}'
-     ;$:='.'^'~';$~  ='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';
-     $,='`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^'[';$/=
-     '`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|
-      '(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}'
-      ;$:='.'^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,=
-       '`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'(';$^=')'^'[';$/='`'|
-        '.';$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~';$~='@'|'('
-         ;$^=')'^'[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\="\)"^ '}'
-          ;$:='.'^'~';$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('  ^((
-           '}'));$,='`'|'!';$\=')'^'}';$:='.'^'~';$~ ='@'|'('  ;$^
-             =')'^'[';$/='`'|'.';$_='('^'}';$,='`'|  '!';$\=   ')'
-              ^'}'; $:='.'^'~';$~='@'|'(';$^="\)"^   '[';$/=   '`'
-                    |'.';$_='('^'}';$,='`'|'!';$\    =(')')^   '}'
-                    ;$:='.'^    '~';$~='@' |"\(";     $^=')'   ^+
-                    '[';$/=     '`'|'.';   $_='('     ^"\}";  $,
-                    =('`')|     "\!";$\=   "\)"^       "\}";  (
-                    ($:))=      '.'^'~';   ($~)         ='@'
-                    |"\(";     $^=(')')^   '[';         ($/)
-                     ='`'|     "\.";$_=    '('^         '}';
-                     ($,)=     '`'|'!'     ;$\=         ')'^
-                     '}';     $:='.'       ^'~'         ;$~=
-                     '@'|     '('          ;$^=         ')'^
-                     '[';      $/=         '`'          |((
-                     '.'        ));       $_=           '('
-                     ^((         '}'     ));            $,=
-                     '`'          |((   '!'              ))
-                     ;(             ($\))=               ((
-                     ((              ')'))               ))
-                     ^+             "\}";$:=             ((
-                    '.'            ))^+ "\~";            $~
-                   =((           '@'))|  '(';           $^=
-                  ')'^         "\[";$/=   '`'          |'.'
-                ;($_)=                                ('(')^
-              "\}";$,=                               '`'|'!'
-
 =head2 Buffy Goes to the Cricket
 
 Buffy fans might like to rotate her letters:
 
     print sightly( { Shape       => 'buffy',
-                     Rotate      => 0,  # try 270, 90 and 180 too
+                     Rotate      => 0,  # try 270, 90 and 180
+                     RotateType  => 1,  # try 0, 1, 2
                      SourceFile  => 'helloworld.pl',
                      Regex       => 1 } );
 
@@ -1832,6 +1929,47 @@ which produces:
  '[';$/='`'|'.';$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~';
  $~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,='`'|"\!";#;#
 
+to:
+
+    print sightly( { Shape       => 'cricket',
+                     Invert      => 1,
+                     BorderWidth => 1,
+                     Reduce      => 1,
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+which produces:
+
+ ''=~('('.'?'.'{'.('`'|('%')).(
+ '['^"\-").(  '`'|'!').('`'|','
+ ).'"'.('['   ^'+').('['^')').(
+ '`'|')').   ('`'|'.').('['^'/'
+ ).("\{"^   '[').'\\'.'"'.('`'|
+ "\(").(   ((  '`'))|'%').('`'|
+ ',')    .(     '`'|',').("\`"|
+ '/'    ).(     '{'^'[').("\["^
+ ((     ',')    )).('`'|"\/").(
+ (        ((      '[')))^')').(
+ ((   (           '`')))|',').(
+ '`'   |          '$').'\\'.''.
+ '\\'              .('`'|"\.").
+ '\\'.   ((        '"'))."\;".(
+ '!'^"\+").        '"'.'}'.')')
+ ;$:=('.')^        '~';$~="\@"|
+ '(';$^=')'        ^'[';$/='`'|
+ ('.');$_=          '('^'}';$,=
+ '`'|'!';            $\=')'^'}'
+ ;$:='.'              ^"\~";$~=
+ '@' |+        (       '(');$^=
+ ')'^        '[';       $/='`'|
+ '.';       $_='('       ^"\}";
+ ($,)=        ('`')|      "\!";
+ $\=')'^        "\}";      ($:)
+ ='.'^'~';$~    =('@')|     '('
+ ;$^=')'^'['   ;$/=('`')|     (
+ '.');$_='('  ^'}';$,='`'|   ((
+ '!'));$\=')'^'}';$:='.'^'~';#;
+
 =head1 REFERENCE
 
 =head2 Sightly Encoding
@@ -1927,9 +2065,22 @@ Invert a shape.
 
 Reflect a shape.
 
-=item rotate_shape SHAPESTRING DEGREES
+=item reduce_shape SHAPESTRING FACT
+
+Reduce the size of a shape by a factor of FACT.
+
+=item expand_shape SHAPESTRING FACT
+
+Expand the size of a shape by a factor of FACT.
+
+=item rotate_shape SHAPESTRING DEGREES RTYPE FLIP
 
 Rotate a shape clockwise thru 90, 180 or 270 degrees.
+RTYPE=0 big rotated shape,
+RTYPE=1 small rotated shape,
+RTYPE=2 squashed rotated shape.
+FLIP=1 to flip (reflect) shape in addition to rotating it.
+RTYPE and FLIP do not apply to 180 degrees.
 
 =item pour_sightly SHAPESTRING PROGSTRING GAP RFILLVAR
 
@@ -1977,7 +2128,18 @@ The attributes that HASHREF may contain are:
 
     Rotate        Rotate the shape clockwise 90, 180 or 270 degrees.
 
+    RotateType    0 = big rotated shape,
+                  1 = small rotated shape,
+                  2 = squashed rotated shape.
+
+    RotateFlip    Boolean. Set if want to flip (reflect) the shape
+                  in addition to rotating it.
+
     Reflect       Reflect the shape.
+
+    Reduce        Reduce the size of the shape.
+
+    Expand        Expand the size of the shape.
 
     Invert        Invert the shape.
 
@@ -2056,7 +2218,7 @@ EyeDrops are:
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
     dipsy       Teletubbies Dipsy (also london.pm infobot name)
-    eugene      World's No. 1 Perl golfer, Eugene van der Pijll
+    eugene      Champion Perl golfer, Eugene van der Pijll
     eye         An eye
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
@@ -2076,7 +2238,7 @@ EyeDrops are:
     tpr         Vertical banner of "The Perl Review"
     uml         A UML diagram
     window      A window
-    yanick      Caricature of `/anick's head
+    yanick      Caricature of `/anick's noggin
     yanick2     Uttered by `/anick during TPR02
     yanick3     Pictorial version of yanick2
 
@@ -2123,9 +2285,13 @@ Andrew Savige <asavige@cpan.org>
 
 =head1 SEE ALSO
 
+Perl Obfuscation Engines, for example, yaoe by Perl Monk mtve,
+at http://www.frox25.dhs.org/~mtve/code/eso/perl/yaoe/.
+
 L<Acme::Bleach>
 L<Acme::Smirch>
 L<Acme::Buffy>
+L<Acme::Pony>
 
 =head1 CREDITS
 
@@ -2140,8 +2306,12 @@ and others on the fwp mailing list for their advice on
 ASCII Art, imaging programs, and on which picture of
 Larry to use.
 
+Thanks also to Mtv Europe and Ronald J Kimball for their help
+in golfing the program in the I<Thirty Two Camels> section.
+Keith Calvert Ivey also contributed some levity to this section.
+
 =head1 COPYRIGHT
 
-Copyright (c) 2001 Andrew Savige. All rights reserved.
+Copyright (c) 2001-2002 Andrew Savige. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

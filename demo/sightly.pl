@@ -21,11 +21,15 @@ Options:
   -r              Insert sightly into a regex (instead of eval).
   -g gap          Gap between successive shapes.
   -o degree       Rotate shape 90, 180, 270 degrees.
+  -a rtype        Rotate type (0, 1 or 2).
+  -k              Rotate flip.
   -x bordergap    Border gap.
   -y borderwidth  Border width.
   -i              Invert shape.
   -n gap          Indent shape gap spaces.
   -e              Reflect shape.
+  -d fact         Reduce shape by a factor of fact.
+  -v fact         Expand shape by a factor of fact.
   -b              Binary file.
   -w width        Width.
   -l              List available shapes.
@@ -57,12 +61,15 @@ sub list_shapes {
 }
 
 my %optarg = (
+   a => 'RotateType',
    b => 'Binary',
    c => 'BannerString',
+   d => 'Reduce',
    e => 'Reflect',
    f => 'SourceFile',
    g => 'Gap',
    i => 'Invert',
+   k => 'RotateFlip',
    n => 'Indent',
    o => 'Rotate',
    p => 'Print',
@@ -70,6 +77,7 @@ my %optarg = (
    s => 'Shape',
    t => 'TrapEvalDie',
    u => 'TrapWarn',
+   v => 'Expand',
    w => 'Width',
    x => 'BorderGap',
    y => 'BorderWidth',
@@ -78,7 +86,8 @@ my %optarg = (
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbeilprtuc:f:g:n:o:s:w:x:y:z:", \%option) or usage();
+Getopt::Std::getopts("hbeiklprtua:c:d:f:g:n:o:s:v:w:x:y:z:", \%option)
+   or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);
 $option{z} =~ s#\\n#\n#g if $option{z};

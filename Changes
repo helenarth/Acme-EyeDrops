@@ -128,3 +128,16 @@ Revision history for Perl extension EyeDrops
 	- new shape: yanick
 	- new shape: yanick2
 	- new shape: yanick3
+
+1.09	Sun May 19 17:09:12 2002
+
+	- new attributes: Reduce and Expand
+	- new attributes: RotateType and RotateFlip
+	- new functions: reduce_shape and expand_shape
+	- new rtype/flip parameters added to rotate_shape function
+	- rotate 90 and 270 now work, no longer squashed
+	- added support for new attributes to demo/sightly.pl
+	- new test: reshape.t (tests Reduce, Expand, Rotate)
+	- new test: camel.t
+	- documentation: added 'Thirty Two Camels' sub-section
+	- minor change to shape yanick (identical dimensions to camel now)
