@@ -1,9 +1,20 @@
+#!/usr/bin/perl
+# nasty.t
+
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 # --------------------------------------------------
 
-select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
 
 # my $have_stderr_redirect = 1;
 # if ($^O eq 'MSWin32') {
@@ -19,6 +30,11 @@ my $camelstr = get_eye_string('camel');
 my $tmpf = 'bill.tmp';
 my $tmpf2 = 'bill2.tmp';
 
+# -------------------------------------------------
+
+my $itest = 0;
+my $prog;
+
 # Camel beginend.pl --------------------------------
 
 # This tests BEGIN/END blocks.
@@ -29,22 +45,22 @@ my $teststr = $evalstr . $camelstr;
 my $srcstr = qq#BEGIN {print "begin\\n"}\n# .
              qq#END {print "end\\n"}\n# .
              qq#print "line1\\nline2\\n";\n#;
-my $prog = sightly({ Shape         => 'camel',
-                     SourceString  => $srcstr,
-                     Regex         => 0,
-                     TrapEvalDie   => 0 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog; close(TT);
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $srcstr,
+                  Regex         => 0,
+                  InformHandler => sub {},
+                  TrapEvalDie   => 0 } );
+build_file($tmpf, $prog);
 
 my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 1\n";
+++$itest; print "ok $itest - BEGIN/END rc\n";
 $outstr eq "begin\nline1\nline2\nend\n" or print "not ";
-print "ok 2\n";
+++$itest; print "ok $itest - BEGIN/END output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $teststr or print "not ";
-print "ok 3\n";
+++$itest; print "ok $itest - BEGIN/END shape\n";
 
 # Camel hellodie.pl --------------------------------
 
@@ -59,9 +75,9 @@ $srcstr = 'die "hello die\\n";';
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $srcstr,
                   Regex         => 0,
+                  InformHandler => sub {},
                   TrapEvalDie   => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog; close(TT);
+build_file($tmpf, $prog);
 
 local *SAVERR; open(SAVERR, ">&STDERR");  # save original STDERR
 open(STDERR, '>'.$tmpf2) or die "Could not create '$tmpf2': $!";
@@ -70,20 +86,18 @@ $rc = $? >> 8;
 open(STDERR, ">&SAVERR");  # restore STDERR
 
 $rc == 0 and print "not ";
-print "ok 4\n";
+++$itest; print "ok $itest - die inside eval rc\n";
 $outstr eq "" or print "not ";
-print "ok 5\n";
-open(TT, $tmpf2) or die "open '$tmpf2': $!";
-{ local $/; $outstr = <TT> } close(TT);
-$outstr eq "hello die\n" or print "not ";
-print "ok 6\n";
+++$itest; print "ok $itest - die inside eval output\n";
+Acme::EyeDrops::slurp_tfile($tmpf2) eq "hello die\n" or print "not ";
+++$itest; print "ok $itest - die inside die output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $teststr or print "not ";
-print "ok 7\n";
+++$itest; print "ok $itest - die inside die shape\n";
 
 # --------------------------------------------------
 
-unlink $tmpf2;
-unlink $tmpf;
+unlink($tmpf2) or die "error: unlink '$tmpf2': $!";
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;

@@ -301,3 +301,23 @@ Revision history for Perl extension EyeDrops
 	- removed demo/hellotest.pl from distribution
 	- removed demo/examples.pl from distribution
 	- updated test programs to not rely on demo directory
+
+1.41	Sun July 27 18:22:04 2003
+
+	- new shapes: smiley, smiley2, smiley3
+	- built-in shape 'all': now supports Width parameter
+	- documentation: shortened some examples
+	- new functions: get_eye_dir, set_eye_dir
+	- new functions: add_builtin_shape, del_builtin_shape
+	- new attribute: InformHandler
+	- function pour_sightly: added new inform_handler parameter
+	- new tests: border.t, gen.t, yharn.t, zgen.t (generated)
+	-            sightly2.t removed (put into sightly.t)
+	- test vshape.t: added tests for new functions
+	- tests: now skipped correctly
+	- tests: text.t now run in taint mode (-Tw)
+	- Fixed some minor border-related bugs exposed by border.t
+	- added camel shape to Makefile.PL/Build.PL
+	- Support PERL_SMOKE environment variable for long-running tests
+	  (see http://archive.develooper.com/perl-qa@perl.org/msg01927.html,
+	  thanks merlyn)

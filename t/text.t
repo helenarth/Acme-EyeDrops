@@ -1,3 +1,7 @@
+#!/usr/bin/perl -Tw
+# text.t
+# Currently the only taint-safe test, mainly due to backticks.
+
 use strict;
 use Acme::EyeDrops qw(sightly hjoin_shapes get_eye_string pour_text);
 

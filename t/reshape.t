@@ -1,9 +1,22 @@
+#!/usr/bin/perl
+# reshape.t
+
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
 
 # -------------------------------------------------
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
+# --------------------------------------------------
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
 
 print "1..27\n";
 
@@ -13,121 +26,99 @@ HELLO
 my $camelstr = get_eye_string('camel');
 my $tmpf = 'bill.tmp';
 
+# --------------------------------------------------
+
+my $itest = 0;
+my $prog;
+
+sub test_one {
+   my ($e, $ostr) = @_;
+   build_file($tmpf, $prog);
+   my $outstr = `$^X -w -Mstrict $tmpf`;
+   my $rc = $? >> 8;
+   $rc == 0 or print "not ";
+   ++$itest; print "ok $itest - $e rc\n";
+   $outstr eq $ostr or print "not ";
+   ++$itest; print "ok $itest - $e output\n";
+}
+
 # -------------------------------------------------
 
-my $bigprog = sightly({ Shape         => 'camel',
-                        SourceString  => $hellostr,
-                        Expand        => 1,
-                        Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $bigprog;
-close(TT);
-my $outstr = `$^X -w -Mstrict $tmpf`;
-my $rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 1\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 2\n";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Expand        => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $bigprog = $prog;
+test_one('big camel', "hello world\n");
 $bigprog =~ tr/!-~/#/;
 $bigprog eq $camelstr and print "not ";
-print "ok 3\n";
+++$itest; print "ok $itest - bigprog\n";
 
 # -------------------------------------------------
 
-my $prog = sightly({ ShapeString   => $bigprog,
-                     SourceString  => $hellostr,
-                     Reduce        => 1,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 4\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 5\n";
+$prog = sightly({ ShapeString   => $bigprog,
+                  SourceString  => $hellostr,
+                  Reduce        => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('camel', "hello world\n");
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
-print "ok 6\n";
+++$itest; print "ok $itest - prog\n";
 
 # -------------------------------------------------
 
-my $rotprog = sightly({ Shape         => 'camel',
-                        SourceString  => $hellostr,
-                        Rotate        => 90,
-                        Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $rotprog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 7\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 8\n";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 90,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $rotprog = $prog;
+test_one('rot 90 camel', "hello world\n");
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 9\n";
+++$itest; print "ok $itest - prog\n";
 
 # -------------------------------------------------
 
-$rotprog = sightly({ Shape          => 'camel',
-                     SourceString  => $hellostr,
-                     Rotate         => 90,
-                     TrailingSpaces => 1,
-                     Regex          => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $rotprog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 10\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 11\n";
+$prog = sightly({ Shape          => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate         => 90,
+                  TrailingSpaces => 1,
+                  InformHandler => sub {},
+                  Regex          => 1 } );
+$rotprog = $prog;
+test_one('rot 90 trail camel', "hello world\n");
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 12\n";
+++$itest; print "ok $itest - prog\n";
 
 # -------------------------------------------------
 
 $prog = sightly({ ShapeString   => $rotprog,
                   SourceString  => $hellostr,
                   Rotate        => 270,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 13\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 14\n";
+test_one('rot 270 camel', "hello world\n");
 $prog =~ tr/!-~/#/;
 $prog eq $bigprog or print "not ";
-print "ok 15\n";
+++$itest; print "ok $itest - bigprog\n";
 
 # -------------------------------------------------
 
-$rotprog = sightly({ Shape         => 'camel',
-                     SourceString  => $hellostr,
-                     Rotate        => 90,
-                     RotateType    => 1,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $rotprog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 16\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 17\n";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 90,
+                  RotateType    => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+$rotprog = $prog;
+test_one('rot 90 camel', "hello world\n");
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 18\n";
+++$itest; print "ok $itest - bigprog\n";
 
 # -------------------------------------------------
 
@@ -136,60 +127,40 @@ $prog = sightly({ Shape         => 'camel',
                   Rotate        => 90,
                   RotateType    => 0,
                   Reduce        => 1,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 19\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 20\n";
+test_one('rot 90 camel', "hello world\n");
 $prog =~ tr/!-~/#/;
 $prog eq $rotprog or print "not ";
-print "ok 21\n";
+++$itest; print "ok $itest - rotprog\n";
 
 # -------------------------------------------------
 
-$rotprog = sightly({ Shape         => 'camel',
-                     SourceString  => $hellostr,
-                     Rotate        => 180,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $rotprog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 22\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 23\n";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 180,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+$rotprog = $prog;
+test_one('rot 180 camel', "hello world\n");
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 24\n";
+++$itest; print "ok $itest - rotprog\n";
 
 # -------------------------------------------------
 
 $prog = sightly({ ShapeString   => $rotprog,
                   SourceString  => $hellostr,
                   Rotate        => 180,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 25\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 26\n";
+test_one('rot 180 camel', "hello world\n");
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
-print "ok 27\n";
+++$itest; print "ok $itest - rotprog\n";
 
 # -------------------------------------------------
 
-unlink $tmpf;
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;

@@ -1,11 +1,22 @@
+#!/usr/bin/perl
+# camel.t
+
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string reflect_shape);
 
-# -------------------------------------------------
-
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
-print "1..16\n";
+# --------------------------------------------------
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
+
+print "1..11\n";
 
 my $camelstr = get_eye_string('camel');
 my $camel_Y_str = $camelstr;
@@ -17,98 +28,51 @@ my $tmpf = 'bill.tmp';
 
 # -------------------------------------------------
 
-my $src = <<'END_SRC';
-$~=uc pop;open$%;chop(@~=<0>);$~=~R&&(@~=map{$-=$_+$_;join'',
-map/.{$-}(.)/,@~}$%..$~[8]=~y~~~c/2);$~!~Q&&y,!-~,#,,$~=~I&&
-y~ #~# ~,print$~=~M?~~reverse:$_,$/for$~=~U?reverse@~:@~
-END_SRC
-$src =~ tr/\n//d;
-my $prog1 = sightly( { Regex         => 1,
-                       Shape         => 'camel',
-                       SourceString  => $src } );
-my @a = split(/\n/, $prog1);
-my $max = 0; length > $max and $max = length for @a;
-$_ .= ' ' x ($max - length) for @a;
-my $camelprog = (' ' x ($max+2)) . "\n";
-$camelprog .= " $_ \n" for @a;
-$camelprog .= (' ' x ($max+2)) . "\n";
-my $camelprogstr = $camelprog;
-$camelprogstr =~ tr/!-~/#/;
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $camelprog;
-close(TT);
+my $itest = 0;
+my $prog;
 
 # -------------------------------------------------
+# Test 12032 camels example.
 
-my $outstr = `$^X -w -Mstrict $tmpf`;
-my $rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 1\n";
-$outstr eq $camelprogstr or print "not ";
-print "ok 2\n";
-$outstr =~ s/^ //mg;
-$outstr =~ s/ +$//mg;
-$outstr =~ s/\n//; chop $outstr;
-$outstr eq $camelstr or print "not ";
-print "ok 3\n";
-
-# -------------------------------------------------
-
-$outstr = `$^X -w -Mstrict $tmpf q`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 4\n";
-$outstr eq $camelprog or print "not ";
-print "ok 5\n";
-
-# -------------------------------------------------
-
-$src = <<'END_SRC_STR';
+$prog = sightly( { Regex          => 1,
+                   Compact        => 1,
+                   RemoveNewlines => 1,
+                   BorderGap      => 1,
+                   Shape          => 'camel',
+                   InformHandler  => sub {},
+                   SourceString   => <<'END_SRC_STR' } );
 $~=uc shift;$:=pop||'#';open$%;chop(@~=<0>);$~=~R&&
 (@~=map{$-=$_+$_;join'',map/.{$-}(.)/,@~}$%..33);
 $|--&$~=~H&&next,$~!~Q&&eval"y, ,\Q$:\E,c",$~=~I&&
 eval"y, \Q$:\E,\Q$:\E ,",$~=~M&&($_=reverse),
 print$~=~V?/(.).?/g:$_,$/for$~=~U?reverse@~:@~
 END_SRC_STR
-$src =~ tr/\n//d;
-$prog1 = sightly( { Regex         => 1,
-                    Compact       => 1,
-                    Shape         => 'camel',
-                    SourceString  => $src } );
-@a = split(/\n/, $prog1);
-$max = 0; length > $max and $max = length for @a;
-$_ .= ' ' x ($max - length) for @a;
-$camelprog = (' ' x ($max+2)) . "\n";
-$camelprog .= " $_ \n" for @a;
-$camelprog .= (' ' x ($max+2)) . "\n";
-$camelprogstr = $camelprog;
+build_file($tmpf, $prog);
+my $camelprog = my $camelprogstr = $prog;
 $camelprogstr =~ tr/!-~/#/;
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $camelprog;
-close(TT);
 
 # -------------------------------------------------
 
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
+my $outstr = `$^X -w -Mstrict $tmpf`;
+my $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 6\n";
+++$itest; print "ok $itest - 12032 camels rc\n";
 $outstr eq $camelprogstr or print "not ";
-print "ok 7\n";
+++$itest; print "ok $itest - 12032 camels shape\n";
 $outstr =~ s/^ //mg;
 $outstr =~ s/ +$//mg;
 $outstr =~ s/\n//; chop $outstr;
 $outstr eq $camelstr or print "not ";
-print "ok 8\n";
+++$itest; print "ok $itest - 12032 camels shape trail\n";
 
 # -------------------------------------------------
 
 $outstr = `$^X -w -Mstrict $tmpf q`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 9\n";
+++$itest; print "ok $itest - 12032 camels quine rc\n";
 $outstr eq $camelprog or print "not ";
-print "ok 10\n";
+++$itest; print "ok $itest - 12032 camels quine shape\n";
 
 # -------------------------------------------------
 
@@ -116,47 +80,46 @@ $camelprogstr =~ tr/#/Y/;
 $outstr = `$^X -w -Mstrict $tmpf Y Y`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 11\n";
+++$itest; print "ok $itest - 12032 camels Y rc\n";
 $outstr eq $camelprogstr or print "not ";
-print "ok 12\n";
+++$itest; print "ok $itest - 12032 camels Y shape\n";
 $outstr =~ s/^ //mg;
 $outstr =~ s/ +$//mg;
 $outstr =~ s/\n//; chop $outstr;
 $outstr eq $camel_Y_str or print "not ";
-print "ok 13\n";
+++$itest; print "ok $itest - 12032 camels Y shape trail\n";
 
 # -------------------------------------------------
-# -------------------------------------------------
+# Test Buffy looking in the mirror example.
 
-$src = <<'END_SRC_STR';
+my $src = <<'END_SRC_STR';
 open$[;chop,($==y===c)>$-&&($-=$=)for@:=<0>;
 print$"x-(y---c-$-).reverse.$/for@:
 END_SRC_STR
-my $buffyprog = sightly( { Regex         => 1,
-                           Compact       => 1,
-                           Shape         => 'buffy2',
-                           SourceString  => $src } );
-my $buffyprogstr = $buffyprog;
+$prog = sightly( { Regex         => 1,
+                   Compact       => 1,
+                   Shape         => 'buffy2',
+                   InformHandler => sub {},
+                   SourceString  => $src } );
+build_file($tmpf, $prog);
+my $buffyprogstr = my $buffyprog = $prog;
 $buffyprogstr =~ tr/!-~/#/;
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $buffyprog;
-close(TT);
 
 # -------------------------------------------------
 
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 14\n";
+++$itest; print "ok $itest - buffy rc\n";
 $outstr =~ tr/!-~/#/;
 $outstr eq $buffyprogstr and print "not ";
-print "ok 15\n";
+++$itest; print "ok $itest - buffy shape\n";
 $outstr =~ s/ +$//mg;
 $outstr eq $buffymirrorstr or print "not ";
-print "ok 16\n";
+++$itest; print "ok $itest - buffy shape mirror\n";
 
 # -------------------------------------------------
 
-unlink $tmpf;
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;

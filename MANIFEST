@@ -58,6 +58,9 @@ lib/Acme/EyeDrops/santa.eye
 lib/Acme/EyeDrops/santa2.eye
 lib/Acme/EyeDrops/schwern.eye
 lib/Acme/EyeDrops/simon.eye
+lib/Acme/EyeDrops/smiley.eye
+lib/Acme/EyeDrops/smiley2.eye
+lib/Acme/EyeDrops/smiley3.eye
 lib/Acme/EyeDrops/snow.eye
 lib/Acme/EyeDrops/spoon.eye
 lib/Acme/EyeDrops/tonick.eye
@@ -70,8 +73,10 @@ lib/Acme/EyeDrops/yanick.eye
 lib/Acme/EyeDrops/yanick2.eye
 lib/Acme/EyeDrops/yanick3.eye
 lib/Acme/EyeDrops/yanick4.eye
+t/border.t
 t/camel.t
 t/convert.t
+t/gen.t
 t/limit.t
 t/limit2.t
 t/module.t
@@ -79,8 +84,9 @@ t/nasty.t
 t/recur.t
 t/reshape.t
 t/sightly.t
-t/sightly2.t
 t/text.t
 t/vshape.t
+t/yharn.t
+t/zgen.t
 demo/sightly.pl
 demo/gentable.pl

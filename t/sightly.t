@@ -1,11 +1,23 @@
-use strict;
-use Acme::EyeDrops qw(sightly get_eye_string make_siertri);
+#!/usr/bin/perl
+# sightly.t
 
-# --------------------------------------------------
+use strict;
+use Acme::EyeDrops qw(sightly get_eye_string make_siertri
+                      regex_eval_sightly);
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
-print "1..35\n";
+# --------------------------------------------------
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
+
+print "1..60\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -17,49 +29,54 @@ for my $i (0..3) {
    print "hello test $i\n";
 }
 HELLOTEST
+my $hellofile = 'helloworld.pl';
 my $camelstr = get_eye_string('camel');
+my $larrystr = get_eye_string('larry');
+my $damianstr = get_eye_string('damian');
 my $umlstr = get_eye_string('uml');
 my $windowstr = get_eye_string('window');
 my $japhstr = get_eye_string('japh');
 my $yanick4str = get_eye_string('yanick4');
 my $siertristr = make_siertri(5);
+my $baldprogstr = regex_eval_sightly($hellostr);
 my $tmpf = 'bill.tmp';
+
+build_file($hellofile, $hellostr);
+
+# --------------------------------------------------
+
+my $itest = 0;
+my $prog;
+
+sub test_one {
+   my ($e, $ostr, $sh) = @_;
+   build_file($tmpf, $prog);
+   my $outstr = `$^X -w -Mstrict $tmpf`;
+   my $rc = $? >> 8;
+   $rc == 0 or print "not ";
+   ++$itest; print "ok $itest - $e rc\n";
+   $outstr eq $ostr or print "not ";
+   ++$itest; print "ok $itest - $e output\n";
+   $prog =~ tr/!-~/#/;
+   $prog eq $sh or print "not ";
+   ++$itest; print "ok $itest - $e shape\n";
+}
 
 # Camel helloworld.pl ------------------------------
 
-my $prog = sightly({ Shape         => 'camel',
-                     SourceString  => $hellostr,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-my $outstr = `$^X -w -Mstrict $tmpf`;
-my $rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 1\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 2\n";
-$prog =~ tr/!-~/#/;
-$prog eq $camelstr or print "not ";
-print "ok 3\n";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Camel helloworld', "hello world\n", $camelstr);
 
 # uml/window helloworld.pl -------------------------
 
 $prog = sightly({ Shape         => 'uml,window',
                   SourceString  => $hellostr,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 4\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 5\n";
-$prog =~ tr/!-~/#/;
-$prog eq "$umlstr$windowstr" or print "not ";
-print "ok 6\n";
+test_one('uml/window helloworld', "hello world\n", $umlstr . $windowstr);
 
 # Text string print --------------------------------
 
@@ -67,19 +84,9 @@ my $srcstr = "Bill Gates is a pest!\n";
 $prog = sightly({ Shape         => 'window',
                   SourceString  => $srcstr,
                   Regex         => 1,
+                  InformHandler => sub {},
                   Print         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 7\n";
-$outstr eq $srcstr or print "not ";
-print "ok 8\n";
-$prog =~ tr/!-~/#/;
-$prog eq $windowstr or print "not ";
-print "ok 9\n";
+test_one('Bill Gates is a pest!', $srcstr, $windowstr);
 
 # Binary encode/decode -----------------------------
 
@@ -91,19 +98,19 @@ $prog = sightly({ Shape         => 'camel',
                   SourceString  => $srcstr,
                   Binary        => 1,
                   Regex         => 0,
+                  InformHandler => sub {},
                   Print         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+build_file($tmpf, $prog);
 # This seems to stop on CTRL-Z on Windows!
 # Something to do with binmode ??
 #   $outstr = `$^X -w -Mstrict $tmpf`;
 # so use a temporary file instead.
 my $tmpf2 = 'bill2.tmp';
 system("$^X -w -Mstrict $tmpf >$tmpf2");
-$rc = $? >> 8;
+my $outstr;
+my $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 10\n";
+++$itest; print "ok $itest - binary encode rc\n";
 open(TT, $tmpf2) or die "open '$tmpf2': $!";
 binmode(TT);
 {
@@ -111,10 +118,10 @@ binmode(TT);
 }
 close(TT);
 $outstr eq $srcstr or print "not ";
-print "ok 11\n";
+++$itest; print "ok $itest - binary encode output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $encodestr or print "not ";
-print "ok 12\n";
+++$itest; print "ok $itest - binary encode shape\n";
 
 # Self-printing JAPH -------------------------------
 
@@ -128,131 +135,91 @@ print $x;
 PROG
 $prog = sightly({ Shape         => 'japh',
                   SourceString  => $src,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+build_file($tmpf, $prog);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 13\n";
+++$itest; print "ok $itest - self-printing japh rc\n";
 $outstr eq $japhstr or print "not ";
-print "ok 14\n";
+++$itest; print "ok $itest - self-printing japh output\n";
 
 # Camel helloworld.pl (FillerVar=';')---------------
 
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $hellostr,
                   FillerVar     => ';',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 15\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 16\n";
-$prog =~ tr/!-~/#/;
-$prog eq $camelstr or print "not ";
-print "ok 17\n";
+test_one('Camel helloworld fillervar=;', "hello world\n", $camelstr);
 
 # Camel helloworld.pl (FillerVar=';#')--------------
 
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $hellostr,
                   FillerVar     => ';#',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 18\n";
-$outstr eq "hello world\n" or print "not ";
-print "ok 19\n";
-$prog =~ tr/!-~/#/;
-$prog eq $camelstr or print "not ";
-print "ok 20\n";
+test_one('Camel helloworld fillervar=;#', "hello world\n", $camelstr);
 
 # Camel helloworld.pl (FillerVar='')----------------
 
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $hellostr,
                   FillerVar     => '',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+build_file($tmpf, $prog);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 21\n";
+++$itest; print "ok $itest - Camel helloworld fillervar= rc\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 22\n";
+++$itest; print "ok $itest - Camel helloworld fillervar= output\n";
 length($prog) eq 472 or print "not ";
-print "ok 23\n";
+++$itest; print "ok $itest - Camel helloworld fillervar= length\n";
 
 # Yanick4 hellotest.pl -----------------(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
                   SourceString  => $helloteststr,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 24\n";
-$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
-   or print "not ";
-print "ok 25\n";
-$prog =~ tr/!-~/#/;
-$prog eq $yanick4str x 3 or print "not ";
-print "ok 26\n";
+test_one('Yanick4 hellotest',
+   "hello test 0\nhello test 1\nhello test 2\nhello test 3\n",
+   $yanick4str x 3);
 
 # Yanick4 hellotest.pl (FillerVar=';')--(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
                   SourceString  => $helloteststr,
                   FillerVar     => ';',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 27\n";
-$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
-   or print "not ";
-print "ok 28\n";
-$prog =~ tr/!-~/#/;
-$prog eq $yanick4str x 3 or print "not ";
-print "ok 29\n";
+test_one('Yanick4 hellotest FillerVar=;',
+   "hello test 0\nhello test 1\nhello test 2\nhello test 3\n",
+   $yanick4str x 3);
 
 # Yanick4 hellotest.pl (FillerVar='')---(3 shapes)--
 
 $prog = sightly({ Shape         => 'yanick4',
                   SourceString  => $helloteststr,
                   FillerVar     => '',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+build_file($tmpf, $prog);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 30\n";
+++$itest; print "ok $itest - Yanick4 hellotest FillerVar= rc\n";
 $outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
    or print "not ";
-print "ok 31\n";
+++$itest; print "ok $itest - Yanick4 helloworld fillervar= output\n";
 $prog =~ tr/!-~/#/;
+# Note: normal 'or' test is 'and' test on next line (hacky).
 $prog eq $yanick4str x 3 and print "not ";
-print "ok 32\n";
+++$itest; print "ok $itest - Yanick4 helloworld fillervar= shape\n";
 
 # siertri hellotest.pl (FillerVar=';')--(3 shapes)--
 
@@ -260,24 +227,99 @@ $prog = sightly({ Shape         => 'siertri',
                   Width         => 5,
                   SourceString  => $helloteststr,
                   FillerVar     => ';',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+test_one('siertri hellotest FillerVar=;',
+   "hello test 0\nhello test 1\nhello test 2\nhello test 3\n",
+   $siertristr x 5);
+
+# Camel helloworld.pl from local eye file ----------
+
+build_file($tmpf2, $camelstr);
+$prog = sightly({ Shape         => $tmpf2,
+                  SourceString  => $hellostr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Camel helloworld local eye file', "hello world\n", $camelstr);
+
+# Shapeless helloworld.pl --------------------------
+
+$prog = sightly({ SourceString  => $hellostr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+$prog eq $baldprogstr or print "not ";
+++$itest; print "ok $itest - Shapeless helloworld bald\n";
+build_file($tmpf, $prog);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 33\n";
-$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
-   or print "not ";
-print "ok 34\n";
+++$itest; print "ok $itest - Shapeless helloworld rc\n";
+$outstr eq "hello world\n" or print "not ";
+++$itest; print "ok $itest - Shapeless helloworld output\n";
 $prog =~ tr/!-~/#/;
-$prog eq $siertristr x 5 or print "not ";
-print "ok 35\n";
+my $nwhite = $prog =~ tr/\n //;
+$nwhite == 0 or print "not ";
+++$itest; print "ok $itest - Shapeless helloworld nwhite\n";
+
+# Fixed width helloworld.pl ------------------------
+
+$prog = sightly({ SourceString  => $hellostr,
+                  Width         => 42,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $ss = '#' x 42 . "\n";
+test_one('Fixed width helloworld', "hello world\n", $ss x 8);
 
 # --------------------------------------------------
 
-unlink $tmpf;
-unlink $tmpf2;
+$prog = sightly({ Shape         => 'larry',
+                  SourceFile    => $hellofile,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one("Larry helloworld", "hello world\n", $larrystr);
+
+# ----------------------------------------------------
+
+$prog = sightly({ Shape         => 'larry,damian',
+                  SourceFile    => $hellofile,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Larry/Damian helloworld', "hello world\n", $larrystr . $damianstr);
+
+# ----------------------------------------------------
+
+$prog = sightly({ Shape         => 'damian,larry',
+                  SourceFile    => $hellofile,
+                  Gap           => 2,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Damian/Larry helloworld', "hello world\n",
+   join("\n\n", $damianstr, $larrystr));
+
+# ----------------------------------------------------
+
+my $shape = "####################   \n   \n########## \n" x 11;
+$prog = sightly({ ShapeString   => $shape,
+                  SourceFile    => $hellofile,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Trailing spaces in shape', "hello world\n", $shape);
+
+# ----------------------------------------------------
+
+$prog = sightly({ Shape         => 'siertri,larry,siertri,larry',
+                  SourceFile    => $hellofile,
+                  Gap           => 2,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('siertr/Larry x 2 helloworld', "hello world\n",
+   join("\n\n", make_siertri(0), $larrystr,
+                make_siertri(0), $larrystr));
+
+# ----------------------------------------------------
+
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
+unlink($tmpf2) or die "error: unlink '$tmpf2': $!";
+unlink($hellofile) or die "error: unlink '$hellofile': $!";
 
 exit 0;

@@ -1,3 +1,6 @@
+#!/usr/bin/perl
+# convert.t
+
 use strict;
 use Acme::EyeDrops qw(ascii_to_sightly sightly_to_ascii
                       get_eye_string make_siertri make_triangle
@@ -66,7 +69,7 @@ LAST_CAMEL
 my $camelstr = get_eye_string('camel');
 $t1 = join("", map(chr, 0..255));
 $f1 = ascii_to_sightly($t1);
-my $shape = pour_sightly($camelstr, $f1, 0, "", 0);
+my $shape = pour_sightly($camelstr, $f1, 0, "", 0, sub {});
 $t1a = sightly_to_ascii($shape);
 $t1 eq $t1a or print "not ";
 print "ok 11\n";
@@ -78,7 +81,7 @@ print "ok 12\n";
 my $siertristr = make_siertri(5);
 $t1 = 'ABCDEFGHIJKLMNOPQ';
 $f1 = ascii_to_sightly($t1);
-$shape = pour_sightly($siertristr, $f1, 0, '#', 0);
+$shape = pour_sightly($siertristr, $f1, 0, '#', 0, sub {});
 $t1a = sightly_to_ascii($shape);
 $t1 eq $t1a or print "not ";
 print "ok 13\n";
@@ -90,7 +93,7 @@ print "ok 14\n";
 my $trianglestr = make_triangle(42);
 $t1 = 'abcdefghijklmnopqrstuvwxyz0123456789';
 $f1 = ascii_to_sightly($t1);
-$shape = pour_sightly($trianglestr, $f1, 0, '#', 0);
+$shape = pour_sightly($trianglestr, $f1, 0, '#', 0, sub {});
 $t1a = sightly_to_ascii($shape);
 $t1 eq $t1a or print "not ";
 print "ok 15\n";

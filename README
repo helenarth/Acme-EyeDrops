@@ -1,5 +1,5 @@
 ===========================================================================
-                 Release of version 1.40 of Acme::EyeDrops
+                 Release of version 1.41 of Acme::EyeDrops
 ===========================================================================
 
 NAME
@@ -37,6 +37,9 @@ INSTALLATION
 
     It's all pure Perl, so you can also install by putting the .pm
     file and *.eye files in the appropriate local sub-directory.
+
+    This module should work on all Windows and Unix variants for
+    Perl 5.005 and above, but is untested on other platforms.
 
 AUTHOR
     Andrew Savige

@@ -1,107 +1,106 @@
+#!/usr/bin/perl
+# limit.t
+
 use strict;
 use Acme::EyeDrops qw(sightly regex_eval_sightly);
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
-print "1..45\n";
+# --------------------------------------------------
 
-my $tmpf = 'bill.tmp';
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
+
+print "1..45\n";
 
 # Exact fit is 215 characters.
 my $exact = 215;
 
+my $tmpf = 'bill.tmp';
+
+# --------------------------------------------------
+
+my $itest = 0;
+my $prog;
+my $last;
+
+sub test_one {
+   my ($e, $ostr, $enlf) = @_;
+   build_file($tmpf, $prog);
+   my $outstr = `$^X -w -Mstrict $tmpf`;
+   my $rc = $? >> 8;
+   $rc == 0 or print "not ";
+   ++$itest; print "ok $itest - $e rc\n";
+   $outstr eq $ostr or print "not ";
+   ++$itest; print "ok $itest - $e output\n";
+   my $nlf = $prog =~ tr/\n//;
+   $nlf == $enlf or print "not ";
+   ++$itest; print "ok $itest - $e nlf $enlf\n";
+   $last = chop($prog);
+   $last eq "\n" or print "not ";
+   ++$itest; print "ok $itest - $e last is newline\n";
+}
+
+# --------------------------------------------------
+
 my $srcstr = qq#print "abc\\n";\n#;
 my $sightlystr = regex_eval_sightly($srcstr);
 length($sightlystr) == $exact or print "not ";
-print "ok 1\n";
+++$itest; print "ok $itest - exact 215\n";
 
 # Exact fit abc ------------------------------------
 
-my $prog = sightly({ Width         => $exact,
-                     SourceString  => $srcstr,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-my $outstr = `$^X -w -Mstrict $tmpf`;
-my $rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 2\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 3\n";
-my $nlf = $prog =~ tr/\n//;
-$nlf == 1 or print "not ";
-print "ok 4\n";
-my $last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 5\n";
+$prog = sightly({ Width         => $exact,
+                  SourceString  => $srcstr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('Exact fit abc', "abc\n", 1);
 length($prog) == $exact or print "not ";
-print "ok 6\n";
+++$itest; print "ok $itest\n";
 $prog eq $sightlystr or print "not ";
-print "ok 7\n";
+++$itest; print "ok $itest\n";
 $last = chop($prog);
 $last eq ')' or print "not ";
-print "ok 8\n";
+++$itest; print "ok $itest\n";
 
 # One more  abc ------------------------------------
 
 $prog = sightly({ Width         => $exact+1,
                   SourceString  => $srcstr,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 9\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 10\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 1 or print "not ";
-print "ok 11\n";
-$last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 12\n";
+test_one('One more abc', "abc\n", 1);
 length($prog) == $exact+1 or print "not ";
-print "ok 13\n";
+++$itest; print "ok $itest\n";
 $last = chop($prog);
 $last eq ';' or print "not ";
-print "ok 14\n";
+++$itest; print "ok $itest\n";
 $prog eq $sightlystr or print "not ";
-print "ok 15\n";
+++$itest; print "ok $itest\n";
 
 # One less  abc ------------------------------------
 
 $prog = sightly({ Width         => $exact-1,
                   SourceString  => $srcstr,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 16\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 17\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 2 or print "not ";
-print "ok 18\n";
-$last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 19\n";
-my @lines = split(/\n/, $prog);
+test_one('One less abc', "abc\n", 2);
+my @lines = split(/^/, $prog, -1); chop(@lines);
 scalar(@lines) == 2 or print "not ";
-print "ok 20\n";
+++$itest; print "ok $itest\n";
 my $fchar = substr($lines[1], 0, 1);
 $fchar eq ')' or print "not ";
-print "ok 21\n";
+++$itest; print "ok $itest\n";
 length($prog) == 2*($exact-1)+1 or print "not ";
-print "ok 22\n";
+++$itest; print "ok $itest\n";
 my $nprog = $lines[0] . $fchar;
 $nprog eq $sightlystr or print "not ";
-print "ok 23\n";
+++$itest; print "ok $itest\n";
 
 # --------------------------------------------------
 # Test with FillerVar = '#'
@@ -111,94 +110,55 @@ print "ok 23\n";
 $prog = sightly({ Width         => $exact,
                   SourceString  => $srcstr,
                   FillerVar     => '#',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 24\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 25\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 1 or print "not ";
-print "ok 26\n";
-$last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 27\n";
+test_one('Exact fit abc, FillerVar=#', "abc\n", 1);
 length($prog) == $exact or print "not ";
-print "ok 28\n";
+++$itest; print "ok $itest\n";
 $prog eq $sightlystr or print "not ";
-print "ok 29\n";
+++$itest; print "ok $itest\n";
 $last = chop($prog);
 $last eq ')' or print "not ";
-print "ok 30\n";
+++$itest; print "ok $itest\n";
 
 # One more  abc ------------------------------------
 
 $prog = sightly({ Width         => $exact+1,
                   SourceString  => $srcstr,
                   FillerVar     => '#',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 31\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 32\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 1 or print "not ";
-print "ok 33\n";
-$last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 34\n";
+test_one('One more abc, FillerVar=#', "abc\n", 1);
 length($prog) == $exact+1 or print "not ";
-print "ok 35\n";
+++$itest; print "ok $itest\n";
 $last = chop($prog);
 $last eq ';' or print "not ";
-print "ok 36\n";
+++$itest; print "ok $itest\n";
 $prog eq $sightlystr or print "not ";
-print "ok 37\n";
+++$itest; print "ok $itest\n";
 
 # One less  abc ------------------------------------
 
 $prog = sightly({ Width         => $exact-1,
                   SourceString  => $srcstr,
                   FillerVar     => '#',
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 38\n";
-$outstr eq "abc\n" or print "not ";
-print "ok 39\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 2 or print "not ";
-print "ok 40\n";
-$last = chop($prog);
-$last eq "\n" or print "not ";
-print "ok 41\n";
-@lines = split(/\n/, $prog);
+test_one('One less abc, FillerVar=#', "abc\n", 2);
+@lines = split(/^/, $prog, -1); chop(@lines);
 scalar(@lines) == 2 or print "not ";
-print "ok 42\n";
+++$itest; print "ok $itest\n";
 $fchar = substr($lines[1], 0, 1);
 $fchar eq ')' or print "not ";
-print "ok 43\n";
+++$itest; print "ok $itest\n";
 length($prog) == 2*($exact-1)+1 or print "not ";
-print "ok 44\n";
+++$itest; print "ok $itest\n";
 $nprog = $lines[0] . $fchar;
 $nprog eq $sightlystr or print "not ";
-print "ok 45\n";
+++$itest; print "ok $itest\n";
 
 # --------------------------------------------------
 
-unlink $tmpf;
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;

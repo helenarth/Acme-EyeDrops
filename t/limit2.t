@@ -1,33 +1,67 @@
+#!/usr/bin/perl
+# limit2.t
+
 use strict;
 use Acme::EyeDrops qw(sightly);
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
+# --------------------------------------------------
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
+
 print "1..44\n";
 
 my $tmpf = 'bill.tmp';
 
-sub do_one_empty_limit {
-   my ($cnt, $shapestr) = @_;
-   my $prog = sightly( { ShapeString => $shapestr } );
-   open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-   print TT $prog;
-   close(TT);
+# --------------------------------------------------
+
+my $itest = 0;
+my $srcstr = '$x=9';
+
+sub test_one {
+   my ($e, $shapestr, $enlf) = @_;
+   my $prog = sightly({ ShapeString   => $shapestr,
+                        SourceString  => $srcstr,
+                        InformHandler => sub {},
+                        Regex         => 1 } );
+   build_file($tmpf, $prog);
    my $outstr = `$^X -w -Mstrict $tmpf`;
-   my $rc = $? >> 8;
-   $rc == 0 or print "not ";
-   print "ok $cnt\n"; ++$cnt;
+   $? >> 8 == 0 or print "not ";
+   ++$itest; print "ok $itest - $e rc\n";
    $outstr eq "" or print "not ";
-   print "ok $cnt\n"; ++$cnt;
-   my $nlf = $prog =~ tr/\n//;
-   $nlf == 1 or print "not ";
-   print "ok $cnt\n"; ++$cnt;
+   ++$itest; print "ok $itest - $e output\n";
+   $prog =~ tr/\n// == $enlf or print "not ";
+   ++$itest; print "ok $itest - $e nlf $enlf\n";
    $prog =~ tr/!-~/#/;
    $prog eq $shapestr or print "not ";
-   print "ok $cnt\n"; ++$cnt;
+   ++$itest; print "ok $itest - $e shape\n";
 }
 
-my $srcstr = '$x=9';
+sub test_one_empty {
+   my $shapestr = shift;
+   my $prog = sightly( { ShapeString   => $shapestr,
+                         InformHandler => sub {} } );
+   build_file($tmpf, $prog);
+   my $outstr = `$^X -w -Mstrict $tmpf`;
+   $? >> 8 == 0 or print "not ";
+   ++$itest; print "ok $itest - rc\n";
+   $outstr eq "" or print "not ";
+   ++$itest; print "ok $itest - output\n";
+   $prog =~ tr/\n// == 1 or print "not ";
+   ++$itest; print "ok $itest - nlf\n";
+   $prog =~ tr/!-~/#/;
+   $prog eq $shapestr or print "not ";
+   ++$itest; print "ok $itest - shape\n";
+}
+
+# --------------------------------------------------
 
 my $bugshape =
 '#######################################################' .
@@ -39,64 +73,27 @@ my $onetoomanyshape =
 '#######################################################' .
 "\n" . "# # # #\n";
 
-# one too many bug ------------------------------------
+# -----------------------------------------------------
 
-my $prog = sightly({ ShapeString   => $onetoomanyshape,
-                     SourceString  => $srcstr,
-                     Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-my $outstr = `$^X -w -Mstrict $tmpf`;
-my $rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 1\n";
-$outstr eq "" or print "not ";
-print "ok 2\n";
-my $nlf = $prog =~ tr/\n//;
-$nlf == 2 or print "not ";
-print "ok 3\n";
-$prog =~ tr/!-~/#/;
-$prog eq $onetoomanyshape or print "not ";
-print "ok 4\n";
-
-# invalid program bug ---------------------------------
-
-$prog = sightly({ ShapeString   => $bugshape,
-                  SourceString  => $srcstr,
-                  Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf`;
-$rc = $? >> 8;
-$rc == 0 or print "not ";
-print "ok 5\n";
-$outstr eq "" or print "not ";
-print "ok 6\n";
-$nlf = $prog =~ tr/\n//;
-$nlf == 2 or print "not ";
-print "ok 7\n";
-$prog =~ tr/!-~/#/;
-$prog eq $bugshape or print "not ";
-print "ok 8\n";
+test_one('One too many bug', $onetoomanyshape, 2);
+test_one('Invalid program bug', $bugshape, 2);
 
 # more invalid program tests --------------------------
 
 # This one failed prior to EyeDrops version 1.17.
-do_one_empty_limit( 9, "############  ######  ###  ###\n");
+test_one_empty("############  ######  ###  ###\n");
 
-do_one_empty_limit(13, "############  ###  ###  #\n");
-do_one_empty_limit(17, "############  #####  ###  #\n");
-do_one_empty_limit(21, "############  ###  ####  #\n");
-do_one_empty_limit(25, "############  #\n");
-do_one_empty_limit(29, "############  ##\n");
-do_one_empty_limit(33, "############  ###\n");
-do_one_empty_limit(37, "############  ####\n");
-do_one_empty_limit(41, "############\n");
+test_one_empty("############  ###  ###  #\n");
+test_one_empty("############  #####  ###  #\n");
+test_one_empty("############  ###  ####  #\n");
+test_one_empty("############  #\n");
+test_one_empty("############  ##\n");
+test_one_empty("############  ###\n");
+test_one_empty("############  ####\n");
+test_one_empty("############\n");
 
 # -----------------------------------------------------
 
-unlink $tmpf;
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
 exit 0;

@@ -1,9 +1,19 @@
+#!/usr/bin/perl
+# module.t
+# Test program for module bug raised by Mark Puttman.
+
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
-# Test program for module bug raised by Mark Puttman.
+# --------------------------------------------------
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
 
 # --------------------------------------------------
 
@@ -43,39 +53,42 @@ my $camelstr = get_eye_string('camel');
 my $japhstr = get_eye_string('japh');
 my $tmpf = 'bill.tmp';
 
+# -------------------------------------------------
+
+my $itest = 0;
+my $prog;
+
 # JAPH  MyEye.pm -----------------------------------
 
-my $prog = sightly({ Shape         => 'japh',
-                     SourceString  => $module_str,
-                     Regex         => 1 } );
-open(TT, '>MyEye.pm') or die "open MyEye.pm: $!";
-print TT $prog;
-close(TT);
+$prog = sightly({ Shape         => 'japh',
+                  SourceString  => $module_str,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+build_file('MyEye.pm', $prog);
 $prog =~ tr/!-~/#/;
 $prog eq $japhstr or print "not ";
-print "ok 1\n";
+++$itest; print "ok $itest - MyEye.pm shape\n";
 
 # Camel myeye.pl -----------------------------------
 
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $main_str,
+                  InformHandler => sub {},
                   Regex         => 1 } );
-open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+build_file($tmpf, $prog);
 my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 2\n";
+++$itest; print "ok $itest - MyEye.pm rc\n";
 $outstr eq "My Name is mark\n" or print "not ";
-print "ok 3\n";
+++$itest; print "ok $itest - MyEye.pm output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
-print "ok 4\n";
+++$itest; print "ok $itest - shape\n";
 
 # --------------------------------------------------
 
-unlink $tmpf;
-unlink 'MyEye.pm';
+unlink($tmpf) or die "error: unlink '$tmpf': $!";
+unlink('MyEye.pm') or die "error: unlink 'MyEye.pm': $!";
 
 exit 0;
