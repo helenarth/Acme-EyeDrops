@@ -60,4 +60,9 @@ Revision history for Perl extension EyeDrops
 	- new attribute: FillerVar
 	- new shape: merlyn
 	- fixed module bug raised by Mark Puttnam
-	- added new test program tmodule.t to test Mark's bug.
+	- added new test program tmodule.t to test Mark's bug
+
+1.03	Sat Dec 15 18:42:09 2001
+
+	- minor improvements to documentation
+	- new shapes: golfer, santa and buffy2

@@ -15,7 +15,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1421,7 +1421,7 @@ the original because its characters are bigger and easier to read:
             '.'^"\~";$~=              '@'|'('
                ;$^=')'^                "\[";
 
-Let's get more ambitious and create a big self-printing JAPH.
+Let's get more ambitious and create a big self-printing I<JAPH>.
 
     my $src = <<'PROG';
     open 0;
@@ -1453,7 +1453,7 @@ is not reentrant. In this case, we must resort to:
 
 which runs the generated sightly program via C<eval> instead.
 
-To produce a JAPH that resembles the original
+To produce a I<JAPH> that resembles the original
 I<Just another Perl hacker,> aka I<Randal L Schwartz>, try this:
 
     print sightly({ Shape        => 'merlyn',
@@ -1957,22 +1957,25 @@ EyeDrops are:
 
     bleach      banner of "use Acme::Bleach;"
     buffy       banner of "Buffy"
+    buffy2      Buffy's angelic face
     camel       dromedary (Camelus dromedarius, one hump)
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
+    golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
     larry       Larry Wall's face
     larry2      Caricature of Larry contributed by Ryan King
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
+    santa       Santa Claus playing golf
     spoon       a wooden spoon
     uml         a UML diagram
     window      a window
 
 It is easy to create your own shapes. For some ideas on shapes,
-point your search engine at I<Ascii Art>. If you generate some
-nice shapes, please send them in so they can be included in
-future versions of EyeDrops.
+point your search engine at I<Ascii Art> or I<Clip Art>.
+If you generate some nice shapes, please send them in so they
+can be included in future versions of EyeDrops.
 
 =head1 BUGS
 
@@ -1995,8 +1998,8 @@ If desperate, give the C<TrapEvalDie> and C<TrapWarn>
 attributes a go, and see if they fix the problem.
 
 If the program to be converted uses the Perl format variables
-$:, $~ or $^ you may need to explicitly set the FillerVar
-attribute to a Perl variable/s not used by the program.
+C<$:>, C<$~> or C<$^> you may need to explicitly set the
+C<FillerVar> attribute to a Perl variable/s not used by the program.
 
 Linux F</usr/games/banner> does not support the following characters:
 
