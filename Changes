@@ -199,11 +199,21 @@ Revision history for Perl extension EyeDrops
 	- documentation: minor changes
 	- documentation: added 'Naked Arm Wrestling' section
 
-1.17	Sun Dec 15 12:21:04 2002
+1.17	Sun Dec 8 12:21:04 2002
 
 	- new shape from cam.pm: snow
 	- new program to generate table: demo/gentable.pl
 	- fixed bug where EyeDrops sometimes generated an
 	  invalid program
 	- extended limit2.t (test 9) to verify above bug fixed
+	- minor code improvements
+
+1.18	Sun Dec 22 13:25:12 2002
+
+	- new shape from Takanori KAWAI: kansai_pm
+	- new shape from Takanori KAWAI: writing_perl
+	- new shape derived from Yanni's Ascii Art collection: candle
+	- new shape derived from Yanni's Ascii Art collection: china1
+	- new shape derived from Yanni's Ascii Art collection: panda
+	- new shape derived from Yanni's Ascii Art collection: santa2
 	- minor code improvements
