@@ -72,6 +72,7 @@ t/sightly.t
 t/sightly2.t
 t/text.t
 demo/sightly.pl
+demo/hellotest.pl
 demo/helloworld.pl
 demo/examples.pl
 demo/gentable.pl

@@ -1,22 +1,21 @@
 use strict;
 use Acme::EyeDrops qw(sightly);
 
-print "1..14\n";
-
 sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
 }
+
+# --------------------------------------------------
+
+print "1..32\n";
 
 my $camelstr = get_shape_str('camel');
 my $umlstr = get_shape_str('uml');
 my $windowstr = get_shape_str('window');
 my $japhstr = get_shape_str('japh');
+my $yanick4str = get_shape_str('yanick4');
 my $tmpf = 'bill.tmp';
 
 # Camel helloworld.pl ------------------------------
@@ -110,12 +109,8 @@ $prog =~ tr/!-~/#/;
 $prog eq $encodestr or print "not ";
 print "ok 12\n";
 
-unlink $tmpf;
-unlink $tmpf2;
-
 # Self-printing JAPH -------------------------------
 
-$tmpf = 'japh.tmp';
 my $src = <<'PROG';
 open 0;
 $/ = undef;
@@ -137,6 +132,123 @@ print "ok 13\n";
 $outstr eq $japhstr or print "not ";
 print "ok 14\n";
 
+# Camel helloworld.pl (FillerVar=';')---------------
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceFile    => 'demo/helloworld.pl',
+                  FillerVar     => ';',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 15\n";
+$outstr eq "hello world\n" or print "not ";
+print "ok 16\n";
+$prog =~ tr/!-~/#/;
+$prog eq $camelstr or print "not ";
+print "ok 17\n";
+
+# Camel helloworld.pl (FillerVar=';#')--------------
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceFile    => 'demo/helloworld.pl',
+                  FillerVar     => ';#',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 18\n";
+$outstr eq "hello world\n" or print "not ";
+print "ok 19\n";
+$prog =~ tr/!-~/#/;
+$prog eq $camelstr or print "not ";
+print "ok 20\n";
+
+# Camel helloworld.pl (FillerVar='')----------------
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceFile    => 'demo/helloworld.pl',
+                  FillerVar     => '',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 21\n";
+$outstr eq "hello world\n" or print "not ";
+print "ok 22\n";
+length($prog) eq 472 or print "not ";
+print "ok 23\n";
+
+# Yanick4 hellotest.pl -----------------(3 shapes)--
+
+$prog = sightly({ Shape         => 'yanick4',
+                  SourceFile    => 'demo/hellotest.pl',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 24\n";
+$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
+   or print "not ";
+print "ok 25\n";
+$prog =~ tr/!-~/#/;
+$prog eq $yanick4str x 3 or print "not ";
+print "ok 26\n";
+
+# Yanick4 hellotest.pl (FillerVar=';')--(3 shapes)--
+
+$prog = sightly({ Shape         => 'yanick4',
+                  SourceFile    => 'demo/hellotest.pl',
+                  FillerVar     => ';',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 27\n";
+$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
+   or print "not ";
+print "ok 28\n";
+$prog =~ tr/!-~/#/;
+$prog eq $yanick4str x 3 or print "not ";
+print "ok 29\n";
+
+# Yanick4 hellotest.pl (FillerVar='')---(3 shapes)--
+
+$prog = sightly({ Shape         => 'yanick4',
+                  SourceFile    => 'demo/hellotest.pl',
+                  FillerVar     => '',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 30\n";
+$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
+   or print "not ";
+print "ok 31\n";
+$prog =~ tr/!-~/#/;
+$prog eq $yanick4str x 3 and print "not ";
+print "ok 32\n";
+
 # --------------------------------------------------
 
 unlink $tmpf;
+unlink $tmpf2;
+

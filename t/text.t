@@ -1,17 +1,15 @@
 use strict;
 use Acme::EyeDrops qw(sightly pour_text);
 
-print "1..25\n";
-
 sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
 }
+
+# --------------------------------------------------
+
+print "1..29\n";
 
 my $snow = get_shape_str('snow');
 
@@ -100,36 +98,62 @@ print "ok 15\n";
 
 # -------------------------------------------------
 
+$p = pour_text($shape, '', 2, '#');
+$p eq "## ###\n" or print "not ";
+print "ok 16\n";
 $p = pour_text($shape, 'X', 2, '#');
 $p eq "X# ###\n" or print "not ";
-print "ok 16\n";
+print "ok 17\n";
 $p = pour_text($shape, 'XX', 2, '#');
 $p eq "XX ###\n" or print "not ";
-print "ok 17\n";
+print "ok 18\n";
 $p = pour_text($shape, 'XXX', 2, '#');
 $p eq "XX X##\n" or print "not ";
-print "ok 18\n";
+print "ok 19\n";
 $p = pour_text($shape, 'XXXX', 2, '#');
 $p eq "XX XX#\n" or print "not ";
-print "ok 19\n";
+print "ok 20\n";
 $p = pour_text($shape, 'XXXXX', 2, '#');
 $p eq "XX XXX\n" or print "not ";
-print "ok 20\n";
+print "ok 21\n";
 $p = pour_text($shape, 'XXXXXX', 2, '#');
 $p eq "XX XXX\n\n\nX# ###\n" or print "not ";
-print "ok 21\n";
+print "ok 22\n";
 
 # -------------------------------------------------
 
 $p = pour_text($shape, 'X', 3, 'abc');
 $p eq "Xa bca\n" or print "not ";
-print "ok 22\n";
+print "ok 23\n";
 $p = pour_text($shape, 'X', 3, 'abcd');
 $p eq "Xa bcd\n" or print "not ";
-print "ok 23\n";
+print "ok 24\n";
 $p = pour_text($shape, 'XXXXX', 3, 'abc');
 $p eq "XX XXX\n" or print "not ";
-print "ok 24\n";
+print "ok 25\n";
 $p = pour_text($shape, '1234567', 3, 'abc');
 $p eq "12 345\n\n\n\n67 abc\n" or print "not ";
-print "ok 25\n";
+print "ok 26\n";
+
+# -------------------------------------------------
+
+$p = sightly( { SourceString  => 'knob',
+                Width         => 1,
+                Text          => 1,
+                TextFiller    => '#' } );
+$p eq "k\nn\no\nb\n" or print "not ";
+print "ok 27\n";
+
+$p = sightly( { SourceString  => 'knob',
+                Width         => 3,
+                Text          => 1,
+                TextFiller    => '#' } );
+$p eq "kno\nb##\n" or print "not ";
+print "ok 28\n";
+
+$p = sightly( { SourceString  => 'knob',
+                Width         => 4,
+                Text          => 1,
+                TextFiller    => '#' } );
+$p eq "knob\n" or print "not ";
+print "ok 29\n";

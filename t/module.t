@@ -3,6 +3,20 @@ use Acme::EyeDrops qw(sightly);
 
 # Test program for module bug raised by Mark Puttman.
 
+sub get_shape_str {
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
+}
+
+sub build_file {
+   my ($f, $d) = @_;
+   local *F; open(F, '>'.$f) or die "open '$f': $!";
+   print F $d; close(F);
+}
+
+# --------------------------------------------------
+
 print "1..4\n";
 
 my $module_str = <<'GROK';
@@ -35,25 +49,8 @@ my $obj=MyEye->new("mark");
 $obj->printName();
 GROK
 
-sub BuildFile {
-   my ($fname, $data) = @_;
-   open(FF, '>'.$fname) or die "error: open '$fname'";
-   print FF $data;
-   close(FF);
-}
-
-sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
-}
-
-BuildFile('t/eye.tmp', $module_str);
-BuildFile('t/myeye.pl', $main_str);
+build_file('t/eye.tmp', $module_str);
+build_file('t/myeye.pl', $main_str);
 
 my $camelstr = get_shape_str('camel');
 my $japhstr = get_shape_str('japh');

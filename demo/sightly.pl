@@ -21,7 +21,8 @@ Options:
   -r              Insert sightly into a regex (instead of eval).
   -m              Use compact sightly encoding.
   -t              Pour unsightly text.
-  -u textfiller   Filler for -t option (default '#').
+  -u textfiller   Filler for -t option.
+  -U filler       FillerVar.
   -g gap          Gap between successive shapes.
   -o degree       Rotate shape 90, 180, 270 degrees.
   -a rtype        Rotate type (0, 1 or 2).
@@ -81,6 +82,7 @@ my %optarg = (
    s => 'Shape',
    t => 'Text',
    u => 'TextFiller',
+   U => 'FillerVar',
    v => 'Expand',
    w => 'Width',
    x => 'BorderGap',
@@ -92,13 +94,13 @@ my %optarg = (
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbeiklmprtEWa:c:d:f:g:n:o:s:u:v:w:x:y:z:", \%option)
+Getopt::Std::getopts("hbeiklmprtEWa:c:d:f:g:n:o:s:u:U:v:w:x:y:z:", \%option)
    or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);
 $option{z} =~ s#\\n#\n#g if $option{z};
 for my $k (keys %option) {
-   next unless $option{$k};
+   next unless exists($option{$k});
    exists($optarg{$k}) and $arg{$optarg{$k}} = $option{$k};
 }
 usage() if @ARGV;

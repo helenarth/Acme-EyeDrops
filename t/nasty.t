@@ -1,24 +1,27 @@
 use strict;
 use Acme::EyeDrops qw(sightly);
 
-my $have_stderr_redirect = 1;
-if ($^O eq 'MSWin32') {
-   Win32::IsWinNT() or $have_stderr_redirect = 0;
-}
-print $have_stderr_redirect ? "1..7\n" : "1..3\n";
-
 sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
 }
+
+# --------------------------------------------------
+
+# my $have_stderr_redirect = 1;
+# if ($^O eq 'MSWin32') {
+#    Win32::IsWinNT() or $have_stderr_redirect = 0;
+# }
+# print $have_stderr_redirect ? "1..7\n" : "1..3\n";
+
+print "1..7\n";
+
+# --------------------------------------------------
 
 my $camelstr = get_shape_str('camel');
 my $tmpf = 'bill.tmp';
+my $tmpf2 = 'bill2.tmp';
 
 # Camel beginend.pl --------------------------------
 
@@ -35,8 +38,8 @@ my $prog = sightly({ Shape         => 'camel',
                      Regex         => 0,
                      TrapEvalDie   => 0 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
+print TT $prog; close(TT);
+
 my $outstr = `$^X -w -Mstrict $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
@@ -47,18 +50,10 @@ $prog =~ tr/!-~/#/;
 $prog eq $teststr or print "not ";
 print "ok 3\n";
 
-unless ($have_stderr_redirect) {
-   unlink $tmpf;
-   exit(0);
-}
-
 # Camel hellodie.pl --------------------------------
 
 # This tests catching die inside eval.
-# This test requires the ability to re-direct stderr,
-# conspiciously absent from Win 95/98 family.
 
-my $tmpf2 = 'bill2.tmp';
 $evalstr = qq#eval eval '"'.\n\n\n#;
 $evalstr =~ tr/!-~/#/;
 my $diestr = qq#\n\n\n;die \$\@ if \$\@\n#;
@@ -70,26 +65,27 @@ $prog = sightly({ Shape         => 'camel',
                   Regex         => 0,
                   TrapEvalDie   => 1 } );
 open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
-print TT $prog;
-close(TT);
-$outstr = `$^X -w -Mstrict $tmpf 2>$tmpf2`;
+print TT $prog; close(TT);
+
+local *SAVERR; open(SAVERR, ">&STDERR");  # save original STDERR
+open(STDERR, '>'.$tmpf2) or die "Could not create '$tmpf2': $!";
+$outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
+open(STDERR, ">&SAVERR");  # restore STDERR
+
 $rc == 0 and print "not ";
 print "ok 4\n";
 $outstr eq "" or print "not ";
 print "ok 5\n";
 open(TT, $tmpf2) or die "open '$tmpf2': $!";
-{
-   local $/ = undef; $outstr = <TT>;
-}
-close(TT);
+{ local $/; $outstr = <TT> } close(TT);
 $outstr eq "hello die\n" or print "not ";
 print "ok 6\n";
 $prog =~ tr/!-~/#/;
 $prog eq $teststr or print "not ";
 print "ok 7\n";
-unlink $tmpf2;
 
 # --------------------------------------------------
 
+unlink $tmpf2;
 unlink $tmpf;

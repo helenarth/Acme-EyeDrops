@@ -1,17 +1,15 @@
 use strict;
 use Acme::EyeDrops qw(sightly reflect_shape);
 
-print "1..16\n";
-
 sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
 }
+
+# -------------------------------------------------
+
+print "1..16\n";
 
 my $camelstr = get_shape_str('camel');
 my $camel_Y_str = $camelstr;

@@ -1,17 +1,15 @@
 use strict;
 use Acme::EyeDrops qw(sightly);
 
-print "1..9\n";
-
 sub get_shape_str {
-   my $sfile = "lib/Acme/$_[0].eye";
-   local *TT;
-   open(TT, $sfile) or die "open '$sfile': $!";
-   local $/ = undef;
-   my $str = <TT>;
-   close(TT);
-   return $str;
+   my $f = "lib/Acme/$_[0].eye";
+   local *T; open(T, $f) or die "open '$f': $!";
+   local $/; my $s = <T>; close(T); $s;
 }
+
+# --------------------------------------------------
+
+print "1..9\n";
 
 my $larrystr = get_shape_str('larry');
 my $damianstr = get_shape_str('damian');
