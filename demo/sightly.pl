@@ -20,6 +20,8 @@ Options:
   -p              Print instead of eval.
   -r              Insert sightly into a regex (instead of eval).
   -m              Use compact sightly encoding.
+  -t              Pour unsightly text.
+  -u textfiller   Filler for -t option (default '#').
   -g gap          Gap between successive shapes.
   -o degree       Rotate shape 90, 180, 270 degrees.
   -a rtype        Rotate type (0, 1 or 2).
@@ -34,8 +36,8 @@ Options:
   -b              Binary file.
   -w width        Width.
   -l              List available shapes.
-  -t              Trap die within eval with 'die $@ if $@'
-  -u              Trap warnings with '$SIG{__WARN__}=sub{}'
+  -E              Trap die within eval with 'die $@ if $@'
+  -W              Trap warnings with '$SIG{__WARN__}=sub{}'
 Examples:
   sightly -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
@@ -77,18 +79,20 @@ my %optarg = (
    p => 'Print',
    r => 'Regex',
    s => 'Shape',
-   t => 'TrapEvalDie',
-   u => 'TrapWarn',
+   t => 'Text',
+   u => 'TextFiller',
    v => 'Expand',
    w => 'Width',
    x => 'BorderGap',
    y => 'BorderWidth',
-   z => 'SourceString'
+   z => 'SourceString',
+   E => 'TrapEvalDie',
+   W => 'TrapWarn',
 );
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbeiklmprtua:c:d:f:g:n:o:s:v:w:x:y:z:", \%option)
+Getopt::Std::getopts("hbeiklmprtEWa:c:d:f:g:n:o:s:u:v:w:x:y:z:", \%option)
    or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);

@@ -236,3 +236,12 @@ Revision history for Perl extension EyeDrops
 
 	- documentation: minor changes
 	- minor code improvements
+
+1.30	Sun Feb 23 17:19:04 2003
+
+	- new function: pour_text
+	- new attributes: Text, TextFiller
+	- added support for new attributes to demo/sightly.pl
+	- new test: text.t
+	- documentation: added 'Snowflakes' section
+	- minor code improvements
