@@ -39,4 +39,9 @@ Revision history for Perl extension EyeDrops
 	- new shapes: larry, damian, cricket, mongers
 	- new functions: border_shape, invert_shape, rotate_shape
 	- new attributes: Rotate, Invert, BorderGap, BorderWidth
+	- documentation improvements
+
+1.01	Sun Nov 11 11:10:09 2001
+
+	- new shape from Ryan King: larry2
 	- minor improvements to documentation

@@ -14,7 +14,7 @@ require Exporter;
                 border_shape invert_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -475,7 +475,7 @@ sub invert_shape {
    return $s;
 }
 
-# Rotate shape clockwise thru 90, 180, 270 degrees
+# Rotate shape clockwise: 90, 180 or 270 degrees
 # (other angles are left as an exercise for the reader:-)
 sub rotate_shape {
    my ($tlines, $degrees) = @_;
@@ -856,8 +856,8 @@ This is a Visual Programming breakthrough in that you can tell
 that it is a Windows program and see its UML structure too,
 just by glancing at the code.
 
-You can improve the quality of your programs simply
-by having them impersonate the Perl 6 maestros,
+You can convert Perl 5 programs to Perl 6 simply by arranging
+for them to impersonate the Perl 6 maestros,
 Larry Wall and Damian Conway:
 
     print sightly( { Shape       => 'larry,damian',
@@ -865,7 +865,7 @@ Larry Wall and Damian Conway:
                      SourceFile  => 'helloworld.pl',
                      Regex       => 1 } );
 
-producing the following good karma:
+producing:
 
                           ''=~('('.'?'.'{'
                        .('`'|'%').('['^"\-").(
@@ -977,17 +977,60 @@ producing the following good karma:
                          '.'^'~';$~=('@')|
                             '(';$^=')';
 
-If you sincerely idolize Larry, you should put a border around
-him like this:
+If you sincerely idolize Larry, you might put a picture frame
+around him:
 
-    print sightly( { Shape       => 'larry',
-                     BorderGap   => 2,
+    print sightly( { Shape       => 'larry2',
+                     BorderGap   => 3,
                      BorderWidth => 2,
                      SourceFile  => 'helloworld.pl',
                      Regex       => 1 } );
 
+where the shape C<larry2> is a caricature contributed by Ryan King:
+
+ ''=~('('.'?'.'{'.('`'|'%').('['^'-').('`'|'!').("\`"|
+ ',').'"'.('['^'+').('['^')').('`'|')').('`'|'.').('['
+ ^+                                                 ((
+ ((                                                 ((
+ ((                                                 ((
+ ((                 '/')))))))))))                  ))
+ .(             '{'^'[').'\\'.'"'.('`'              |+
+ ((            '('))).('`'|'%').('`'|','            ).
+ +(          '`'|(',')).( '`'|'/'). ('{'^           ((
+ ((         '['))))).('['  ^',').(  ((  '`'         ))
+ |+        '/' ).('['^')') .("\`"|  (    ','        ))
+ .(       '`' |"\$").'\\'.  '\\'.  (      '`'       |+
+ ((       '.' ))).('\\').   '"'.  (        ((       ((
+ ((      ';') )))))).''.   ('!'             ^       ((
+ ((     '+'))) )). '"'    . (             ((        ((
+ ((    '}')))))) )      . (    (    (     ((        ((
+ ((    ')')))))) ))));    $:='.'^'~';$~=('@')|      ((
+ ((    '(')))); $^  ="\)"^      (( ((    (  ((      ((
+ ((     '[')))))     )))         ) )     )   ;(     $/
+ )=    '`'|'.';       $_       = ( ( (    (  ((     ((
+ ((     '('))))       ))         ) )      )  )^     ((
+ ((      '}')))        );       $,  =(     '`'      )|
+ ((       "\!"));  (    $\)=')'^     '}'; $:        =(
+ ((        '.')))^ (        '~'); ($~)= ( ((        ((
+ ((         '@'))))))      )|"\(";  $^=')'^'['      ;(
+ $/           )="\`"|   '.';$_='('   ^'}';$,='`'    |+
+ ((            '!')) ; $\=(')')^        (  "\}");   $:
+ =(                (  '.'))      ^'~'     ;  ($~)   =(
+ ((              ( (   '@'               )    )))   )|
+ ((           '(' )    );  (            (     $^    ))
+ =(         ((  (       (    "\)")))))^       (     ((
+ ((      '['     ))           )                     ))
+ ;(     (         $/           ))                   =(
+ ((   (             ((        (   (                 ((
+ ((                   '`')))))     )                ))
+ ))                                                 ))
+ |+                                                 ((
+ ((                                                 ((
+ '.'))))));$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~'
+ ;$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,="\`";
+
 For Linux-only, you can apply its F</usr/games/banner> command
-to the program's source text like this:
+to the program's source text:
 
     print sightly( { Shape       => 'srcbanner',
                      Width       => 70,
@@ -1521,7 +1564,7 @@ which produces:
                      ;$/=                      '`'|'.';
                      $_=                         "\(";
 
-with:
+to:
 
     print sightly( { Shape       => 'cricket',
                      Invert      => 1,
@@ -1681,7 +1724,7 @@ Invert a shape.
 
 =item rotate_shape SHAPESTRING DEGREES
 
-Rotate a shape thru 90, 180 or 270 degrees.
+Rotate a shape clockwise thru 90, 180 or 270 degrees.
 
 =item pour_sightly SHAPESTRING PROGSTRING GAP RFILLVAR
 
@@ -1727,7 +1770,7 @@ The attributes that HASHREF may contain are:
 
     Gap           The number of lines between successive shapes.
 
-    Rotate        Rotate the shape thru 90, 180 or 270 degrees.
+    Rotate        Rotate the shape clockwise 90, 180 or 270 degrees.
 
     Invert        Invert the shape.
 
@@ -1755,7 +1798,7 @@ The attributes that HASHREF may contain are:
 
 =back
 
-=head2 Shapes
+=head2 Shape Reference
 
 When you specify a shape like this:
 
@@ -1763,20 +1806,15 @@ When you specify a shape like this:
 
 EyeDrops looks for the file F<camel.eye> in the same
 directory as F<EyeDrops.pm>.
-
-You can also specify a shape with a file name like this:
+You can also specify a shape with a file name:
 
     sightly( { Shape => '/tmp/camel.eye' ...
 
-Finally, you can specify a shape with a string like this:
+or with a string, for example:
 
     my $shapestr = <<'GROK';
-            ###
-           #####
-          #######
-         #########
-        ###########
-       #############
+             #####
+    #######################
     GROK
     sightly ( { ShapeString => $shapestr ...
 
@@ -1786,10 +1824,11 @@ EyeDrops are:
     bleach      banner of "use Acme::Bleach;"
     buffy       banner of "Buffy"
     camel       An animal
-    cricket     Australia is world champions in this game
+    cricket     Australia are world champions in this game
     damian      Damian Conway's face
-    japh        First invented by Randal L Schwartz in 1988
+    japh        JAPHs were invented by Randal L Schwartz in 1988
     larry       Larry Wall's face
+    larry2      Caricature of Larry contributed by Ryan King
     mongers     Perl Mongers logo
     spoon       a wooden spoon
     uml         a UML diagram
@@ -1797,11 +1836,8 @@ EyeDrops are:
 
 It is easy to create your own shapes. For some ideas on shapes,
 point your search engine at I<Ascii Art>. If you generate some
-nice shapes, please send them to me so I can include them in
+nice shapes, please send them in so they can be included in
 future versions of EyeDrops.
-
-To aid those migrating from C<Acme::Bleach> and C<Acme::Buffy>,
-the C<'bleach'> and C<'buffy'> shapes are provided.
 
 =head1 BUGS
 
@@ -1846,6 +1882,12 @@ I blame Japhy and Ronald J Kimball and others on the fwp
 mailing list for exposing the ''=~ trick, Jas Nagra for
 explaining his C<Acme::Smirch> module, and Rajah Ankur
 and Supremely Unorthodox Eric for provoking me.
+
+I would also like to thank Ian Phillipps, Philip Newton,
+Ryan King, Michael G Schwern, Robert G Werner, Simon Cozens,
+and others on the fwp mailing list for their advice on
+ASCII Art, imaging programs, and on which picture of
+Larry to use.
 
 =head1 COPYRIGHT
 
