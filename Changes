@@ -95,7 +95,7 @@ Revision history for Perl extension EyeDrops
 	- new shape: eugene
 	- new shape: tpr
 
-1.07	Sun Mar 31 25:12:17 2002
+1.07	Sun Mar 31 15:12:17 2002
 
 	- improved documentation, added Buffy looking in the mirror
 	- fixed EyeDrops.pm to work with Perl 5.7.3
@@ -116,3 +116,15 @@ Revision history for Perl extension EyeDrops
 	  they work with -w and 'use strict' too
 	- localised file globals appropriately in all test programs
 	- tested under Win98 and adjusted nasty.t accordingly
+
+1.08	Sun Apr 21 16:13:18 2002
+
+	- documentation: added sub-sections to Examples section
+	- documentation: added 'Dueling Dingos' sub-section
+	- minor change to shape: pgolf
+	- new shape: eye
+	- new shape: mosquito
+	- new shape: coffee
+	- new shape: yanick
+	- new shape: yanick2
+	- new shape: yanick3

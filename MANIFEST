@@ -12,10 +12,12 @@ lib/Acme/buffy4.eye
 lib/Acme/camel.eye
 lib/Acme/camel2.eye
 lib/Acme/camel3.eye
+lib/Acme/coffee.eye
 lib/Acme/cricket.eye
 lib/Acme/damian.eye
 lib/Acme/dipsy.eye
 lib/Acme/eugene.eye
+lib/Acme/eye.eye
 lib/Acme/golfer.eye
 lib/Acme/japh.eye
 lib/Acme/kermit.eye
@@ -24,6 +26,7 @@ lib/Acme/larry2.eye
 lib/Acme/london.eye
 lib/Acme/merlyn.eye
 lib/Acme/mongers.eye
+lib/Acme/mosquito.eye
 lib/Acme/pgolf.eye
 lib/Acme/pony.eye
 lib/Acme/pony2.eye
@@ -33,6 +36,9 @@ lib/Acme/spoon.eye
 lib/Acme/tpr.eye
 lib/Acme/uml.eye
 lib/Acme/window.eye
+lib/Acme/yanick.eye
+lib/Acme/yanick2.eye
+lib/Acme/yanick3.eye
 t/convert.t
 t/limit.t
 t/limit2.t

@@ -15,7 +15,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -731,15 +731,16 @@ sub sightly {
          my $widthleft = $arg{BorderWidth};
          $widthleft = $arg{BorderWidthLeft} if $arg{BorderWidthLeft};
          my $widthright = $arg{BorderWidth};
-         $widthright = $arg{BorderWidthRight} if $arg{BorderWidthRight};
+         $widthright = $arg{BorderWidthRight}
+            if $arg{BorderWidthRight};
          my $widthtop = $arg{BorderWidth};
          $widthtop = $arg{BorderWidthTop} if $arg{BorderWidthTop};
          my $widthbottom = $arg{BorderWidth};
          $widthbottom = $arg{BorderWidthBottom}
                            if $arg{BorderWidthBottom};
          $shapestr = border_shape($shapestr,
-                      $gapleft,   $gapright,   $gaptop,   $gapbottom,
-                      $widthleft, $widthright, $widthtop, $widthbottom);
+                   $gapleft,   $gapright,   $gaptop,   $gapbottom,
+                   $widthleft, $widthright, $widthtop, $widthbottom);
       }
       if ($arg{Indent}) {
          my $s = ' ' x $arg{Indent};
@@ -854,6 +855,8 @@ Notice that the shape C<'camel'> is just the file F<camel.eye> in
 the same directory as F<EyeDrops.pm>, so you are free to add your
 own new shapes as required.
 
+=head2 Making Your Programs Easier to Understand
+
 If your boss demands a UML diagram describing the program, you
 can give him this:
 
@@ -928,6 +931,19 @@ producing this improved visual representation:
 This is a Visual Programming breakthrough in that you can tell
 that it is a Windows program and see its UML structure too,
 just by glancing at the code.
+
+For Linux-only, you can apply its F</usr/games/banner> command
+to the program's source text:
+
+    print sightly( { Shape       => 'srcbanner',
+                     Width       => 70,
+                     SourceFile  => 'helloworld.pl',
+                     Regex       => 1 } );
+
+The generated program is easier to understand than the
+original because its characters are bigger and easier to read.
+
+=head2 Converting from Perl 5 to Perl 6
 
 You can convert Perl 5 programs to Perl 6 simply by arranging
 for them to impersonate the Perl 6 maestros,
@@ -1102,16 +1118,7 @@ where the shape C<larry2> is a caricature contributed by Ryan King:
  '.'))))));$_='('^'}';$,='`'|'!';$\=')'^'}';$:='.'^'~'
  ;$~='@'|'(';$^=')'^'[';$/='`'|'.';$_='('^'}';$,="\`";
 
-For Linux-only, you can apply its F</usr/games/banner> command
-to the program's source text:
-
-    print sightly( { Shape       => 'srcbanner',
-                     Width       => 70,
-                     SourceFile  => 'helloworld.pl',
-                     Regex       => 1 } );
-
-The generated program is easier to understand than the
-original because its characters are bigger and easier to read.
+=head2 Just another Perl hacker
 
 Let's get more ambitious and create a big self-printing I<JAPH>.
 
@@ -1207,15 +1214,17 @@ producing:
                   #;#           ;#
                       ;#;#;#;#;
 
+=head2 Buffy Looking in the Mirror
+
 Because the sightly encoding is not very compact, you sometimes
 find yourself playing a surreal form of I<Perl Golf>, where
 the winner is the one with the smallest F<f.tmp> in:
 
     sightly.pl -r -f program_to_be_converted >f.tmp
 
-Apart from reducing the (key-)stroke count, you should strive
-to replace alphanumeric characters with sightly ones, because
-they do not require encoding.
+Apart from reducing the (key-)stroke count, you must avoid regexes
+and strive to replace alphanumeric characters with sightly ones,
+which do not require sightly encoding.
 
 To illustrate, consider the intriguing problem of creating
 I<Buffy looking in the mirror>. Let's start with F<k.pl>:
@@ -1232,7 +1241,7 @@ Buffy looking in the mirror can now be created with:
     cat b.pl        (should show Buffy's face)
     perl b.pl       (should show Buffy looking in the mirror)
 
-Drat. This requires two buffy2 shapes. What to do?
+Drat. This requires two I<buffy2> shapes. What to do?
 Since significantly shortening F<k.pl> above seems unlikely
 (but if you do, please let me know!), we resort to writing
 a post processor program, F<pp.pl>, to append the required
@@ -1245,7 +1254,7 @@ With this program in place, we can write a briefer F<kk.pl>:
 
     open$%;chop,print+reverse.$/for<0>
 
-and finally produce Buffy looking in the mirror with:
+and finally produce I<Buffy looking in the mirror> with:
 
     sightly.pl -r -f kk.pl -s buffy2 >b.pl
     perl pp.pl b.pl >bb.pl
@@ -1261,7 +1270,7 @@ and easier still for a self-printing shape:
 
     open$%;print<0>
 
-To combine I<Buffy looking in the mirror> with a (cheating) quine,
+To combine I<Buffy looking in the mirror> with a (cheating) I<quine>,
 we create F<m.pl>:
 
     $:=pop||'';open$[;print+map$:eq'mirror'?chop&&reverse.$/:$_,<0>
@@ -1274,7 +1283,7 @@ and:
     perl buffy.pl          (should show Buffy's face again)
     perl buffy.pl mirror   (should show Buffy looking in the mirror)
 
-producing:
+producing F<buffy.pl>:
 
                     ''=~('('.'?'                                
                  .'{'.('`'|"\%").(                              
@@ -1329,6 +1338,247 @@ producing:
  (   '\\')).'$'.'/'.':'.'\\'.'$'.'_'.','.'<'.(('^')^(          (
  (   '`'))|'.')).'>'.('!'^'+').'"'.'}'.')');$:='.'^'~'         ;
 
+=head2 Dueling Dingos
+
+During the TPR02 Perl Golf tournament, I<`/anick> composed a poem
+describing his experience, entitled I<Dueling Dingos>.
+
+You can produce a program that emits his superb poem like this:
+
+    print sightly( { Shape        => 'yanick3',
+                     Regex        => 1,
+                     Print        => 1,
+                     SourceString => <<'END_DINGO' } );
+    #!/usr/bin/perl
+    # Dueling Dingos v1.1, by Yanick Champoux (9/4/2002)
+    #
+    # Inspired by the TPR(0,2) Perl Golf contest.
+    # Name haven't been changed, since the involved
+    # parties could hardly be labelled as 'innocent',
+    # and are way far too gone to protect anyway.
+
+    wait until localtime > @April[0];  # wait until the first of April
+
+    BEGIN{}
+
+    study and seek FOR, $some, $inspiration;
+
+    write $stuff;
+
+    $score = 145; # no good;
+
+    delete $stuff { I_can_do_without }
+       and do $more_stuff;
+
+    delete $even{more_stuff};
+
+    reverse $engineer; study; eval $strategy and redo;
+
+    write, write, write;
+    delete $_{'!'}, delete $"{"@!"}, delete $@{'*'}; # must stop cursing
+
+    use less 'characters', $durnit;
+
+    read THE, $current, $solution;
+
+    not 2, $bad;
+
+    delete $white_spaces{''} until $program == glob;
+
+    for( $all, my @troubles )
+    {
+        unlink 1, $character;
+    }
+
+    ARGH:
+
+    $must, not $despair;
+
+    $I->can(do{ $it });
+
+    study new Idea;
+
+    m/mmmm/m... do{able};
+
+    kill $chickens;
+
+    'ask', $Nanabozo, 2, bless $me, 'with more inspiration';
+
+    $so, close; warn $mailing_list and alarm $Andrew;
+
+    $toil until my $solution < /-\ndrew's
+    /;
+
+    GOT_IT:
+
+    send $solution, $to, ref;
+
+    $brain, shutdown  I,'m dead';
+
+    goto sleep;
+
+    wait; $till, $the, $day, $after;
+
+    readline last $scoreboard;
+
+    grep $all, stat;
+
+    read THE, $stats, $again until $it_sinks_in;
+
+    $Andrew,'s score' lt $mine;
+
+    $eyeball, pop @o
+    ;
+    END_DINGO
+
+The generated program, being 2577 lines long, is not reproduced here.
+To generate a shorter program summarising `/anick's TPR02 anguish:
+
+    print sightly( { Shape        => 'yanick,eye,mosquito,coffee',
+                     Gap          => 3,
+                     Regex        => 1,
+                     Print        => 1,
+                     SourceString => <<'END_SUFFERING' } );
+    My head is hurting, my right eye feels like it's going to pop
+    like a mosquito drinking from an expresso addict with high
+    blood pressure, I want to crawl somewhere damp and dark and
+    quiet and I consider never to touch a keyboard again.
+    END_SUFFERING
+
+producing:
+
+                             ''=~('('.'?'.'{'.(
+                          '['^'+').('['^')').('`'|
+                        ')').('`'|'.').('['^'/').'"'
+                      .('`'^'-').('['^'"').('{'^'[').(
+                     '`'|'(').('`'|'%').('`'|'!').("\`"|
+                    '$').('{'^'[').('`'|')').('['^('(')).(
+                   '{'^'[').('`'|'(').('['^'.').('['^"\)").(
+                  '['^'/').('`'|')').('`'|'.').('`'|"'").','.
+                 ('{'^'[').('`'|'-').('['^'"').('{'^'[').('['^
+                 ')').('`'|')').('`'|"'").('`'|'(').('['^'/').(
+                '{'^'[').('`'|'%').('['^'"').('`'|'%').('{'^'['
+               ).('`'|'&').('`'|'%').('`'|'%').('`'|',').(('[')^
+              '(').('{'^'[').('`'|',').('`'|')').('`'|'+').("\`"|
+             '%').('{'^'[').('`'|')').           ('['^    ('/')).
+            "'".('['^'(').('{'^'[').                       ("\`"|
+            "'").('`'|'/').('`'|')'                         ).''.
+           ('`'|'.').('`'|"'").('{'                         ^'[')
+     .('[' ^'/').('`'|'/').(('{')^                          '[').
+  ('['^'+'  ).('`'|'/').('['^'+').                          ('!'^
+ '+').('`'  |',')  .('`'|(')')).(                           "\`"|
+ '+').('`'  |'%'    ).('{'^'[').                            ('`'|
+ '!').('{'     ^      ('[')).(                              "\`"|
+ '-').('`'     |      "\/").(                               "\["^
+ '(').('['     ^       '*'                                   ).(
+ '['^'.'       )     .+(             (  ( (            ( (    (
+ '`')))        )   ))                         |      (        (
+ ')'))         )                   .               (         (
+ '[')^         (                                            (
+ '/'))         )                      .('`'|        '/').  (
+ "\{"^          '['                   ).('`'        |'$') .
+ ('['^           (                                (      (
+ ')'))            )                               )     .
+ ('`'|            (                  ')'))        .     (
+ "\`"|             (            '.'))              .   (
+ "\`"|              (                               ( (
+ '+')))              )           .(         (       (
+ "\`"))|              (           ((         (       (
+ ')'))))))             .           +(         (     (
+ '`'))|'.').(           (           ((          ( (
+ '`')))))|"'").('{'^'[').(            ((         (
+ '`')))|'&').('['^')').('`'|            ((     (
+ '/')))).('`'|'-').('{'^'[').             ('`'
+ |'!').('`'|'.').('{'^'[').('`'             |
+ '%').('['^'#').('['^'+').("\["^          (
+ ')')).('`'|'%').('['^('(')).(     '['^'('
+ ).('`'|'/').('{'^'[').("\`"|
+ '!').('`'|'$').('`'|"\$").(
+
+
+
+                          '`'|')').(('`')|
+                    (  '#')).('['^'/').("\{"^  (
+                (    '['))).('['^',').('`'|')')    .
+             (     '['^'/').('`'|'(').('{'^'[').(     (
+          (       '`'))|'(').('`'|')').('`'|"'").(       (
+        (        '`'))|'(').('!'^'+').('`'|('"')).(        (
+      (          '`'))|',').('`'|'/').('`'|('/')).(          (
+    (           '`'))|'$').('{'^'[').('['^'+').('['^           (
+  (             ')'))).('`'|'%').('['^'(').('['^'(')             .
+ (              '['^'.').('['^')').('`'|'%').(',').(              (
+  (             '{'))^'[').('`'^')').('{'^'[').('['^             (
+    (           ','))).('`'|'!').('`'|'.').('['^'/')           .
+      (          '{'^'[').('['^'/').('`'|'/').('{'^          (
+        (        '['))).('`'|'#').('['^')').(('`')|        (
+          (       '!'))).('['^',').('`'|',').('{'^       (
+             (     '['))).('['^'(').('`'|('/')).(     (
+                (    '`'))|'-').('`'|'%').('['^    (
+                    (  ','))).('`'|'(').('`'|  (
+                          '%')).('['^')').
+
+
+
+              +(                                                 ((
+             '`'))                                             |  (
+            "\%")).(                                         (   (
+            '{'))^'['                 )  .                 (   (
+            '`')|'$').(               (  (               (   (
+            '`'))))|'!')              .  (            (   (
+             '`'))|'-').(             (  (          (   (
+              '['))))^'+')            .  (        (    (
+               '{'))^'[').(           (  (     (    (
+                 '`'))))|'!'          ) .   (     (
+    '`')|'.'       ).('`'|'$'         ) .  (  (
+ '{')^'[').('`'|      ('$')).(  '`'| '!' )  .
+ ('['^')').('`'|'+')     .('{'^'[').('`'| (
+  '!')).('`'|'.').('`'|'$').('!'^"\+").( (
+   '[')^'*').('['^'.').('`'|')').('`'|'%'
+    ).('['^'/').('{'^'[')   .('`'|'!').
+      ('`'|('.')).(       '`'|('$')).(
+                             '{'^'['
+                            ).( '`'
+                           ^+ ( ( (
+                           (( ( ( (
+                          (( ( (  (
+                         (( (  (  (
+                        ((  ( (   (
+                     ')')  )  )   )
+                      )) ) )  )   )
+                         ) )  )   )
+                         ) )  )  )
+                         ) ) )   )
+                        )  ) .   (
+                        (  ( (  (
+                        (  ( (  (
+                        (  ( ( (
+                        ( ( (  (
+                        '{'))))
+                        ))))))
+                        )))))
+                       )^'['
+                      ).''.
+                     ('`'|
+
+
+
+ '#').('`'|'/').('`'|'.').('['^'(').(('`')|   ')').(
+ '`'|'$').('`'|'%').('['^')').('{'^('[')).( '`'|'.').
+ ('`'|'%').('['^'-').('`'|'%').('['^')').('{'^    '['
+ ).('['^'/').('`'|'/').('{'^'[').('['^'/').(      '`'
+ |'/').('['^'.').('`'|'#').('`'|'(').("\{"^       '['
+  ).('`'|'!').('{'^'[').('`'|'+').('`'|'%'       ).(
+  '['^'"').('`'|'"').('`'|'/').('`'|'!').(     '['^
+   ')').('`'|'$').('{'^'[').('`'|('!')).(    '`'|
+    "'").('`'|'!').('`'|')').('`'|"\.").   '.'.
+     ('!'^'+').'"'.'}'.')');$:='.'^('~');$~=
+      '@'|'(';$^=')'^'[';$/='`'|'.';$_='('
+        ^'}';$,='`'|'!';$\=')'^'}';$:=
+          '.'^'~';$~='@'|('(');$^=
+            ')'^'[';$/='`'|'.'
+
+=head2 Encoding Binary Files
+
 But wait, there's more. You can encode binary files too.
 
     print sightly({Shape      => 'camel,mongers',
@@ -1351,6 +1601,8 @@ To decode:
 To verify it worked:
 
     cmp f.tmp some_binary_file
+
+=head2 A Slow Day
 
 On a really slow day, you can sit at your Unix terminal and type
 things like:
@@ -1431,6 +1683,8 @@ Here is the original one camel program, F<t1.pl>:
                   ')'^         "\[";$/=   '`'          |'.'
                 ;($_)=                                ('(')^
               "\}";$,=                               '`'|'!'
+
+=head2 Buffy Goes to the Cricket
 
 Buffy fans might like to rotate her letters:
 
@@ -1798,10 +2052,12 @@ EyeDrops are:
     camel       Dromedary (Camelus dromedarius, one hump)
     camel2      Another dromedary (from use.perl.org)
     camel3      London.pm's bactrian camel at London zoo
+    coffee      A cup of coffee
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
     dipsy       Teletubbies Dipsy (also london.pm infobot name)
     eugene      World's No. 1 Perl golfer, Eugene van der Pijll
+    eye         An eye
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
     kermit      Kermit the frog
@@ -1810,6 +2066,7 @@ EyeDrops are:
     london      Haiku "A Day in The Life of a London Perl Monger"
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
+    mosquito    A mosquito
     pgolf       Perl Golf logo (inspired by `/anick)
     pony        Horizontal banner of "Pony"
     pony2       Picture of a Pony
@@ -1819,6 +2076,9 @@ EyeDrops are:
     tpr         Vertical banner of "The Perl Review"
     uml         A UML diagram
     window      A window
+    yanick      Caricature of `/anick's head
+    yanick2     Uttered by `/anick during TPR02
+    yanick3     Pictorial version of yanick2
 
 It is easy to create your own shapes. For some ideas on shapes,
 point your search engine at I<Ascii Art> or I<Clip Art>.
