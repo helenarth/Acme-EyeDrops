@@ -18,7 +18,7 @@ use File::Path ();
 use Acme::EyeDrops qw(sightly);
 use Test::Harness ();
 
-select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+$|=1;
 
 # --------------------------------------------------
 
@@ -60,9 +60,9 @@ sub eye_drop_eyedrops_pm {
    my $orig = Acme::EyeDrops::slurp_yerself();
    # Split $orig into the source ($src) and the pod ($doc).
    my ($src, $doc) = split(/\n1;\n/, $orig, 2);
-   # Remove the line containing $this_dir = __FILE__ ...
+   # Remove the line containing $eye_dir = __FILE__ ...
    # because this line confuses eval.
-   $src =~ s/^(my \$this_dir\b.*)$//m;
+   $src =~ s/^(my \$eye_dir\b.*)$//m;
    # Return the new sightly version of EyeDrops.pm.
    $1 . sightly( { Regex         => 0,
                    Compact       => 1,
@@ -144,8 +144,14 @@ sub test_one {
    open(STDOUT, '>'.$outf) or die "Could not create '$outf': $!";
    open(STDERR, '>'.$errf) or die "Could not create '$errf': $!";
    my $status = Test::Harness::runtests(@{$rtests});
-   open(STDERR, ">&SAVERR");  # restore STDERR
-   open(STDOUT, ">&SAVOUT");  # restore STDOUT
+   # XXX: Test harness does not like the next two closes.
+   # close(STDOUT) or die "error: close STDOUT: $!";
+   # close(STDERR) or die "error: close STDERR: $!";
+   open(STDERR, ">&SAVERR") or die "error: restore STDERR: $!";
+   open(STDOUT, ">&SAVOUT") or die "error: restore STDOUT: $!";
+   # XXX: is this necessary to prevent leaks?
+   close(SAVOUT) or die "error: close SAVOUT: $!";
+   close(SAVERR) or die "error: close SAVERR: $!";
 
    my $outstr = Acme::EyeDrops::slurp_tfile($outf);
    my $errstr = Acme::EyeDrops::slurp_tfile($errf);

@@ -348,3 +348,17 @@ Revision history for Perl extension EyeDrops
 	         new Test::Pod test, 18_sky.t
 	         11_bold.t now tested in taint mode (no banner test)
 	         12_Beer.t now banner test only (not taint safe)
+
+1.44	Sun Apr 25 19:07:41 2004
+
+	- Bug fix release for Perl 5.8.4: some of the tests broke because
+	  they were naughtily exploiting a Perl bug re use strict inside
+	  (?{...}) constructions in regexps (see 01_mug.t/05_Parrot.t)
+	- new shapes: map_world1, map_world2, map_world3, map_japan, map_uk
+	- new shapes: music, dan, bottle3
+	- Build.PL: fixed for Module::Build v0.24 (_find_file_by_type changed)
+	- new attribute: SourceHandle
+	- new test: 14_gulp.t tests SourceHandle (and other invalid attributes)
+	- minor code improvements (removed $this_dir, check for invalid
+	  attrs in sightly(), allow SourceFile/SourceString of '0')
+	- documentation: updated stale URL links

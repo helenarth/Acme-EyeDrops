@@ -53,7 +53,14 @@ $camelprogstr =~ tr/!-~/#/;
 
 # -------------------------------------------------
 
-my $outstr = `$^X -w -Mstrict $tmpf`;
+# This one used to be OK with -Mstrict but not as of perl 5.8.4.
+# From the perl 5.8.4 perldelta:
+#   Pragmata are now correctly propagated into (?{...}) constructions in regexps.
+#   Code such as
+#     my $x = qr{ ... (??{ $x }) ... };
+#   will now (correctly) fail under use strict.
+#   (As the inner $x is and has always referred to $::x)
+my $outstr = `$^X -w $tmpf`;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - 12032 camels rc\n";
@@ -67,7 +74,8 @@ $outstr eq $camelstr or print "not ";
 
 # -------------------------------------------------
 
-$outstr = `$^X -w -Mstrict $tmpf q`;
+# This one used to be OK with -Mstrict but not as of perl 5.8.4.
+$outstr = `$^X -w $tmpf q`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - 12032 camels quine rc\n";
@@ -77,7 +85,8 @@ $outstr eq $camelprog or print "not ";
 # -------------------------------------------------
 
 $camelprogstr =~ tr/#/Y/;
-$outstr = `$^X -w -Mstrict $tmpf Y Y`;
+# This one used to be OK with -Mstrict but not as of perl 5.8.4.
+$outstr = `$^X -w $tmpf Y Y`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - 12032 camels Y rc\n";
@@ -107,6 +116,7 @@ $buffyprogstr =~ tr/!-~/#/;
 
 # -------------------------------------------------
 
+# This one is OK with -Mstrict
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";

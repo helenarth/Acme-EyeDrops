@@ -5,7 +5,7 @@ use strict;
 use Acme::EyeDrops qw(sightly get_eye_string make_siertri
                       regex_eval_sightly);
 
-select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+$|=1;
 
 # --------------------------------------------------
 
@@ -138,7 +138,15 @@ $prog = sightly({ Shape         => 'japh',
                   InformHandler => sub {},
                   Regex         => 1 } );
 build_file($tmpf, $prog);
-$outstr = `$^X -Tw -Mstrict $tmpf`;
+
+# This one used to be OK with -Mstrict but not as of perl 5.8.4.
+# From the perl 5.8.4 perldelta:
+#   Pragmata are now correctly propagated into (?{...}) constructions in regexps.
+#   Code such as
+#     my $x = qr{ ... (??{ $x }) ... };
+#   will now (correctly) fail under use strict.
+#   (As the inner $x is and has always referred to $::x)
+$outstr = `$^X -Tw $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - self-printing japh rc\n";

@@ -6,7 +6,7 @@ use Acme::EyeDrops qw(ascii_to_sightly sightly_to_ascii
                       get_eye_string make_siertri make_triangle
                       pour_sightly);
 
-select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+$|=1;
 
 print "1..16\n";
 

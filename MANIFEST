@@ -15,6 +15,7 @@ lib/Acme/EyeDrops/bighorn.eye
 lib/Acme/EyeDrops/bleach.eye
 lib/Acme/EyeDrops/bottle.eye
 lib/Acme/EyeDrops/bottle2.eye
+lib/Acme/EyeDrops/bottle3.eye
 lib/Acme/EyeDrops/buffy.eye
 lib/Acme/EyeDrops/buffy2.eye
 lib/Acme/EyeDrops/buffy3.eye
@@ -28,6 +29,7 @@ lib/Acme/EyeDrops/china1.eye
 lib/Acme/EyeDrops/coffee.eye
 lib/Acme/EyeDrops/cricket.eye
 lib/Acme/EyeDrops/damian.eye
+lib/Acme/EyeDrops/dan.eye
 lib/Acme/EyeDrops/dipsy.eye
 lib/Acme/EyeDrops/eugene.eye
 lib/Acme/EyeDrops/eye.eye
@@ -46,9 +48,15 @@ lib/Acme/EyeDrops/llama.eye
 lib/Acme/EyeDrops/london.eye
 lib/Acme/EyeDrops/map_australia.eye
 lib/Acme/EyeDrops/map_italy.eye
+lib/Acme/EyeDrops/map_japan.eye
+lib/Acme/EyeDrops/map_uk.eye
+lib/Acme/EyeDrops/map_world1.eye
+lib/Acme/EyeDrops/map_world2.eye
+lib/Acme/EyeDrops/map_world3.eye
 lib/Acme/EyeDrops/merlyn.eye
 lib/Acme/EyeDrops/mongers.eye
 lib/Acme/EyeDrops/mosquito.eye
+lib/Acme/EyeDrops/music.eye
 lib/Acme/EyeDrops/naw.eye
 lib/Acme/EyeDrops/panda.eye
 lib/Acme/EyeDrops/parrot.eye
