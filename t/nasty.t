@@ -3,6 +3,8 @@ use Acme::EyeDrops qw(sightly get_eye_string);
 
 # --------------------------------------------------
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 # my $have_stderr_redirect = 1;
 # if ($^O eq 'MSWin32') {
 #    Win32::IsWinNT() or $have_stderr_redirect = 0;
@@ -83,3 +85,5 @@ print "ok 7\n";
 
 unlink $tmpf2;
 unlink $tmpf;
+
+exit 0;

@@ -1,6 +1,8 @@
 use strict;
 use Acme::EyeDrops qw(sightly regex_eval_sightly);
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..45\n";
 
 my $tmpf = 'bill.tmp';
@@ -195,7 +197,8 @@ $nprog = $lines[0] . $fchar;
 $nprog eq $sightlystr or print "not ";
 print "ok 45\n";
 
-exit 0;
-
 # --------------------------------------------------
+
 unlink $tmpf;
+
+exit 0;

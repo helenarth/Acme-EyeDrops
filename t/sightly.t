@@ -3,6 +3,8 @@ use Acme::EyeDrops qw(sightly get_eye_string make_siertri);
 
 # --------------------------------------------------
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..35\n";
 
 my $camelstr = get_eye_string('camel');
@@ -268,3 +270,4 @@ print "ok 35\n";
 unlink $tmpf;
 unlink $tmpf2;
 
+exit 0;

@@ -3,6 +3,8 @@ use Acme::EyeDrops qw(sightly get_eye_string);
 
 # --------------------------------------------------
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..6\n";
 
 my $camelstr = get_eye_string('camel');
@@ -48,3 +50,5 @@ print "ok 6\n";
 # --------------------------------------------------
 
 unlink $tmpf;
+
+exit 0;

@@ -30,6 +30,8 @@ Options:
   -x bordergap    Border gap.
   -y borderwidth  Border width.
   -i              Invert shape.
+  -R              Remove newlines from source text.
+  -T              Add trailing spaces to output shape.
   -n gap          Indent shape gap spaces.
   -e              Reflect shape.
   -d fact         Reduce shape by a factor of fact.
@@ -89,12 +91,14 @@ my %optarg = (
    y => 'BorderWidth',
    z => 'SourceString',
    E => 'TrapEvalDie',
+   R => 'RemoveNewlines',
+   T => 'TrailingSpaces',
    W => 'TrapWarn',
 );
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbeiklmprtEWa:c:d:f:g:n:o:s:u:U:v:w:x:y:z:", \%option)
+Getopt::Std::getopts("hbeiklmprtERTWa:c:d:f:g:n:o:s:u:U:v:w:x:y:z:", \%option)
    or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);

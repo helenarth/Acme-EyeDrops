@@ -1,9 +1,11 @@
 use strict;
-use Acme::EyeDrops qw(sightly get_eye_string pour_text);
+use Acme::EyeDrops qw(sightly hjoin_shapes get_eye_string pour_text);
 
 # --------------------------------------------------
 
-print "1..29\n";
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
+print "1..30\n";
 
 my $snow = get_eye_string('snow');
 
@@ -151,3 +153,13 @@ $p = sightly( { SourceString  => 'knob',
                 TextFiller    => '#' } );
 $p eq "knob\n" or print "not ";
 print "ok 29\n";
+
+# -------------------------------------------------
+
+$p = hjoin_shapes(2, "##\n###\n", "#\n##\n###\n");
+$p eq "##   #\n###  ##\n     ###\n" or print "not ";
+print "ok 30\n";
+
+# -------------------------------------------------
+
+exit 0;

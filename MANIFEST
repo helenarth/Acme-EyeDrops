@@ -11,6 +11,8 @@ lib/Acme/alien.eye
 lib/Acme/baghdad.eye
 lib/Acme/beer.eye
 lib/Acme/bleach.eye
+lib/Acme/bottle.eye
+lib/Acme/bottle2.eye
 lib/Acme/buffy.eye
 lib/Acme/buffy2.eye
 lib/Acme/buffy3.eye
@@ -74,6 +76,7 @@ t/reshape.t
 t/sightly.t
 t/sightly2.t
 t/text.t
+t/vshape.t
 demo/sightly.pl
 demo/hellotest.pl
 demo/helloworld.pl

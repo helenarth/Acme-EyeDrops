@@ -1,6 +1,8 @@
 use strict;
 use Acme::EyeDrops qw(sightly);
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..44\n";
 
 my $tmpf = 'bill.tmp';
@@ -96,3 +98,5 @@ do_one_empty_limit(41, "############\n");
 # -----------------------------------------------------
 
 unlink $tmpf;
+
+exit 0;

@@ -3,6 +3,8 @@ use Acme::EyeDrops qw(ascii_to_sightly sightly_to_ascii
                       get_eye_string make_siertri make_triangle
                       pour_sightly);
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..16\n";
 
 my $t1 = 'abcdefghijklmnopqrstuvwxyz';
@@ -96,3 +98,5 @@ print "ok 15\n";
 $shape =~ tr/!-~/#/;
 $shape eq $trianglestr or print "not ";
 print "ok 16\n";
+
+exit 0;

@@ -3,6 +3,8 @@ use Acme::EyeDrops qw(sightly get_eye_string reflect_shape);
 
 # -------------------------------------------------
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 print "1..16\n";
 
 my $camelstr = get_eye_string('camel');
@@ -149,9 +151,12 @@ print "ok 14\n";
 $outstr =~ tr/!-~/#/;
 $outstr eq $buffyprogstr and print "not ";
 print "ok 15\n";
+$outstr =~ s/ +$//mg;
 $outstr eq $buffymirrorstr or print "not ";
 print "ok 16\n";
 
 # -------------------------------------------------
 
 unlink $tmpf;
+
+exit 0;

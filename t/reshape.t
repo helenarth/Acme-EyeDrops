@@ -3,7 +3,9 @@ use Acme::EyeDrops qw(sightly get_eye_string);
 
 # -------------------------------------------------
 
-print "1..24\n";
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
+print "1..27\n";
 
 my $camelstr = get_eye_string('camel');
 my $tmpf = 'bill.tmp';
@@ -67,6 +69,26 @@ print "ok 9\n";
 
 # -------------------------------------------------
 
+$rotprog = sightly({ Shape          => 'camel',
+                     SourceFile     => 'demo/helloworld.pl',
+                     Rotate         => 90,
+                     TrailingSpaces => 1,
+                     Regex          => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $rotprog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 10\n";
+$outstr eq "hello world\n" or print "not ";
+print "ok 11\n";
+$rotprog =~ tr/!-~/#/;
+$rotprog eq $camelstr and print "not ";
+print "ok 12\n";
+
+# -------------------------------------------------
+
 $prog = sightly({ ShapeString   => $rotprog,
                   SourceFile    => 'demo/helloworld.pl',
                   Rotate        => 270,
@@ -77,12 +99,12 @@ close(TT);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 10\n";
+print "ok 13\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 11\n";
+print "ok 14\n";
 $prog =~ tr/!-~/#/;
 $prog eq $bigprog or print "not ";
-print "ok 12\n";
+print "ok 15\n";
 
 # -------------------------------------------------
 
@@ -97,12 +119,12 @@ close(TT);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 13\n";
+print "ok 16\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 14\n";
+print "ok 17\n";
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 15\n";
+print "ok 18\n";
 
 # -------------------------------------------------
 
@@ -118,12 +140,12 @@ close(TT);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 16\n";
+print "ok 19\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 17\n";
+print "ok 20\n";
 $prog =~ tr/!-~/#/;
 $prog eq $rotprog or print "not ";
-print "ok 18\n";
+print "ok 21\n";
 
 # -------------------------------------------------
 
@@ -137,12 +159,12 @@ close(TT);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 19\n";
+print "ok 22\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 20\n";
+print "ok 23\n";
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-print "ok 21\n";
+print "ok 24\n";
 
 # -------------------------------------------------
 
@@ -156,13 +178,15 @@ close(TT);
 $outstr = `$^X -w -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
-print "ok 22\n";
+print "ok 25\n";
 $outstr eq "hello world\n" or print "not ";
-print "ok 23\n";
+print "ok 26\n";
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
-print "ok 24\n";
+print "ok 27\n";
 
 # -------------------------------------------------
 
 unlink $tmpf;
+
+exit 0;

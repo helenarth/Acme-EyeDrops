@@ -1,6 +1,8 @@
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
 
+select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
+
 # Test program for module bug raised by Mark Puttman.
 
 sub build_file {
@@ -88,3 +90,5 @@ unlink $tmpf;
 # --------------------------------------------------
 
 chdir('..') or die "chdir: $!";
+
+exit 0;
