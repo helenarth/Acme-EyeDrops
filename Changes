@@ -261,3 +261,8 @@ Revision history for Perl extension EyeDrops
 	- new function: get_eye_string
 	- documentation: make_triangle, make_siertri, make_banner
 	- convert.t, sightly.t: new test cases added
+
+1.33	Sat May 3 11:19:27 2003
+
+	- new shape: baghdad
+	- documentation: added 'Baghdad Bob' section

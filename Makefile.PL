@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
    NAME     => 'Acme::EyeDrops',
-   VERSION  => '1.32',
+   VERSION  => '1.33',
    PL_FILES => {}
 );

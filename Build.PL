@@ -22,7 +22,7 @@ my $class = Module::Build->subclass(
 my $m = $class->new(
    module_name => 'Acme::EyeDrops',
    license => 'perl',
-   requires => {perl => '5.005_03' },
+   requires => { perl => '5.005' },
    build_requires => { 'Module::Build' => 0.17 }
 );
 $m->create_build_script;

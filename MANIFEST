@@ -8,6 +8,7 @@ lib/Acme/EyeDrops.pm
 lib/Acme/a.eye
 lib/Acme/acme.eye
 lib/Acme/alien.eye
+lib/Acme/baghdad.eye
 lib/Acme/beer.eye
 lib/Acme/bleach.eye
 lib/Acme/buffy.eye
