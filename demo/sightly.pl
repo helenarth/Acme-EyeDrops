@@ -24,6 +24,8 @@ Options:
   -x bordergap    Border gap.
   -y borderwidth  Border width.
   -i              Invert shape.
+  -n gap          Indent shape gap spaces.
+  -e              Reflect shape.
   -b              Binary file.
   -w width        Width.
   -l              List available shapes.
@@ -57,9 +59,11 @@ sub list_shapes {
 my %optarg = (
    b => 'Binary',
    c => 'BannerString',
+   e => 'Reflect',
    f => 'SourceFile',
    g => 'Gap',
    i => 'Invert',
+   n => 'Indent',
    o => 'Rotate',
    p => 'Print',
    r => 'Regex',
@@ -74,7 +78,7 @@ my %optarg = (
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbilprtuc:f:g:o:s:w:x:y:z:", \%option) or usage();
+Getopt::Std::getopts("hbeilprtuc:f:g:n:o:s:w:x:y:z:", \%option) or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);
 $option{z} =~ s#\\n#\n#g if $option{z};

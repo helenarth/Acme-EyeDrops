@@ -11,10 +11,11 @@ require Exporter;
                 regex_binmode_print_sightly
                 clean_binmode_print_sightly
                 get_builtin_shapes get_eye_shapes
-                border_shape invert_shape rotate_shape
+                border_shape invert_shape
+                reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -439,25 +440,33 @@ sub pour_sightly {
 # -----------------------------------------------------------------
 # This section is a little bit experimental.
 
+# Put a border of $fillc around shape defined by $rarr.
+sub _border {
+   my ($rarr, $width, $fillc, $left, $right, $top, $bottom) = @_;
+   my $lfill = $fillc x $left; my $rfill = $fillc x $right;
+   for my $l (@{$rarr}) { $l = $lfill . $l . $rfill }
+   my $line = $fillc x ($width + $left + $right);
+   unshift(@{$rarr}, ($line) x $top);
+   push(@{$rarr}, ($line) x $bottom);
+}
+
 # Put a border around a shape.
 sub border_shape {
-   my ($tlines, $gap, $width) = @_;
+   my ($tlines, $gap_left, $gap_right, $gap_top, $gap_bottom,
+       $width_left, $width_right, $width_top, $width_bottom) = @_;
    my @a = split(/\n/, $tlines);
    my $maxlen = 0;
    for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
    for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
                        if length($l) < $maxlen }
-   if ($gap) {
-      for my $l (@a) { $l = ' ' x $gap . $l . ' ' x $gap }
-      for my $i (1 .. $gap) { unshift(@a, ' ' x ($maxlen+2*$gap)) }
-      for my $i (1 .. $gap) { push(@a, ' ' x ($maxlen+2*$gap)) }
+   if ($gap_left or $gap_right or $gap_top or $gap_bottom) {
+      _border(\@a, $maxlen, ' ',
+         $gap_left, $gap_right, $gap_top, $gap_bottom);
    }
-   if ($width) {
-      for my $l (@a) { $l = '#' x $width . $l . '#' x $width }
-      for my $i (1 .. $width) { unshift(@a,
-                                  '#' x ($maxlen+2*$gap+2*$width)) }
-      for my $i (1 .. $width) { push(@a,
-                                   '#' x ($maxlen+2*$gap+2*$width)) }
+   $maxlen += $gap_left + $gap_right;
+   if ($width_left or $width_right or $width_top or $width_bottom) {
+      _border(\@a, $maxlen, '#',
+         $width_left, $width_right, $width_top, $width_bottom);
    }
    return join("\n", @a) . "\n";
 }
@@ -473,6 +482,18 @@ sub invert_shape {
    my $s = join("\n", @a) . "\n";
    $s =~ tr/ #/# /;
    return $s;
+}
+
+# Reflect shape
+sub reflect_shape {
+   my ($tlines) = @_;
+   my @a = split(/\n/, $tlines);
+   my $maxlen = 0;
+   for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
+   for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
+                       if length($l) < $maxlen }
+   for my $l (@a) { $l = reverse($l) }
+   return join("\n", @a) . "\n";
 }
 
 # Rotate shape clockwise: 90, 180 or 270 degrees
@@ -594,22 +615,33 @@ my %builtin_shapes = (
 );
 
 my %default_arg = (
-   Width         => 0,
-   Shape         => "",
-   ShapeString   => "",
-   SourceFile    => "",
-   SourceString  => "",
-   BannerString  => "",
-   Regex         => 0,
-   Print         => 0,
-   Binary        => 0,
-   Gap           => 0,
-   Rotate        => 0,
-   Invert        => 0,
-   BorderGap     => 0,
-   BorderWidth   => 0,
-   TrapEvalDie   => 0,
-   TrapWarn      => 0
+   Width             => 0,
+   Shape             => "",
+   ShapeString       => "",
+   SourceFile        => "",
+   SourceString      => "",
+   BannerString      => "",
+   Regex             => 0,
+   Print             => 0,
+   Binary            => 0,
+   Gap               => 0,
+   Rotate            => 0,
+   Reflect           => 0,
+   Invert            => 0,
+   Indent            => 0,
+   BorderGap         => 0,
+   BorderGapLeft     => 0,
+   BorderGapRight    => 0,
+   BorderGapTop      => 0,
+   BorderGapBottom   => 0,
+   BorderWidth       => 0,
+   BorderWidthLeft   => 0,
+   BorderWidthRight  => 0,
+   BorderWidthTop    => 0,
+   BorderWidthBottom => 0,
+   TrapEvalDie       => 0,
+   TrapWarn          => 0,
+   FillerVar         => []
 );
 
 sub get_builtin_shapes {
@@ -670,15 +702,46 @@ sub sightly {
          if $arg{Width} < 4;
       $shapestr = '#' x $arg{Width};
    }
-   if ($arg{Rotate}) {
-      $shapestr = rotate_shape($shapestr, $arg{Rotate});
-   }
-   if ($arg{Invert}) {
-      $shapestr = invert_shape($shapestr);
-   }
-   if ($arg{BorderGap} or $arg{BorderWidth}) {
-      $shapestr = border_shape($shapestr, $arg{BorderGap},
-                     $arg{BorderWidth});
+   if ($shapestr) {
+      if ($arg{Rotate}) {
+         $shapestr = rotate_shape($shapestr, $arg{Rotate});
+      }
+      if ($arg{Reflect}) {
+         $shapestr = reflect_shape($shapestr);
+      }
+      if ($arg{Invert}) {
+         $shapestr = invert_shape($shapestr);
+      }
+      if ($arg{BorderGap}       or $arg{BorderWidth}       or
+          $arg{BorderGapLeft}   or $arg{BorderWidthLeft}   or
+          $arg{BorderGapRight}  or $arg{BorderWidthRight}  or
+          $arg{BorderGapTop}    or $arg{BorderWidthTop}    or
+          $arg{BorderGapBottom} or $arg{BorderWidthBottom}) {
+         my $gapleft = $arg{BorderGap};
+         $gapleft = $arg{BorderGapLeft} if $arg{BorderGapLeft};
+         my $gapright = $arg{BorderGap};
+         $gapright = $arg{BorderGapRight} if $arg{BorderGapRight};
+         my $gaptop = $arg{BorderGap};
+         $gaptop = $arg{BorderGapTop} if $arg{BorderGapTop};
+         my $gapbottom = $arg{BorderGap};
+         $gapbottom = $arg{BorderGapBottom} if $arg{BorderGapBottom};
+         my $widthleft = $arg{BorderWidth};
+         $widthleft = $arg{BorderWidthLeft} if $arg{BorderWidthLeft};
+         my $widthright = $arg{BorderWidth};
+         $widthright = $arg{BorderWidthRight} if $arg{BorderWidthRight};
+         my $widthtop = $arg{BorderWidth};
+         $widthtop = $arg{BorderWidthTop} if $arg{BorderWidthTop};
+         my $widthbottom = $arg{BorderWidth};
+         $widthbottom = $arg{BorderWidthBottom}
+                           if $arg{BorderWidthBottom};
+         $shapestr = border_shape($shapestr,
+                      $gapleft,   $gapright,   $gaptop,   $gapbottom,
+                      $widthleft, $widthright, $widthtop, $widthbottom);
+      }
+      if ($arg{Indent}) {
+         my $s = ' ' x $arg{Indent};
+         $shapestr =~ s/^/$s/mg;
+      }
    }
 
    my $sightlystr = "";
@@ -704,10 +767,17 @@ sub sightly {
 
    $shapestr or return $sightlystr;
 
-   # Non-rigourous check for END block.
-   my @fill = ($arg{SourceString} =~ /^\s*END\b/m) ?
-      ( '$:', '$~', '$^' ) :
-      ( '$:', '$~', '$^' , '$/', '$_', '$,', '$\\' );
+   my @fill = ();
+   if (@{$arg{FillerVar}}) {
+      @fill = @{$arg{FillerVar}};
+   } else {
+      # Non-rigourous check for module (package) or END block.
+      @fill = ( '$:', '$~', '$^' , '$/', '$_', '$,', '$\\' );
+      my $danger = 0;
+      $danger = 1 if $arg{SourceString} =~ /^\s*END\b/m;
+      $danger = 1 if $arg{SourceString} =~ /^\s*package\b/m;
+      $danger and @fill = ( '$:', '$~', '$^' );
+   }
 
    return pour_sightly($shapestr, $sightlystr, $arg{Gap}, \@fill)
       unless ($arg{TrapEvalDie} or $arg{TrapWarn});
@@ -858,7 +928,7 @@ just by glancing at the code.
 
 You can convert Perl 5 programs to Perl 6 simply by arranging
 for them to impersonate the Perl 6 maestros,
-Larry Wall and Damian Conway:
+I<Larry Wall> and I<Damian Conway>:
 
     print sightly( { Shape       => 'larry,damian',
                      Gap         => 2,
@@ -1351,7 +1421,7 @@ the original because its characters are bigger and easier to read:
             '.'^"\~";$~=              '@'|'('
                ;$^=')'^                "\[";
 
-Let's get more ambitious and create a big JAPH.
+Let's get more ambitious and create a big self-printing JAPH.
 
     my $src = <<'PROG';
     open 0;
@@ -1383,22 +1453,64 @@ is not reentrant. In this case, we must resort to:
 
 which runs the generated sightly program via C<eval> instead.
 
-EyeDrops can also convert plain text:
+To produce a JAPH that resembles the original
+I<Just another Perl hacker,> aka I<Randal L Schwartz>, try this:
 
-    print sightly({Shape        => 'spoon',
-                   SourceString => "Ankur will get the wooden spoon!\n",
-                   Regex        => 1,
-                   Print        => 1 } );
+    print sightly({ Shape        => 'merlyn',
+                    SourceString => 'Just another Perl hacker,',
+                    Regex        => 1,
+                    Print        => 1 } );
 
-In this example, the generated program will print the C<SourceString>
-above. Or with a banner (Linux only):
+producing:
 
-    print sightly({Shape        => 'banner',
-                   SourceString => "Eric is supremely unorthodox!\n",
-                   BannerString => "Eric is supremely unorthodox!",
-                   Width        => 70,
-                   Regex        => 1,
-                   Print        => 1 } );
+                       ''=~('('.'?'.'{'.('['
+                    ^'+').('['^')').('`'|')').(
+                 '`'|'.').('['^'/').'"'.('`'^'*')
+              .('['                          ^'.')
+            .('['                              ^'(')
+           .('['                                ^'/')
+         .('{'^                                 '[').(
+        "\`"|                                    '!').(
+       '`'|                                      '.').(
+      '`'|          (                (           '/'))).
+    ('['            ^              ( (          '/'))).(
+   '`'|           (              (  (         ( '('))))).
+  ('`'|         (              (    (        (  '%'))))).
+  ('['^       (              (    (        (    ')'))))).
+  ('{'^      '[')        .(      (      ((      ('{'))))^
+  '+').     (    '`'|'%'       ).("\["^         ')').('`'
+ |',').('{'^                                    '[').('`'
+ |'(').('`'                                      |"\!").(
+ '`'|'#').(        ('`')|             '+').(     '`'|'%')
+ .('['^')')     .((      ','       )).      '"'   .('}').
+ "\)");$:=         ('.')^       (     "\~");      $~='@'|
+ ('(');$^=       (( ')'  ))     ^   (( '['  ))     ;($/)=
+  '`'|'.';       $_='('^'}'     ;   $,='`'|'!'      ;($\)
+  =(')')^                       (                    '}'
+   );($:)                       =                    '.'
+    ^'~';                     ( ( (                  $~)
+    )  )=                    (  (  (                 '@'
+    )   )                   ) | ( ( (               '('
+    )   )                   ) ; ( ( (               $^
+    )   )                                          ) =
+     (  (                                         ( (
+      ( (                                         ( (
+       (               ')')))))))))^'['     ;    # ;
+        #        ;    #                ;    #    ;#
+        ;        #     ;              #    ;    #;
+        #        ;      #;          #;    #    ;
+        #        ;        #       ;#      ;   #
+        ;        #          ;#;#;        #   ;
+         #        ;                     #   ;
+         #        ;                    #   ;
+          #        ;                      #
+           ;       #                     ;
+            #      ;                    #
+             ;      #                  ;
+              #                      ;
+                #                  ;
+                  #;#           ;#
+                      ;#;#;#;#;
 
 But wait, there's more. You can encode binary files too.
 
@@ -1714,13 +1826,18 @@ Returns a list of the I<eye> shapes. An eye shape is just a
 file with a F<.eye> extension residing in the same directory
 as F<EyeDrops.pm>.
 
-=item border_shape SHAPESTRING GAP WIDTH
+=item border_shape SHAPESTRING GAP_LEFT GAP_RIGHT GAP_TOP GAP_BOTTOM
+WIDTH_LEFT WIDTH_RIGHT WIDTH_TOP WIDTH_BOTTOM
 
 Put a border around a shape.
 
 =item invert_shape SHAPESTRING
 
 Invert a shape.
+
+=item reflect_shape SHAPESTRING
+
+Reflect a shape.
 
 =item rotate_shape SHAPESTRING DEGREES
 
@@ -1772,12 +1889,24 @@ The attributes that HASHREF may contain are:
 
     Rotate        Rotate the shape clockwise 90, 180 or 270 degrees.
 
+    Reflect       Reflect the shape.
+
     Invert        Invert the shape.
+
+    Indent        Indent the shape. The number of spaces to indent.
 
     BorderGap     Put a border around the shape. Gap between border
                   and the shape.
 
+    BorderGapLeft,BorderGapRight,BorderGapTop,BorderGapBottom
+                  You can override BorderGap with one or more from
+                  the above.
+
     BorderWidth   Put a border around the shape. Width of border.
+
+    BorderWidthLeft,BorderWidthRight,BorderWidthTop,BorderWidthBottom
+                  You can override BorderWidth with one or more from
+                  the above.
 
     Width         Ignored for .eye file shapes. For built-in shapes,
                   specifies the shape width in characters.
@@ -1795,6 +1924,11 @@ The attributes that HASHREF may contain are:
                   Use this option if generated program emits
                   'No such signal: SIGHUP at ...' when run with
                   warnings enabled.
+
+    FillerVar     Reference to a list of 'filler variables'.
+                  A filler variable is a Perl variable consisting
+                  of two characters: $ and a punctuation character.
+                  For example, FillerVar => [ '$:', '$^' ]
 
 =back
 
@@ -1823,12 +1957,13 @@ EyeDrops are:
 
     bleach      banner of "use Acme::Bleach;"
     buffy       banner of "Buffy"
-    camel       An animal
+    camel       dromedary (Camelus dromedarius, one hump)
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
     japh        JAPHs were invented by Randal L Schwartz in 1988
     larry       Larry Wall's face
     larry2      Caricature of Larry contributed by Ryan King
+    merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
     spoon       a wooden spoon
     uml         a UML diagram
@@ -1858,6 +1993,10 @@ problems for non-trivial programs. A C<die> statement or
 an C<INIT> block, for instance, may cause trouble.
 If desperate, give the C<TrapEvalDie> and C<TrapWarn>
 attributes a go, and see if they fix the problem.
+
+If the program to be converted uses the Perl format variables
+$:, $~ or $^ you may need to explicitly set the FillerVar
+attribute to a Perl variable/s not used by the program.
 
 Linux F</usr/games/banner> does not support the following characters:
 

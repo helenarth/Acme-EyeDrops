@@ -6,6 +6,7 @@ Revision history for Perl extension EyeDrops
 
 0.02	Tue Sep 25 18:05:02 2001
 
+	- updated version number :-)
 	- improved documentation
 	- new functions: get_builtin_shapes, get_eye_shapes
 	- extra tests added
@@ -45,3 +46,18 @@ Revision history for Perl extension EyeDrops
 
 	- new shape from Ryan King: larry2
 	- minor improvements to documentation
+
+1.02	Sun Dec 9 17:11:42 2001
+
+	- minor improvements to documentation
+	- minor enhancements to demo/sightly.pl
+	- left-justified spoon.eye
+	- changed parameters to border_shape function
+	- new attributes: BorderGapLeft, BorderGapRight etc.
+	-                 BorderWidthLeft, BorderWidthRight etc.
+	- new attribute: Indent
+	- new attribute: Reflect
+	- new attribute: FillerVar
+	- new shape: merlyn
+	- fixed module bug raised by Mark Puttnam
+	- added new test program tmodule.t to test Mark's bug.
