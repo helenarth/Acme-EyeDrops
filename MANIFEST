@@ -41,6 +41,7 @@ lib/Acme/riding.eye
 lib/Acme/santa.eye
 lib/Acme/schwern.eye
 lib/Acme/simon.eye
+lib/Acme/snow.eye
 lib/Acme/spoon.eye
 lib/Acme/tonick.eye
 lib/Acme/tpr.eye
@@ -64,3 +65,4 @@ t/sightly2.t
 demo/sightly.pl
 demo/helloworld.pl
 demo/examples.pl
+demo/gentable.pl
