@@ -6,9 +6,13 @@ lib/Acme/EyeDrops.pm
 lib/Acme/bleach.eye
 lib/Acme/buffy.eye
 lib/Acme/buffy2.eye
+lib/Acme/buffy3.eye
 lib/Acme/camel.eye
+lib/Acme/camel2.eye
+lib/Acme/camel3.eye
 lib/Acme/cricket.eye
 lib/Acme/damian.eye
+lib/Acme/dipsy.eye
 lib/Acme/golfer.eye
 lib/Acme/japh.eye
 lib/Acme/larry.eye

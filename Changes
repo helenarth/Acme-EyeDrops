@@ -66,3 +66,12 @@ Revision history for Perl extension EyeDrops
 
 	- minor improvements to documentation
 	- new shapes: golfer, santa and buffy2
+
+1.04	Sat Jan 5 14:15:15 2002
+
+	- minor improvements to documentation
+	- minor fixes to shape: buffy2
+	- new shape: camel2 (use.perl.org camel)
+	- new shape: camel3 (London.pm bactrian camel at London zoo)
+	- new shape: dipsy (London.pm infobot is called dipsy)
+	- new shape: buffy3 (buffy riding a pony)

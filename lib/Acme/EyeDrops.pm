@@ -15,7 +15,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1955,12 +1955,16 @@ or with a string, for example:
 The shapes (F<.eye> files) distributed with this version of
 EyeDrops are:
 
-    bleach      banner of "use Acme::Bleach;"
-    buffy       banner of "Buffy"
+    bleach      Banner of "use Acme::Bleach;"
+    buffy       Banner of "Buffy"
     buffy2      Buffy's angelic face
-    camel       dromedary (Camelus dromedarius, one hump)
+    buffy3      Buffy riding a pony
+    camel       Dromedary (Camelus dromedarius, one hump)
+    camel2      Another dromedary (from use.perl.org)
+    camel3      London.pm's bactrian camel at London zoo
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
+    dipsy       Teletubbies Dipsy (also london.pm infobot name)
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
     larry       Larry Wall's face
@@ -1968,9 +1972,9 @@ EyeDrops are:
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
     santa       Santa Claus playing golf
-    spoon       a wooden spoon
-    uml         a UML diagram
-    window      a window
+    spoon       A wooden spoon
+    uml         A UML diagram
+    window      A window
 
 It is easy to create your own shapes. For some ideas on shapes,
 point your search engine at I<Ascii Art> or I<Clip Art>.
