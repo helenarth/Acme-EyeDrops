@@ -13,7 +13,7 @@ require Exporter;
                 get_builtin_shapes get_eye_shapes
                 pour_sightly sightly);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -94,7 +94,8 @@ $C[125] = q#'\\\\'.'}'#;
 # 128..255
 for my $i (128..255) {
    $C[$i] = join('.', q#'\\\\'#,
-               map($C[$_], unpack('C*', sprintf('%o', $i))));
+      # map($C[$_], unpack('C*', sprintf('%o', $i))));
+      $C[120], map($C[$_], unpack('C*', sprintf('%x', $i))));
 }
 
 sub ascii_to_sightly {
@@ -138,12 +139,17 @@ sub clean_eval_sightly {
 # Return the largest number of tokens with combined length
 # less than $slen.
 sub _guess_ntok {
-   my ($rtok, $sidx, $slen) = @_;
+   my ($rtok, $sidx, $slen, $rexact) = @_;
    my $eidx = $sidx + $slen - 1;
-   my $tlen = 0; my $ntok = 0;
+   my $tlen = 0; my $ntok = 0; ${$rexact} = 0;
    for my $i ($sidx .. $eidx) {
       $tlen += length($rtok->[$i]);
-      return $ntok if $tlen > $slen;
+      if ($tlen == $slen) {
+         ${$rexact} = 1;
+         return $ntok+1;
+      } elsif ($tlen > $slen) {
+         return $ntok;
+      }
       ++$ntok;
    }
    return $slen;
@@ -165,7 +171,7 @@ sub _pour_line {
       $tlen += length($rtok->[$i]);
       if ($rtok->[$i] eq '.') { $idot = $i }
       if ($rtok->[$i] eq '(') { $iparen = $i }
-      if ($rtok->[$i] eq '$:') { $idollar = $i }
+      if (substr($rtok->[$i], 0, 1) eq '$') { $idollar = $i }
       if (substr($rtok->[$i], 0, 1) =~ /['"]/) {
          $iquote = $i;
          $i3quote = $i if length($rtok->[$i]) == 3;
@@ -194,7 +200,8 @@ sub _pour_line {
    }
 
    my $i2 = int($diff/2);
-   my $r2 = $diff % 2;
+   # my $r2 = $diff % 2;
+   my $r2 = $diff & 1;
    if ($r2 == 0 and ($iquote >= 0 or $idollar >= 0)) {
       $iquote = $idollar if $iquote < 0;
       my $istr = '(' x $i2 . $rtok->[$iquote] . ')' x $i2;
@@ -243,7 +250,19 @@ sub _pour_line {
 sub pour_sightly {
    my ($tlines, $prog, $gap) = @_;
 
-   my @ttlines = split(/\n/, $tlines);
+   $tlines =~ s/\s+$/\n/;
+   my @tnlines = ();
+   for my $line (split(/\n/, $tlines)) {
+      if ($line =~ /^\s*$/) {
+         push(@tnlines, undef); next;
+      }
+      my @oneline = ();
+      my @ttok = $line =~ / +|[^ ]+/g;
+      push(@oneline, 0) if substr($ttok[0], 0, 1) ne ' ';
+      push(@oneline, map { length } @ttok);
+      push(@tnlines, [ @oneline ] );
+   }
+
    my $outstr = "";
    my @ptok = ();
    my $istart = 0;
@@ -270,32 +289,48 @@ sub pour_sightly {
    }
 
    my $iendprog = scalar(@ptok);
+   # Beware with these filler values.
+   # See "Trouble: wipe out last bit" comment below.
+   # I suppose an END block might cause trouble since
+   # it is executed after this code (?).
+   # For more variety may try ($/ $\ $,) but for now stick
+   # just to 'format' variables ($: $~ $^) since a format
+   # in an END block is considered unlikely.
+   # Oops, setting $^ or $~ (but not $:) resets $@ !!
+   # (this looks like a Perl bug to me).
+   # So stick with $: and $_ for now.
    my @filler = ( ';', '$:', '=',
                   q#'"'#, '|', q^'#'^,
-                  ';', '$:', '=',
+                  ';', '$_', '=',
                   q#'?'#, '&', q#'!'#,
                   ';', '$:', '=',
-                  q#'*'#, '|', q#'~'#,
+                  q#']'#, '|', q#'{'#,
+                  ';', '$_', '=',
+                  q#'*'#, '&', q#'~'#,
                   ';', '$:', '=',
-                  q#'%'#, '&', q#'$'# );
-   my $nfiller = int(length($tlines)/42);  # not accurate
+                  q#'}'#, '|', q#'@'#,
+                  ';', '$_', '=',
+                  q#':'#, '&', q#'='# );
+   my $nfiller = int(length($tlines)/64);  # not accurate
    $nfiller = 2 if $nfiller < 2;
    for (0 .. $nfiller) { push(@ptok, @filler) }
 
    my $sidx = 0;
    my $nshape = 0;
+   my $exactfit;
    while (1) {
       my $linenum = 0;
-      for my $line (@ttlines) {
+      for my $rline (@tnlines) {
          ++$linenum;
-         my @ttok = $line =~ / +|[^ ]+/g;
-         for my $it (0..$#ttok) {
-            my $t = $ttok[$it];
-            if (substr($t, 0, 1) eq ' ') {
-               $outstr .= $t;
-               next;
+         unless ($rline) {
+            $outstr .= "\n"; next;
+         }
+         for my $it (0 .. $#{$rline}) {
+            # if ($it % 2 == 0) {
+            unless ($it & 1) {
+               $outstr .= ' ' x $rline->[$it]; next;
             }
-            my $tlen = length($t);
+            my $tlen = $rline->[$it];
             my $plen = length($ptok[$sidx]);
             if ($plen == $tlen) {
                $outstr .= $ptok[$sidx++];
@@ -305,37 +340,42 @@ sub pour_sightly {
                splice(@ptok, $sidx+1, 0, @itok);
                $iendprog += $tlen;
             } else {
-               my $n = _guess_ntok(\@ptok, $sidx, $tlen);
-               my $str = "";
-               while ($n > 0) {
-                  if (_pour_line(\@ptok, $sidx, $n, $tlen, \$str)) {
-                     # warn "line $linenum: ok, n=$n\n";
-                     last;
-                  } else {
-                     # warn "line $linenum: failed, n=$n\n";
-                     --$n;
-                  }
-               }
-               if ($n == 0) {
-                  # warn "line $linenum: failed\n";
-                  # $outstr .= $ptok[$sidx++];
-                  my $zlen = 0;
-                  while (1) {
-                     last if (substr($ptok[$sidx], 0, 1) =~ /['"]/);
-                     last if $ptok[$sidx] eq '$:';
-                     $outstr .= $ptok[$sidx];
-                     $zlen += length($ptok[$sidx]);
-                     ++$sidx;
-                  }
-                  die "oops ($zlen >= $tlen)" if $zlen >= $tlen;
-                  my $nleft = $tlen - $zlen;
-                  $outstr .= '(' x $nleft;
-                  my @itok = (')') x $nleft;
-                  splice(@ptok, $sidx+1, 0, @itok);
-                  $iendprog += $nleft;
-               } else {
-                  $outstr .= $str;
+               my $n = _guess_ntok(\@ptok, $sidx, $tlen, \$exactfit);
+               if ($exactfit) {
+                  $outstr .= join("", @ptok[$sidx .. $sidx+$n-1]);
                   $sidx += $n;
+               } else {
+                  my $str = "";
+                  while ($n > 0) {
+                     if (_pour_line(\@ptok,$sidx,$n,$tlen,\$str)) {
+                        # warn "line $linenum: ok, n=$n\n";
+                        last;
+                     } else {
+                        # warn "line $linenum: failed, n=$n\n";
+                        --$n;
+                     }
+                  }
+                  if ($n == 0) {
+                     # warn "line $linenum: failed\n";
+                     # $outstr .= $ptok[$sidx++];
+                     my $zlen = 0;
+                     while (1) {
+                        last if substr($ptok[$sidx], 0, 1) =~ /['"]/;
+                        last if substr($ptok[$sidx], 0, 1) eq '$';
+                        $outstr .= $ptok[$sidx];
+                        $zlen += length($ptok[$sidx]);
+                        ++$sidx;
+                     }
+                     die "oops ($zlen >= $tlen)" if $zlen >= $tlen;
+                     my $nleft = $tlen - $zlen;
+                     $outstr .= '(' x $nleft;
+                     my @itok = (')') x $nleft;
+                     splice(@ptok, $sidx+1, 0, @itok);
+                     $iendprog += $nleft;
+                  } else {
+                     $outstr .= $str;
+                     $sidx += $n;
+                  }
                }
             }
          }
@@ -347,7 +387,7 @@ sub pour_sightly {
       $outstr .= "\n" x $gap;
    }
 
-   $outstr =~ s/\s+$/\n/;
+   # $outstr =~ s/\s+$/\n/;
    if ($sidx != $iendprog) {
       my $lastchar = substr($outstr, -2, 1);
       if ($lastchar eq '|' or $lastchar eq '&') {
@@ -377,7 +417,8 @@ sub pour_sightly {
 sub make_triangle {
    my $rarg = shift;
    my $width = $rarg->{Width};
-   ++$width if $width % 2 == 0;
+   # ++$width if $width % 2 == 0;
+   ++$width unless $width & 1;
    $width < 9 and $width = 9;
    my $height = int($width/2) + 1;
    my $str = ""; my $ns = $height; my $nf = 1;
@@ -462,7 +503,9 @@ my %default_arg = (
    Regex         => 0,
    Print         => 0,
    Binary        => 0,
-   Gap           => 0
+   Gap           => 0,
+   TrapEvalDie   => 0,
+   TrapWarn      => 0
 );
 
 sub get_builtin_shapes {
@@ -546,7 +589,22 @@ sub sightly {
    }
 
    $shapestr or return $sightlystr;
-   pour_sightly($shapestr, $sightlystr, $arg{Gap});
+   return pour_sightly($shapestr, $sightlystr, $arg{Gap})
+      unless ($arg{TrapEvalDie} or $arg{TrapWarn});
+
+   if ($arg{TrapEvalDie}) {
+      if ($arg{TrapWarn}) {
+         return 'local $SIG{__WARN__}=sub{};' .
+            pour_sightly($shapestr, $sightlystr, $arg{Gap}) .
+            "\n\n\n;die \$\@ if \$\@\n";
+      } else {
+         return pour_sightly($shapestr, $sightlystr, $arg{Gap}) .
+            "\n\n\n;die \$\@ if \$\@\n";
+      }
+   } else {
+      return 'local $SIG{__WARN__}=sub{};' .
+         pour_sightly($shapestr, $sightlystr, $arg{Gap});
+   }
 }
 
 1;
@@ -643,36 +701,35 @@ producing this improved visual representation:
  (                             (      (                             (
  '`'))))))))))))))))))))|"\,").(      '`'|'/').('{'^'[').('['^"\,").(
 
-
- '`'|'/').('['^')').('`'|',').('`'|'$').('\\').
- '\\'.('`'|'.').'\\'.'"'.';'.('!'^'+').'"'.'}'.
- ')');$:='"'|'#';$:='?'&'!';$:='*'|'~';$:="\%"&
- '$';                  $:                  ='"'
- |'#'                  ;(                  $:)=
- '?'&                  ((                  '!')
- );$:                  =(                  '*')
- |'~'                  ;(                  $:)=
- '%'&                  ((                  '$')
- );$:                  =(                  '"')
- |'#'                  ;(                  $:)=
- '?'&                  ((                  '!')
- );$:                  =(                  '*')
- |'~'                  ;(                  $:)=
- '%'&'$';$:='"'|'#';$:='?'&'!';$:='*'|('~');$:=
- '%'&                  ((                  '$')
- );$:                  =(                  '"')
- |'#'                  ;(                  $:)=
- '?'&                  ((                  '!')
- );$:                  =(                  '*')
- |'~'                  ;(                  $:)=
- '%'&                  ((                  '$')
- );$:                  =(                  '"')
- |'#'                  ;(                  $:)=
- '?'&                  ((                  '!')
- );$:                  =(                  '*')
- |'~';$:='%'&'$';$:='"'|'#';$:='?'&'!';$:="\*"|
- '~';$:='%'&'$';$:='"'|'#';$:='?'&'!';$:=('*')|
- '~';$:='%'&'$';$:='"'|'#';$:='?'&'!';$:=('*');
+ '`'|'/').('['^')').('`'|',').('`'|'$').'\\'.'\\'
+ .('`'|'.').'\\'.'"'.';'.('!'^'+').'"'.'}'."\)");
+ $:='"'|'#';$~='?'&'!';$,=']'|'{';$\='*'&"\~";$^=
+ "\}"|                  ((                  '@'))
+ ;($/)                  =(                  ':')&
+ "\=";                  $:                  ='"'|
+ "\#";                  $~                  ='?'&
+ "\!";                  $,                  =']'|
+ "\{";                  $\                  ='*'&
+ "\~";                  $^                  ='}'|
+ "\@";                  $/                  =':'&
+ "\=";                  $:                  ='"'|
+ "\#";                  $~                  ='?'&
+ "\!";                  $,                  =']'|
+ '{';$\='*'&'~';$^='}'|'@';$/=':'&'=';$:='"'|'#';
+ ($~)=                  ((                  '?'))
+ &'!';                  $,                  =']'|
+ "\{";                  $\                  ='*'&
+ "\~";                  $^                  ='}'|
+ "\@";                  $/                  =':'&
+ "\=";                  $:                  ='"'|
+ "\#";                  $~                  ='?'&
+ "\!";                  $,                  =']'|
+ "\{";                  $\                  ='*'&
+ "\~";                  $^                  ='}'|
+ "\@";                  $/                  =':'&
+ '=';$:='"'|'#';$~='?'&'!';$,=']'|'{';$\='*'&'~';
+ $^='}'|'@';$/=':'&'=';$:='"'|'#';$~='?'&"\!";$,=
+ ']'|'{';$\='*'&'~';$^='}'|'@';$/=':'&'=';$:='"';
 
 This is a Visual Programming breakthrough in that you can tell
 that it is a Windows program and see its UML structure too,
@@ -1162,9 +1219,9 @@ returns a properly shaped program string.
 The attributes that HASHREF may contain are:
 
     Shape         Describes the shape you want.
-                  First, a built-in shape is looked for. Next a
-                  I<eye> shape (.eye file in the same directory
-                  as EyeDrops.pm) is looked for. Finally a file
+                  First, a built-in shape is looked for. Next, a
+                  'eye' shape (.eye file in the same directory
+                  as EyeDrops.pm) is looked for. Finally, a file
                   name is looked for.
 
     ShapeString   Describes the shape you want.
@@ -1190,6 +1247,20 @@ The attributes that HASHREF may contain are:
     Width         Ignored for .eye file shapes. For built-in shapes,
                   specifies the shape width in characters.
 
+    TrapEvalDie   Boolean.
+                  Add closing 'die $@ if $@' to generated program.
+                  When an eval code block calls the die function,
+                  the program does not die; instead the die string
+                  is returned to eval in $@. Using this flag allows
+                  you to convert programs that call die.
+
+    TrapWarn      Boolean.
+                  Add leading 'local $SIG{__WARN__}=sub{};' to
+                  generated program. This shuts up some warnings.
+                  Use this option if generated program emits
+                  'No such signal: SIGHUP at ...' when run with
+                  warnings enabled.
+
 =back
 
 =head1 MIGRATION
@@ -1206,6 +1277,12 @@ You can eliminate all alphanumerics (via Regex => 1) only for
 small programs with simple I/O and no regular expressions.
 To convert complex programs, you must use Regex => 0, which
 emits a leading unsightly eval.
+
+The converted program runs inside an eval which may cause
+problems for non-trivial programs. A die statement or an
+INIT block, for instance, may cause trouble.
+If desperate, give the TrapEvalDie and TrapWarn attributes
+a go, and see if they fix the problem.
 
 =head1 AUTHOR
 

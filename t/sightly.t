@@ -78,7 +78,7 @@ print "ok 9\n";
 
 my $encodestr = qq#binmode(STDOUT);print eval '"'.\n\n\n#;
 $encodestr =~ tr/!-~/#/;
-$encodestr .= $camelstr x 6;
+$encodestr .= $camelstr x 5;
 $srcstr = join("", map {chr} 0..255);
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $srcstr,

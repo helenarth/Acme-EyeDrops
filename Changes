@@ -10,3 +10,15 @@ Revision history for Perl extension EyeDrops
 	- new functions: get_builtin_shapes, get_eye_shapes
 	- extra tests added
 
+0.03	Sun Sep 30 14:07:03 2001
+
+	- fixed die within eval with new TrapEvalDie attribute
+	- new test t/nasty.t added to test TrapEvalDie
+	- fixed SIG warnings with new TrapWarn attribute
+	- improved filler: added $_ to $:
+	- changed encoding from octal (%o) to hex (%x)
+	  for chars in range 128..255; this reduces binary
+	  encoding size
+	- minor performance improvements
+	- minor shape improvements
+

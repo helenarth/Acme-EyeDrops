@@ -21,7 +21,7 @@ Options:
                    banner (make banner from -c switch)
                    srcbanner (make banner from source)
   -f file       The file to be made sightly.
-  -t string     Specify a string instead of a file.
+  -z string     Specify a string instead of a file.
   -c string     String used with -s banner above.
   -p            Print instead of eval.
   -r            Insert sightly into a regex (instead of eval).
@@ -29,6 +29,8 @@ Options:
   -b            Binary file.
   -w width      Width.
   -l            List available shapes.
+  -t            Trap die within eval with 'die $@ if $@'
+  -u            Trap warnings with '$SIG{__WARN__}=sub{}'
 Examples:
   sightly.pl -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
@@ -62,16 +64,18 @@ my %optarg = (
    p => 'Print',
    r => 'Regex',
    s => 'Shape',
-   t => 'SourceString',
-   w => 'Width'
+   t => 'TrapEvalDie',
+   u => 'TrapWarn',
+   w => 'Width',
+   z => 'SourceString'
 );
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hblprc:f:g:s:t:w:", \%option) or usage();
+Getopt::Std::getopts("hblprtuc:f:g:s:w:z:", \%option) or usage();
 usage() if $option{h};
 $option{l} and list_shapes(),exit(0);
-$option{t} =~ s#\\n#\n#g if $option{t};
+$option{z} =~ s#\\n#\n#g if $option{z};
 for my $k (keys %option) {
    next unless $option{$k};
    exists($optarg{$k}) and $arg{$optarg{$k}} = $option{$k};
