@@ -39,11 +39,11 @@ PROG
 
 # This shows how to sightly-encode a binary file.
 # To decode, run the generated Perl program, redirecting STDOUT.
-# print sightly({ Shape       => 'camel,japh,camel',
+# print sightly({ Shape       => 'camel,mongers',
 #                 SourceFile  => 'sightly.pl',
 #                 Binary      => 1,
 #                 Print       => 1,
-#                 Gap         => 5 } );
+#                 Gap         => 3 } );
 
 # This example works on Linux only.
 # It uses /usr/games/banner to pour the original program into

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # sightly.pl.
- 
+
 use strict;
 use Getopt::Std ();
 use Acme::EyeDrops qw(sightly);
@@ -37,7 +37,7 @@ Examples:
      myprog.pl, but prettier and shaped like a camel.
   sightly -pr -s window -z "Bill Gates is a pest!\n" >bill.pl
      This creates bill.pl, a program that prints the above string.
-  sightly -g 5 -bps camel,japh,camel -f some_binary_file >eyesore
+  sightly -g 3 -bps camel,mongers -f some_binary_file >eyesore
      This creates eyesore, a sightly-encoded file.
      To decode it:   perl eyesore > f.tmp
      To check it worked: cmp f.tmp some_binary_file

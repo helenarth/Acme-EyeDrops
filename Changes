@@ -84,3 +84,13 @@ Revision history for Perl extension EyeDrops
 	- new shape: riding (banner of "riding")
 	- new shape: a (banner of "a")
 	- new shape: pony (banner of "Pony")
+
+1.06	Sun Feb 24 23:09:35 2002
+
+	- minor improvements to documentation
+	- minor code improvements
+	- minor fixes to shape: pony, buffy2
+	- new shape: london
+	- new shape: pony2
+	- new shape: eugene
+	- new shape: tpr

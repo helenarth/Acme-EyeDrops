@@ -15,7 +15,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -468,7 +468,7 @@ sub border_shape {
       _border(\@a, $maxlen, '#',
          $width_left, $width_right, $width_top, $width_bottom);
    }
-   return join("\n", @a) . "\n";
+   join("\n", @a, "");
 }
 
 # Invert shape (i.e. convert '#' to space and vice-versa).
@@ -479,9 +479,9 @@ sub invert_shape {
    for my $l (@a) { $maxlen = length($l) if length($l) > $maxlen }
    for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
                        if length($l) < $maxlen }
-   my $s = join("\n", @a) . "\n";
+   my $s = join("\n", @a, "");
    $s =~ tr/ #/# /;
-   return $s;
+   $s;
 }
 
 # Reflect shape
@@ -493,7 +493,7 @@ sub reflect_shape {
    for my $l (@a) { $l .= ' ' x ($maxlen - length($l))
                        if length($l) < $maxlen }
    for my $l (@a) { $l = reverse($l) }
-   return join("\n", @a) . "\n";
+   join("\n", @a, "");
 }
 
 # Rotate shape clockwise: 90, 180 or 270 degrees
@@ -502,7 +502,7 @@ sub rotate_shape {
    my ($tlines, $degrees) = @_;
    if ($degrees == 180) {
       my @a = reverse split(/\n/, $tlines);
-      return join("\n", @a) . "\n";
+      return join("\n", @a, "");
    }
    if ($degrees == 90) {
       my @a = split(/\n/, $tlines);
@@ -516,7 +516,7 @@ sub rotate_shape {
          for my $l (reverse @a) { $line .= substr($l, $i, 1) }
          push(@n, $line);
       }
-      return join("\n", @n) . "\n";
+      return join("\n", @n, "");
    }
    if ($degrees == 270) {
       my @a = split(/\n/, $tlines);
@@ -531,7 +531,7 @@ sub rotate_shape {
          for my $l (@a) { $line .= substr($l, $i, 1) }
          push(@n, $line);
       }
-      return join("\n", @n) . "\n";
+      return join("\n", @n, "");
    }
 }
 
@@ -547,7 +547,7 @@ sub make_triangle {
       $str .= ' ' x --$ns . '#' x $nf . "\n";
       $nf += 2;
    }
-   return $str;
+   $str;
 }
 
 # Linux /usr/games/banner can be used.
@@ -583,7 +583,7 @@ sub _make_banner {
    $str =~ s/ +$//mg;
    my $blen = length($str);
    warn "$len chars bannerised (bannerlen=$blen)\n";
-   return $str;
+   $str;
 }
 
 sub make_banner {
@@ -650,6 +650,7 @@ sub get_builtin_shapes {
 
 sub get_eye_shapes {
    my $dir = $this_dir ? $this_dir : '.';
+   local *DD;
    opendir(DD, $dir) or return ();
    my @eye = sort map { substr($_, 0, length($_)-4) }
                 grep { /\.eye$/ } readdir(DD);
@@ -668,6 +669,7 @@ sub sightly {
    }
 
    if ($arg{SourceFile}) {
+      local *SSS;
       open(SSS, $arg{SourceFile}) or
          die "open '$arg{SourceFile}': $!";
       binmode(SSS) if $arg{Binary};
@@ -690,6 +692,7 @@ sub sightly {
             } else {
                my $f = $s =~ m#[./]# ? $s :
                           $this_dir . $s . $sightly_suffix;
+               local *SSS;
                open(SSS, $f) or die "open '$f': $!";
                $shapestr .= <SSS>;
                close(SSS);
@@ -1452,6 +1455,8 @@ is not reentrant. In this case, we must resort to:
                    Regex        => 0 } );
 
 which runs the generated sightly program via C<eval> instead.
+If you want to use Regex => 1, ensure that the program to be
+converted does not use $_ and does not use any regular expressions.
 
 To produce a I<JAPH> that resembles the original
 I<Just another Perl hacker,> aka I<Randal L Schwartz>, try this:
@@ -1976,16 +1981,20 @@ EyeDrops are:
     cricket     Australia are world champions in this game
     damian      Damian Conway's face
     dipsy       Teletubbies Dipsy (also london.pm infobot name)
+    eugene      World's No. 1 Perl golfer, Eugene van der Pijll
     golfer      A golfer hitting a one iron
     japh        JAPHs were invented by Randal L Schwartz in 1988
     larry       Larry Wall's face
     larry2      Caricature of Larry contributed by Ryan King
+    london      Haiku "A Day in The Life of a London Perl Monger"
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
     pony        Horizontal banner of "Pony"
+    pony2       Picture of a Pony
     riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
     spoon       A wooden spoon
+    tpr         Vertical banner of "The Perl Review"
     uml         A UML diagram
     window      A window
 
@@ -1999,8 +2008,9 @@ can be included in future versions of EyeDrops.
 A really diabolical shape with lots of single character lines
 will defeat the shape-pouring algorithm.
 
-You can eliminate all alphanumerics (via Regex => 1) only for
-small programs with simple I/O and no regular expressions.
+You can eliminate all alphanumerics (via Regex => 1) only if the
+program to be converted does not use regular expressions and does
+not use C<$_>.
 To convert complex programs, you must use Regex => 0, which
 emits a leading unsightly C<eval>.
 
