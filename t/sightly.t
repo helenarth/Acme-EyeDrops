@@ -1,21 +1,16 @@
 use strict;
-use Acme::EyeDrops qw(sightly);
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
+use Acme::EyeDrops qw(sightly get_eye_string make_siertri);
 
 # --------------------------------------------------
 
-print "1..32\n";
+print "1..35\n";
 
-my $camelstr = get_shape_str('camel');
-my $umlstr = get_shape_str('uml');
-my $windowstr = get_shape_str('window');
-my $japhstr = get_shape_str('japh');
-my $yanick4str = get_shape_str('yanick4');
+my $camelstr = get_eye_string('camel');
+my $umlstr = get_eye_string('uml');
+my $windowstr = get_eye_string('window');
+my $japhstr = get_eye_string('japh');
+my $yanick4str = get_eye_string('yanick4');
+my $siertristr = make_siertri(5);
 my $tmpf = 'bill.tmp';
 
 # Camel helloworld.pl ------------------------------
@@ -246,6 +241,27 @@ print "ok 31\n";
 $prog =~ tr/!-~/#/;
 $prog eq $yanick4str x 3 and print "not ";
 print "ok 32\n";
+
+# siertri hellotest.pl (FillerVar=';')--(3 shapes)--
+
+$prog = sightly({ Shape         => 'siertri',
+                  Width         => 5,
+                  SourceFile    => 'demo/hellotest.pl',
+                  FillerVar     => ';',
+                  Regex         => 1 } );
+open(TT, '>'.$tmpf) or die "open >$tmpf : $!";
+print TT $prog;
+close(TT);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+print "ok 33\n";
+$outstr eq "hello test 0\nhello test 1\nhello test 2\nhello test 3\n"
+   or print "not ";
+print "ok 34\n";
+$prog =~ tr/!-~/#/;
+$prog eq $siertristr x 5 or print "not ";
+print "ok 35\n";
 
 # --------------------------------------------------
 

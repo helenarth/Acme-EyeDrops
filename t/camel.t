@@ -1,20 +1,14 @@
 use strict;
-use Acme::EyeDrops qw(sightly reflect_shape);
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
+use Acme::EyeDrops qw(sightly get_eye_string reflect_shape);
 
 # -------------------------------------------------
 
 print "1..16\n";
 
-my $camelstr = get_shape_str('camel');
+my $camelstr = get_eye_string('camel');
 my $camel_Y_str = $camelstr;
 $camel_Y_str =~ tr/#/Y/;
-my $buffystr = get_shape_str('buffy2');
+my $buffystr = get_eye_string('buffy2');
 my $buffymirrorstr = reflect_shape($buffystr);
 
 my $tmpf = 'bill.tmp';

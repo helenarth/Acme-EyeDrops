@@ -1,13 +1,7 @@
 use strict;
-use Acme::EyeDrops qw(sightly);
+use Acme::EyeDrops qw(sightly get_eye_string);
 
 # Test program for module bug raised by Mark Puttman.
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
 
 sub build_file {
    my ($f, $d) = @_;
@@ -52,8 +46,8 @@ GROK
 build_file('t/eye.tmp', $module_str);
 build_file('t/myeye.pl', $main_str);
 
-my $camelstr = get_shape_str('camel');
-my $japhstr = get_shape_str('japh');
+my $camelstr = get_eye_string('camel');
+my $japhstr = get_eye_string('japh');
 my $tmpf = 'bill.tmp';
 
 # JAPH  MyEye.pm -----------------------------------

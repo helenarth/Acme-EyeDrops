@@ -1,5 +1,5 @@
 ===========================================================================
-                 Release of version 1.31 of Acme::EyeDrops
+                 Release of version 1.32 of Acme::EyeDrops
 ===========================================================================
 
 NAME
@@ -27,6 +27,13 @@ INSTALLATION
         make
         make test
         make install
+
+    Alternatively, if you have Module::Build installed, you can:
+
+        perl Build.PL
+        perl Build
+        perl Build test
+        perl Build install
 
     It's all pure Perl, so you can also install by putting the .pm
     file and *.eye files in the appropriate local sub-directory.

@@ -1,11 +1,5 @@
 use strict;
-use Acme::EyeDrops qw(sightly);
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
+use Acme::EyeDrops qw(sightly get_eye_string);
 
 # --------------------------------------------------
 
@@ -19,7 +13,7 @@ print "1..7\n";
 
 # --------------------------------------------------
 
-my $camelstr = get_shape_str('camel');
+my $camelstr = get_eye_string('camel');
 my $tmpf = 'bill.tmp';
 my $tmpf2 = 'bill2.tmp';
 

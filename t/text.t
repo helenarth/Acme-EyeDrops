@@ -1,17 +1,11 @@
 use strict;
-use Acme::EyeDrops qw(sightly pour_text);
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
+use Acme::EyeDrops qw(sightly get_eye_string pour_text);
 
 # --------------------------------------------------
 
 print "1..29\n";
 
-my $snow = get_shape_str('snow');
+my $snow = get_eye_string('snow');
 
 my $src = <<'SNOWING';
 $_=q~vZvZ&%('$&"'"&(&"&$&"'"&$Z$#$$$#$%$&"'"&(&#

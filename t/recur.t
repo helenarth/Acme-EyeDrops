@@ -1,18 +1,12 @@
 use strict;
-use Acme::EyeDrops qw(sightly);
-
-sub get_shape_str {
-   my $f = "lib/Acme/$_[0].eye";
-   local *T; open(T, $f) or die "open '$f': $!";
-   local $/; my $s = <T>; close(T); $s;
-}
+use Acme::EyeDrops qw(sightly get_eye_string);
 
 # --------------------------------------------------
 
 print "1..6\n";
 
-my $camelstr = get_shape_str('camel');
-$camelstr .= get_shape_str('window');
+my $camelstr = get_eye_string('camel');
+$camelstr .= get_eye_string('window');
 my $tmpf = 'bill.tmp';
 
 # Run camel,window helloworld.pl on itself twice ---
