@@ -9,6 +9,7 @@ lib/Acme/camel.eye
 lib/Acme/japh.eye
 lib/Acme/uml.eye
 lib/Acme/window.eye
+t/convert.t
 t/sightly.t
 demo/sightly.pl
 demo/helloworld.pl

@@ -37,8 +37,8 @@ PROG
 #                 Regex         => 1,
 #                 Print         => 1 } );
 
-# This shows how to lipstick-encode a binary file.
-# To decode, simply run the generated Perl program.
+# This shows how to sightly-encode a binary file.
+# To decode, run the generated Perl program, redirecting STDOUT.
 # print sightly({ Shape       => 'camel,japh,camel',
 #                 SourceFile  => 'sightly.pl',
 #                 Binary      => 1,

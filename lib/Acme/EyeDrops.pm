@@ -10,9 +10,10 @@ require Exporter;
                 clean_print_sightly clean_eval_sightly
                 regex_binmode_print_sightly
                 clean_binmode_print_sightly
+                get_builtin_shapes get_eye_shapes
                 pour_sightly sightly);
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -464,6 +465,19 @@ my %default_arg = (
    Gap           => 0
 );
 
+sub get_builtin_shapes {
+   sort keys %builtin_shapes;
+}
+
+sub get_eye_shapes {
+   my $dir = $this_dir ? $this_dir : '.';
+   opendir(DD, $dir) or return ();
+   my @eye = sort map { substr($_, 0, length($_)-4) }
+                grep { /\.eye$/ } readdir(DD);
+   closedir(DD);
+   return @eye;
+}
+
 sub sightly {
    my ($ruarg) = @_;
    my %arg = %default_arg;
@@ -556,10 +570,10 @@ Acme::EyeDrops - Visual Programming in Perl
 C<Acme::EyeDrops> converts a Perl program into an equivalent one,
 but without all those unsightly letters and numbers.
 
-It supports Visual Programming by allowing you to pour the generated
-program into various shapes, such as UML diagrams, enabling you to
-instantly understand how the program works by glancing at its new
-and improved visual representation.
+In a Visual Programming breakthrough, EyeDrops allows you to pour
+the generated program into various shapes, such as UML diagrams,
+enabling you to instantly understand how the program works just
+by glancing at its new and improved visual representation.
 
 Like C<Acme::Smirch>, but unlike C<Acme::Bleach> and C<Acme::Buffy>,
 the generated program runs without requiring that C<Acme::EyeDrops>
@@ -580,10 +594,10 @@ You can make this program look like a camel with:
 Instead of using the API above, you may find it more convenient
 to use the sightly.pl command in the demo directory:
 
-    sightly.pl -h    (for help)
+    sightly.pl -h           (for help)
     sightly.pl -s camel -f helloworld.pl -r >new.pl
     cat new.pl
-    perl new.pl      (should "print hello" world as before)
+    perl new.pl             (should print "hello world" as before)
 
 Notice that the shape 'camel' is just the file 'camel.eye' in the
 same directory as EyeDrops.pm, so you are free to add your own
@@ -664,8 +678,8 @@ This is a Visual Programming breakthrough in that you can tell
 that it is a Windows program and see its UML structure too,
 just by glancing at the code.
 
-For Linux-only, you can use its /usr/games/banner command
-like this:
+For Linux-only, you can apply its /usr/games/banner command
+to the program's source text like this:
 
     print sightly( { Shape       => 'srcbanner',
                      Width       => 70,
@@ -760,9 +774,6 @@ the original because its characters are bigger and easier to read:
   
   
   
-  
-  
-  
  
  
  
@@ -840,8 +851,6 @@ the original because its characters are bigger and easier to read:
                     '~';$:='%'&'$';$:='"' 
                       |'#';$:='?'&"\!"; 
                           $:=('*')| 
-  
-  
   
   
   
@@ -992,9 +1001,6 @@ the original because its characters are bigger and easier to read:
                ;$:='?'&                "\!";
 
 
-The shapes 'bleach' and 'buffy' are also provided to aid folks
-migrating from Acme::Bleach and Acme::Buffy.
-
 Let's get more ambitious and create a big JAPH.
 
     my $src = <<'PROG';
@@ -1046,7 +1052,9 @@ But wait, there's more. You can encode binary files too.
                     Gap         => 5 } );
 
 This is prettier than uuencode/uudecode.
-Here is how you do it with sightly.pl:
+Here is how you encode/decode binary files with sightly.pl.
+
+To encode:
 
     sightly.pl -g5 -bps camel,japh,camel -f some_binary_file >fred
 
@@ -1058,16 +1066,146 @@ To verify it worked:
 
     cmp f.tmp some_binary_file
 
-The sightly-encoding engine is implemented in the functions
-C<ascii_to_sightly> and C<sightly_to_ascii>.
+=head1 REFERENCE
+
+=head2 Sightly Encoding
+
+There are 32 characters in the sightly character set:
+
+    ! " # $ % & ' ( ) * + , - . /            (33-47)
+    : ; < = > ? @                            (58-64)
+    [ \ ] ^ _ `                              (91-96)
+    { | } ~                                  (123-126)
+
+A I<sightly string> consists only of characters drawn from
+this set.
+
+The C<ascii_to_sightly> function converts an ASCII string
+(0-255) to a sightly string; the C<sightly_to_ascii> function
+does the reverse.
+
+=head2 Function Reference
+
+=over 4
+
+=item ascii_to_sightly STRING
+
+Given an ascii string STRING, returns a sightly string.
+
+=item sightly_to_ascii STRING
+
+Given a sightly string STRING, returns an ascii string.
+
+=item regex_print_sightly STRING
+
+Given an ascii string STRING, returns a sightly-encoded Perl
+program with a print statement embedded in a regular expression.
+When run, the program will print STRING.
+
+=item regex_eval_sightly STRING
+
+Given a Perl program in ascii string STRING, returns an
+equivalent sightly-encoded Perl program using an eval
+statement embedded in a regular expression.
+
+=item clean_print_sightly STRING
+
+Given an ascii string STRING, returns a sightly-encoded Perl
+program with a print statement executed via eval.
+When run, the program will print STRING.
+
+=item clean_eval_sightly STRING
+
+Given a Perl program in ascii string STRING, returns an
+equivalent sightly-encoded Perl program using an eval
+statement executed via eval.
+
+=item regex_binmode_print_sightly STRING
+
+Given an ascii string STRING, returns a sightly-encoded Perl
+program with a binmode(STDOUT) and a print statement embedded
+in a regular expression. When run, the program will print STRING.
+Note that STRING may contain any character in the range 0-255.
+This function is used to sightly-encode binary files.
+This function is dodgy because regexs don't seem to like
+binary zeros; use C<clean_binmode_print_sightly> instead.
+
+=item clean_binmode_print_sightly STRING
+
+Given an ascii string STRING, returns a sightly-encoded Perl
+program with a binmode(STDOUT) and a print statement executed
+via eval. When run, the program will print STRING.
+Note that STRING may contain any character in the range 0-255.
+This function is used to sightly-encode binary files.
+
+=item get_builtin_shapes
+
+Returns a list of the built-in shape names.
+
+=item get_eye_shapes
+
+Returns a list of the I<eye> shapes. An eye shape is just a
+file with a C<.eye> extension residing in the same directory
+as C<EyeDrops.pm>.
+
+=item pour_sightly SHAPESTRING PROGSTRING GAP
+
+Given a shape string SHAPESTRING, a sightly-encoded program
+string PROGSTRING, and a GAP between successive shapes,
+returns a properly shaped program string.
+
+=item sightly HASHREF
+
+Given a hash reference, HASHREF, describing various attributes,
+returns a properly shaped program string.
+
+The attributes that HASHREF may contain are:
+
+    Shape         Describes the shape you want.
+                  First, a built-in shape is looked for. Next a
+                  I<eye> shape (.eye file in the same directory
+                  as EyeDrops.pm) is looked for. Finally a file
+                  name is looked for.
+
+    ShapeString   Describes the shape you want.
+                  This time you specify a shape string.
+
+    SourceFile    The source file name to convert.
+
+    SourceString  Specify a string instead of a file name.
+
+    BannerString  String to use with built-in Shape 'banner'.
+
+    Regex         Boolean. If set, try to embed source program
+                  in a regular expression. Do not set this flag
+                  when converting complex programs.
+
+    Print         Boolean. If set, use a print statement instead
+                  of the default eval statement.
+
+    Binary        Boolean. Set if encoding a binary file.
+
+    Gap           The number of lines between successive shapes.
+
+    Width         Ignored for .eye file shapes. For built-in shapes,
+                  specifies the shape width in characters.
+
+=back
+
+=head1 MIGRATION
+
+To aid those migrating from Acme::Bleach and Acme::Buffy,
+the 'bleach' and 'buffy' shapes are provided.
 
 =head1 BUGS
 
 A really diabolical shape with lots of single character lines
 will defeat the shape-pouring algorithm.
 
-In the general case, all unsightly alphanumerics are not
-eliminated because of the need for a leading eval.
+You can eliminate all alphanumerics (via Regex => 1) only for
+small programs with simple I/O and no regular expressions.
+To convert complex programs, you must use Regex => 0, which
+emits a leading unsightly eval.
 
 =head1 AUTHOR
 

@@ -4,4 +4,9 @@ Revision history for Perl extension EyeDrops
 
 	- original version
 
+0.02	Tue Sep 25 18:05:02 2001
+
+	- improved documentation
+	- new functions: get_builtin_shapes, get_eye_shapes
+	- extra tests added
 

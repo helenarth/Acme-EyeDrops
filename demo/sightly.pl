@@ -20,14 +20,15 @@ Options:
                 provided for Linux only (/usr/games/banner):
                    banner (make banner from -c switch)
                    srcbanner (make banner from source)
-  -f file       The file to be beautified.
+  -f file       The file to be made sightly.
   -t string     Specify a string instead of a file.
   -c string     String used with -s banner above.
   -p            Print instead of eval.
   -r            Insert sightly into a regex (instead of eval).
   -g gap        Gap between successive shapes.
   -b            Binary file.
-  -w width      Use a block shape of specified width.
+  -w width      Width.
+  -l            List available shapes.
 Examples:
   sightly.pl -s camel -f myprog.pl >myprog2.pl
      This creates myprog2.pl, equivalent to the original
@@ -36,7 +37,7 @@ Examples:
      This creates bill.pl, a program that prints the above string.
   sightly.pl -g 5 -bps camel,japh,camel -f some_binary_file >sightly
      This creates sightly, a sightly-encoded file.
-     To decode it use:   perl sightly > f.tmp
+     To decode it:   perl sightly > f.tmp
      To check it worked: cmp f.tmp some_binary_file
 Notes:
   If no shape is specified, a single (very long) line will be output.
@@ -44,6 +45,13 @@ Notes:
   be used to fill the shape.
 EOM
    exit 1;
+}
+
+sub list_shapes {
+   my @builtin = Acme::EyeDrops::get_builtin_shapes();
+   my @eye = Acme::EyeDrops::get_eye_shapes();
+   print "builtin shapes  : @builtin\n";
+   print ".eye file shapes: @eye\n";
 }
 
 my %optarg = (
@@ -60,8 +68,9 @@ my %optarg = (
 
 usage() unless @ARGV;
 my %arg = (); my %option = ();
-Getopt::Std::getopts("hbprc:f:g:s:t:w:", \%option) or usage();
+Getopt::Std::getopts("hblprc:f:g:s:t:w:", \%option) or usage();
 usage() if $option{h};
+$option{l} and list_shapes(),exit(0);
 $option{t} =~ s#\\n#\n#g if $option{t};
 for my $k (keys %option) {
    next unless $option{$k};
