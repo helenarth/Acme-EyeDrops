@@ -11,7 +11,7 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
@@ -73,8 +73,6 @@ $prog eq $teststr or print "not ";
 # --------------------------------------------------
 
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
-
-exit 0;
 
 # --------------------------------------------------
 # Original Perl bug report #23143 follows:

@@ -11,7 +11,7 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
@@ -22,7 +22,7 @@ sub build_file {
 # }
 # print $have_stderr_redirect ? "1..7\n" : "1..3\n";
 
-print "1..7\n";
+print "1..8\n";
 
 # --------------------------------------------------
 
@@ -89,7 +89,7 @@ $rc == 0 and print "not ";
 ++$itest; print "ok $itest - die inside eval rc\n";
 $outstr eq "" or print "not ";
 ++$itest; print "ok $itest - die inside eval output\n";
-Acme::EyeDrops::slurp_tfile($tmpf2) eq "hello die\n" or print "not ";
+Acme::EyeDrops::_slurp_tfile($tmpf2) eq "hello die\n" or print "not ";
 ++$itest; print "ok $itest - die inside die output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $teststr or print "not ";
@@ -100,4 +100,9 @@ $prog eq $teststr or print "not ";
 unlink($tmpf2) or die "error: unlink '$tmpf2': $!";
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
 
-exit 0;
+# --------------------------------------------------
+# Test slurp of non-existent file.
+
+eval { Acme::EyeDrops::_slurp_tfile($tmpf) };
+$@ =~ m|open \Q'$tmpf'\E| or print "not ";
+++$itest; print "ok $itest - slurp of non-existent file\n";

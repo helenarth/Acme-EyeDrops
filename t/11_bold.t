@@ -26,7 +26,7 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 # --------------------------------------------------
 
 my @eye_shapes = get_eye_shapes();
-my $n_tests = @eye_shapes * 6 + 12 * 6;
+my $n_tests = @eye_shapes * 6 + 13 * 6;
 $n_tests += 2;   # plus builtin shape tests
 
 print "1..$n_tests\n";
@@ -60,7 +60,8 @@ test_one_shape('expand_shape', expand_shape($s, 1));
 test_one_shape('rotate_shape-90', rotate_shape($s, 90, 0, 0));
 test_one_shape('rotate_shape-180', rotate_shape($s, 180, 0, 0));
 test_one_shape('rotate_shape-270', rotate_shape($s, 270, 0, 0));
-test_one_shape('make_triangle', make_triangle(70));
+test_one_shape('make_triangle', make_triangle(71));
+test_one_shape('make_triangle', make_triangle(2));
 test_one_shape('make_siertri', make_siertri(5));
 
 my $p = sightly( { SourceString  => "knob\n",
@@ -108,5 +109,3 @@ my @oldb = get_builtin_shapes();
 # ++$itest; print "ok $itest - get_builtin_shape v\n";
 
 # -----------------------------------------------------------------------
-
-exit 0;

@@ -12,7 +12,7 @@ use Acme::EyeDrops qw(sightly hjoin_shapes get_eye_string pour_text);
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
-print "1..30\n";
+print "1..34\n";
 
 my $snow = get_eye_string('snow');
 
@@ -32,9 +32,11 @@ SNOWING
 
 # -------------------------------------------------
 
+my $itest = 0;
+
 my $snowflake = pour_text($snow, "",  1, '#');
 $snowflake eq $snow or print "not ";
-print "ok 1\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
@@ -42,9 +44,9 @@ $snowflake = pour_text($snow, $src,  1, "");
 my $t = $snowflake; $t =~ s/\s+//g;
 my $v = $src; $v =~ s/\s+//g;
 substr($t, 0, length($v)) eq $v or print "not ";
-print "ok 2\n";
+++$itest; print "ok $itest\n";
 substr($t, length($v)) eq '' or print "not ";
-print "ok 3\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
@@ -52,13 +54,13 @@ $snowflake = pour_text($snow, $src,  1, '#');
 $t = $snowflake;
 $t =~ tr/!-~/#/;
 $t eq $snow or print "not ";
-print "ok 4\n";
+++$itest; print "ok $itest\n";
 $t = $snowflake; $t =~ s/\s+//g;
 $v = $src; $v =~ s/\s+//g;
 substr($t, 0, length($v)) eq $v or print "not ";
-print "ok 5\n";
+++$itest; print "ok $itest\n";
 substr($t, length($v)) eq '#' x (length($t)-length($v)) or print "not ";
-print "ok 6\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
@@ -69,74 +71,88 @@ $snowflake = sightly( { Shape         => 'snow',
 $t = $snowflake;
 $t =~ tr/!-~/#/;
 $t eq $snow or print "not ";
-print "ok 7\n";
+++$itest; print "ok $itest\n";
 $t = $snowflake; $t =~ s/\s+//g;
 $v = $src; $v =~ s/\s+//g;
 substr($t, 0, length($v)) eq $v or print "not ";
-print "ok 8\n";
+++$itest; print "ok $itest\n";
 substr($t, length($v)) eq '#' x (length($t)-length($v)) or print "not ";
-print "ok 9\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
 my $shape = "## ###\n";
 my $p = pour_text($shape, "", 1, "");
 $p eq "\n" or print "not ";
-print "ok 10\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'X', 1, "");
 $p eq "X\n" or print "not ";
-print "ok 11\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XX', 1, "");
 $p eq "XX\n" or print "not ";
-print "ok 12\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXX', 1, "");
 $p eq "XX X\n" or print "not ";
-print "ok 13\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXXX', 1, "");
 $p eq "XX XXX\n" or print "not ";
-print "ok 14\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXXXX', 1, "");
 $p eq "XX XXX\n\nX\n" or print "not ";
-print "ok 15\n";
+++$itest; print "ok $itest\n";
+
+my $shape_gap = "## ###\n\n####\n";
+$p = pour_text($shape_gap, 'XXXXX', 4, "");
+$p eq "XX XXX\n" or print "not ";
+++$itest; print "ok $itest\n";
+$p = pour_text($shape_gap, 'XXXXXX', 4, "");
+$p eq "XX XXX\n\nX\n" or print "not ";
+++$itest; print "ok $itest\n";
+$p = pour_text($shape_gap, 'XXXXXXXXX', 4, "");
+$p eq "XX XXX\n\nXXXX\n" or print "not ";
+++$itest; print "ok $itest\n";
+$p = pour_text($shape_gap, 'XXXXXXXXXX', 4, "");
+$p eq "XX XXX\n\nXXXX\n\n\n\n\nX\n" or print "not ";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
 $p = pour_text($shape, '', 2, '#');
 $p eq "## ###\n" or print "not ";
-print "ok 16\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'X', 2, '#');
 $p eq "X# ###\n" or print "not ";
-print "ok 17\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XX', 2, '#');
 $p eq "XX ###\n" or print "not ";
-print "ok 18\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXX', 2, '#');
 $p eq "XX X##\n" or print "not ";
-print "ok 19\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXX', 2, '#');
 $p eq "XX XX#\n" or print "not ";
-print "ok 20\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXXX', 2, '#');
 $p eq "XX XXX\n" or print "not ";
-print "ok 21\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXXXX', 2, '#');
 $p eq "XX XXX\n\n\nX# ###\n" or print "not ";
-print "ok 22\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
 $p = pour_text($shape, 'X', 3, 'abc');
 $p eq "Xa bca\n" or print "not ";
-print "ok 23\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'X', 3, 'abcd');
 $p eq "Xa bcd\n" or print "not ";
-print "ok 24\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, 'XXXXX', 3, 'abc');
 $p eq "XX XXX\n" or print "not ";
-print "ok 25\n";
+++$itest; print "ok $itest\n";
 $p = pour_text($shape, '1234567', 3, 'abc');
 $p eq "12 345\n\n\n\n67 abc\n" or print "not ";
-print "ok 26\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
@@ -145,28 +161,26 @@ $p = sightly( { SourceString  => 'knob',
                 Text          => 1,
                 TextFiller    => '#' } );
 $p eq "k\nn\no\nb\n" or print "not ";
-print "ok 27\n";
+++$itest; print "ok $itest\n";
 
 $p = sightly( { SourceString  => 'knob',
                 Width         => 3,
                 Text          => 1,
                 TextFiller    => '#' } );
 $p eq "kno\nb##\n" or print "not ";
-print "ok 28\n";
+++$itest; print "ok $itest\n";
 
 $p = sightly( { SourceString  => 'knob',
                 Width         => 4,
                 Text          => 1,
                 TextFiller    => '#' } );
 $p eq "knob\n" or print "not ";
-print "ok 29\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
 
 $p = hjoin_shapes(2, "##\n###\n", "#\n##\n###\n");
 $p eq "##   #\n###  ##\n     ###\n" or print "not ";
-print "ok 30\n";
+++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
-
-exit 0;

@@ -27,7 +27,7 @@ sub skip_test { print "1..0 # Skipped: $_[0]\n"; exit }
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 sub get_first_line {
@@ -153,8 +153,8 @@ sub test_one {
    close(SAVOUT) or die "error: close SAVOUT: $!";
    close(SAVERR) or die "error: close SAVERR: $!";
 
-   my $outstr = Acme::EyeDrops::slurp_tfile($outf);
-   my $errstr = Acme::EyeDrops::slurp_tfile($errf);
+   my $outstr = Acme::EyeDrops::_slurp_tfile($outf);
+   my $errstr = Acme::EyeDrops::_slurp_tfile($errf);
 
    print STDERR "\nstdout of TestHarness::runtests:\n$outstr\n";
    print STDERR "stderr of TestHarness::runtests:\n$errstr\n";
@@ -229,5 +229,3 @@ rm_f_dir($genbase);
 
 unlink($outf) or die "error: unlink '$outf': $!";
 unlink($errf) or die "error: unlink '$errf': $!";
-
-exit 0;

@@ -41,5 +41,3 @@ plan tests => scalar(@pod_files);
 for my $f (@pod_files) { pod_file_ok($f) }
 
 # ----------------------------------------------------
-
-exit 0;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 13_to.t
-# Tests get_eye_dir()
+# Tests get_eye_dir() and slurp_yerself()
 
 use strict;
 use Acme::EyeDrops qw(get_eye_dir);
@@ -9,12 +9,27 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
 # --------------------------------------------------
 
-print "1..3\n";
+print "1..5\n";
 
 my $itest = 0;
 
 # -----------------------------------------------------------------------
-# get_eye_dir tests
+# slurp_yerself tests (primitive)
+
+my $eyedrops_pm = Acme::EyeDrops::slurp_yerself();
+my $elen = length($eyedrops_pm);
+$elen > 50000 or print "not ";
+++$itest; print "ok $itest - slurp_yerself length is $elen\n";
+my $nlines = $eyedrops_pm =~ tr/\n//;
+$nlines > 1000 or print "not ";
+++$itest; print "ok $itest - slurp_yerself line count is $nlines\n";
+
+# XXX: could add MD5 checksum test here.
+# XXX: beware above test is fragile when testing auto-generated EyeDrops.pm
+#      (as is done by 19_surrounds.t)
+
+# -----------------------------------------------------------------------
+# get_eye_dir tests.
 
 my $eyedir = get_eye_dir();
 $eyedir or print "not ";
@@ -54,5 +69,3 @@ $eyedir or print "not ";
 
 # unlink($mytesteyefile) or die "error: unlink '$mytesteyefile': $!";
 # rmdir($mytesteyedir) or die "error: rmdir '$mytesteyedir': $!";
-
-exit 0;

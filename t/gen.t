@@ -15,7 +15,7 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 sub get_first_line {
@@ -52,9 +52,7 @@ for my $p (@pnames) {
       build_file("$base/z$p", $s_new);
       next;
    }
-   my $s_old = Acme::EyeDrops::slurp_tfile("$base/z$p");
+   my $s_old = Acme::EyeDrops::_slurp_tfile("$base/z$p");
    $s_old eq $s_new or print "not ";
    ++$itest; print "ok $itest - $p\n";
 }
-
-exit 0;

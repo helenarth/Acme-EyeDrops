@@ -36,12 +36,14 @@ lib/Acme/EyeDrops/eye.eye
 lib/Acme/EyeDrops/flag_canada.eye
 lib/Acme/EyeDrops/gelly.eye
 lib/Acme/EyeDrops/golfer.eye
+lib/Acme/EyeDrops/halloween.eye
 lib/Acme/EyeDrops/heart.eye
 lib/Acme/EyeDrops/hipowls.eye
 lib/Acme/EyeDrops/japh.eye
 lib/Acme/EyeDrops/jon.eye
 lib/Acme/EyeDrops/kansai_pm.eye
 lib/Acme/EyeDrops/kermit.eye
+lib/Acme/EyeDrops/koaladile.eye
 lib/Acme/EyeDrops/larry.eye
 lib/Acme/EyeDrops/larry2.eye
 lib/Acme/EyeDrops/llama.eye
@@ -67,6 +69,7 @@ lib/Acme/EyeDrops/riding.eye
 lib/Acme/EyeDrops/rose.eye
 lib/Acme/EyeDrops/santa.eye
 lib/Acme/EyeDrops/santa2.eye
+lib/Acme/EyeDrops/saturn.eye
 lib/Acme/EyeDrops/schwern.eye
 lib/Acme/EyeDrops/simon.eye
 lib/Acme/EyeDrops/smiley.eye

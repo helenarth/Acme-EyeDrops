@@ -12,7 +12,7 @@ $|=1;
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # ----------------------------------------------------------------
@@ -226,5 +226,3 @@ $@ =~ /'\Q$hellotestfile\E':/ or print "not ";
 ++$itest; print "ok $itest - Invalid SourceFile, file not found\n";
 
 # ----------------------------------------------------------------
-
-exit 0;

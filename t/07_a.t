@@ -11,12 +11,12 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
 
-print "1..10\n";
+print "1..14\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -60,6 +60,39 @@ $prog eq $camelstr or print "not ";
 ++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
+# Same again, but exercise Left/Right/Top/Bottom
+
+$prog = sightly({ Shape              => 'camel',
+                  SourceString       => $hellostr,
+                  BorderWidthLeft    => 2,
+                  BorderWidthRight   => 2,
+                  BorderWidthTop     => 2,
+                  BorderWidthBottom  => 2,
+                  BorderGapLeft      => 1,
+                  BorderGapRight     => 1,
+                  BorderGapTop       => 1,
+                  BorderGapBottom    => 1,
+                  InformHandler      => \&test_inform,
+                  Regex              => 1 } );
+build_file($tmpf, $prog);
+$outstr = `$^X -w -Mstrict $tmpf`;
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+++$itest; print "ok $itest\n";
+$outstr eq "hello world\n" or print "not ";
+++$itest; print "ok $itest\n";
+$prog =~ tr/!-~/#/;
+@lines = split(/^/, $prog, -1);
+scalar(@lines) > 6 or print "not ";
+++$itest; print "ok $itest\n";
+pop(@lines);pop(@lines);pop(@lines);
+shift(@lines);shift(@lines);shift(@lines);
+$prog = join("", @lines);
+$prog =~ s/^## //mg; $prog =~ s/ ##$//mg; $prog =~ s/ +$//mg;
+$prog eq $camelstr or print "not ";
+++$itest; print "ok $itest\n";
+
+# -------------------------------------------------
 # This test failed prior to EyeDrops.pm version 1.41.
 
 $prog = sightly({ Shape         => 'camel,camel',
@@ -89,7 +122,7 @@ $prog eq $camel2str or print "not ";
 
 # -------------------------------------------------
 
-$inform_string eq "1 shapes completed.\n" x 2 or print "not ";
+$inform_string eq "1 shapes completed.\n" x 3 or print "not ";
 ++$itest; print "ok $itest\n";
 
 # -------------------------------------------------
@@ -113,5 +146,3 @@ sightly( { Shape         => 'camel,mongers',
 # -------------------------------------------------
 
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
-
-exit 0;

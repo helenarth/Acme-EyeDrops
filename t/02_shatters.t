@@ -12,7 +12,7 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
@@ -90,5 +90,3 @@ $prog eq $camelstr or print "not ";
 
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
 unlink('MyEye.pm') or die "error: unlink 'MyEye.pm': $!";
-
-exit 0;

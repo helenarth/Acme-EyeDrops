@@ -362,3 +362,26 @@ Revision history for Perl extension EyeDrops
 	- minor code improvements (removed $this_dir, check for invalid
 	  attrs in sightly(), allow SourceFile/SourceString of '0')
 	- documentation: updated stale URL links
+
+1.45	Mon Dec 27 17:15:04 2004
+
+	- new shape: halloween (thanks TheEnigma)
+	- new shape: koaladile (thanks Schwern)
+	- new shape: saturn
+	- renamed function slurp_tfile() to _slurp_tfile()
+	- regenerated zgen.t (gen.t changed due to slurp_tfile() change)
+	     (regenerated it with: perl -w -I lib t/gen.t generate)
+	- pod coverage: documented slurp_yerself()
+	- tests: improved the ugly test suite a little
+	     new test: 16_astride.t simple threads test
+	     new test: 17_Orange.t tests pod coverage
+	     split 00_Coffee.t into two (last bit is now 15_Buffy.t)
+	     added slurp_yerself() tests to 13_to.t
+	     added Regex => 0 tests to 05_Parrot.t
+	     exercise regex_binmode_print_sightly() in 05_Parrot.t
+	     new tests added to 05_Parrot.t/06_not.t/10_Ponie.t et al
+	     in response to gaping holes detected by Devel::Cover
+	     removed exit 0 from end of tests
+	- documentation: added new Error Handling section
+	- Devel::Cover results: stmt   branch cond  sub    pod   total
+	                        95.2   91.3   90.8  100.0  100.0  93.5

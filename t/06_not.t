@@ -13,17 +13,18 @@ select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
 
-print "1..27\n";
+print "1..50\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
 HELLO
 my $camelstr = get_eye_string('camel');
+my $indent_camelstr = $camelstr; $indent_camelstr =~ s/^/ /mg;
 my $tmpf = 'bill.tmp';
 
 # --------------------------------------------------
@@ -78,7 +79,65 @@ my $rotprog = $prog;
 test_one('rot 90 camel', "hello world\n");
 $rotprog =~ tr/!-~/#/;
 $rotprog eq $camelstr and print "not ";
-++$itest; print "ok $itest - prog\n";
+++$itest; print "ok $itest - rotprog\n";
+
+# -------------------------------------------------
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 90,
+                  RotateFlip    => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $rot90_flipprog = $prog;
+test_one('rot 90 flip camel', "hello world\n");
+$rot90_flipprog =~ tr/!-~/#/;
+$rot90_flipprog eq $camelstr and print "not ";
+++$itest; print "ok $itest - rot 90 flip prog\n";
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 90,
+                  Reflect       => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $rot90_refprog = $prog;
+test_one('rot 90 reflect camel', "hello world\n");
+$rot90_refprog =~ tr/!-~/#/;
+$rot90_refprog eq $camelstr and print "not ";
+++$itest; print "ok $itest - rot 90 ref prog\n";
+
+$rot90_flipprog eq $rot90_refprog or print "not ";
+++$itest; print "ok $itest - flip eq reflect\n";
+
+# -------------------------------------------------
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 270,
+                  RotateFlip    => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $rot270_flipprog = $prog;
+test_one('rot 270 flip camel', "hello world\n");
+$rot270_flipprog =~ tr/!-~/#/;
+$rot270_flipprog eq $camelstr and print "not ";
+++$itest; print "ok $itest - rot 270 flip prog\n";
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Rotate        => 270,
+                  Reflect       => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+my $rot270_refprog = $prog;
+test_one('rot 270 reflect camel', "hello world\n");
+$rot270_refprog =~ tr/!-~/#/;
+$rot270_refprog eq $camelstr and print "not ";
+++$itest; print "ok $itest - rot 270 ref prog\n";
+
+$rot270_flipprog eq $rot270_refprog or print "not ";
+++$itest; print "ok $itest - flip eq reflect\n";
 
 # -------------------------------------------------
 
@@ -161,6 +220,42 @@ $prog eq $camelstr or print "not ";
 
 # -------------------------------------------------
 
-unlink($tmpf) or die "error: unlink '$tmpf': $!";
+$prog = sightly({ Shape         => 'camel',
+                  SourceString  => $hellostr,
+                  Indent        => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('indent 1 camel', "hello world\n");
+$prog =~ tr/!-~/#/;
+$prog eq $indent_camelstr or print "not ";
+++$itest; print "ok $itest - indent 1 prog\n";
 
-exit 0;
+# -------------------------------------------------
+
+my $testshape     = "########         ##########\n" x 50;
+my $inv_testshape = "        #########\n"           x 50;
+my $ref_testshape = "##########         ########\n" x 50;
+
+$prog = sightly({ ShapeString   => $testshape,
+                  SourceString  => $hellostr,
+                  Invert        => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('inverted test shape', "hello world\n");
+$prog =~ tr/!-~/#/;
+$prog eq $inv_testshape or print "not ";
+++$itest; print "ok $itest - inverted test shape prog\n";
+
+$prog = sightly({ ShapeString   => $testshape,
+                  SourceString  => $hellostr,
+                  Reflect       => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('reflected test shape', "hello world\n");
+$prog =~ tr/!-~/#/;
+$prog eq $ref_testshape or print "not ";
+++$itest; print "ok $itest - reflected test shape prog\n";
+
+# -------------------------------------------------
+
+unlink($tmpf) or die "error: unlink '$tmpf': $!";

@@ -3,7 +3,7 @@
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string make_siertri
-                      regex_eval_sightly);
+                      regex_eval_sightly regex_binmode_print_sightly);
 
 $|=1;
 
@@ -12,12 +12,12 @@ $|=1;
 sub build_file {
    my ($f, $d) = @_;
    local *F; open(F, '>'.$f) or die "open '$f': $!";
-   print F $d; close(F);
+   print F $d or die "write '$f': $!"; close(F);
 }
 
 # --------------------------------------------------
 
-print "1..60\n";
+print "1..66\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -39,6 +39,9 @@ my $japhstr = get_eye_string('japh');
 my $yanick4str = get_eye_string('yanick4');
 my $siertristr = make_siertri(5);
 my $baldprogstr = regex_eval_sightly($hellostr);
+# XXX: regex_binmode_print_sightly seems dodgy, this call is just to
+# improve code coverage. Investigate later.
+my $dodgyprogstr = regex_binmode_print_sightly($hellostr);
 my $tmpf = 'bill.tmp';
 
 build_file($hellofile, $hellostr);
@@ -57,6 +60,7 @@ sub test_one {
    ++$itest; print "ok $itest - $e rc\n";
    $outstr eq $ostr or print "not ";
    ++$itest; print "ok $itest - $e output\n";
+   $prog =~ s/^.*eval.*\n\n\n//;
    $prog =~ tr/!-~/#/;
    $prog eq $sh or print "not ";
    ++$itest; print "ok $itest - $e shape\n";
@@ -88,12 +92,21 @@ $prog = sightly({ Shape         => 'window',
                   Print         => 1 } );
 test_one('Bill Gates is a pest!', $srcstr, $windowstr);
 
+# Text string print (eval) -------------------------
+
+$prog = sightly({ Shape         => 'window',
+                  SourceString  => $srcstr,
+                  Regex         => 0,
+                  InformHandler => sub {},
+                  Print         => 1 } );
+test_one('Bill Gates is a pest!', $srcstr, $windowstr);
+
 # Binary encode/decode -----------------------------
 
 my $encodestr = qq#binmode(STDOUT);print eval '"'.\n\n\n#;
 $encodestr =~ tr/!-~/#/;
 $encodestr .= $camelstr x 5;
-$srcstr = join("", map {chr} 0..255);
+$srcstr = join("", map(chr(), 0..255));
 $prog = sightly({ Shape         => 'camel',
                   SourceString  => $srcstr,
                   Binary        => 1,
@@ -107,21 +120,39 @@ build_file($tmpf, $prog);
 # so use a temporary file instead.
 my $tmpf2 = 'bill2.tmp';
 system("$^X -Tw -Mstrict $tmpf >$tmpf2");
-my $outstr;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
-++$itest; print "ok $itest - binary encode rc\n";
+++$itest; print "ok $itest - binary str encode rc\n";
 open(TT, $tmpf2) or die "open '$tmpf2': $!";
 binmode(TT);
-{
-   local $/ = undef; $outstr = <TT>;
-}
+my $outstr = do { local $/; <TT> };
 close(TT);
 $outstr eq $srcstr or print "not ";
-++$itest; print "ok $itest - binary encode output\n";
+++$itest; print "ok $itest - binary str encode output\n";
 $prog =~ tr/!-~/#/;
 $prog eq $encodestr or print "not ";
-++$itest; print "ok $itest - binary encode shape\n";
+++$itest; print "ok $itest - binary str encode shape\n";
+
+$prog = sightly({ Shape         => 'camel',
+                  SourceFile    => $tmpf2,
+                  Binary        => 1,
+                  Regex         => 0,
+                  InformHandler => sub {},
+                  Print         => 1 } );
+build_file($tmpf, $prog);
+system("$^X -Tw -Mstrict $tmpf >$tmpf2");
+$rc = $? >> 8;
+$rc == 0 or print "not ";
+++$itest; print "ok $itest - binary file encode rc\n";
+open(TT, $tmpf2) or die "open '$tmpf2': $!";
+binmode(TT);
+$outstr = do { local $/; <TT> };
+close(TT);
+$outstr eq $srcstr or print "not ";
+++$itest; print "ok $itest - binary file encode output\n";
+$prog =~ tr/!-~/#/;
+$prog eq $encodestr or print "not ";
+++$itest; print "ok $itest - binary file encode shape\n";
 
 # Self-printing JAPH -------------------------------
 
@@ -329,5 +360,3 @@ test_one('siertr/Larry x 2 helloworld', "hello world\n",
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
 unlink($tmpf2) or die "error: unlink '$tmpf2': $!";
 unlink($hellofile) or die "error: unlink '$hellofile': $!";
-
-exit 0;
