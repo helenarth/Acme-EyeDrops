@@ -1,10 +1,10 @@
 #!/usr/bin/perl
-# yharn.t
+# 12_Beer.t (was yharn.t)
 
 use strict;
 use File::Basename ();
 use Acme::EyeDrops qw(sightly);
-use Test::Harness;
+use Test::Harness ();
 
 select(STDERR);$|=1;select(STDOUT);$|=1;  # autoflush
 
@@ -44,6 +44,10 @@ my $errf = 'err.tmp';
 -f $outf and (unlink($outf) or die "error: unlink '$outf': $!");
 -f $errf and (unlink($errf) or die "error: unlink '$errf': $!");
 
+my $itest = 0;
+
+# --------------------------------------------------
+
 my %attrs = (
    Shape          => 'camel',
    Regex          => 0,
@@ -53,12 +57,24 @@ my %attrs = (
    Shape          => 'camel',
    Gap            => 1
 );
-my @pnames = ( 'border.t', 'vshape.t', 'text.t', 'sightly.t' );
+my @pnames = (
+   '00_Coffee.t',
+   '01_mug.t',
+   '02_shatters.t',
+   '03_Larry.t',
+   '04_Apocalyptic.t',
+   '05_Parrot.t',
+   '06_not.t',
+   '07_a.t',
+   '08_hoax.t',
+   '09_Gallop.t',
+   '10_Ponie.t',
+   '11_bold.t',
+);
+
 # zsightly.t test works but the following might be written to stderr:
 # Scalar found where operator expected at (eval 2) line 41, near "regex_eval_sightly($hellostr"
 # This seems to happen only on Perl versions before 5.6.1. Is this a Perl bug?
-
-my $itest = 0;
 
 # --------------------------------------------------
 
@@ -74,7 +90,7 @@ for my $p (@pnames) {
    build_file("$base/z$p", $s_new);
 }
 
-# Run them with TestHarness::runtests
+# Run them with Test::Harness::runtests
 
 my @tests = map("$base/z$_", @pnames);
 
@@ -83,7 +99,7 @@ local *SAVOUT; open(SAVOUT, ">&STDOUT");  # save original STDOUT
 open(STDOUT, '>'.$outf) or die "Could not create '$outf': $!";
 open(STDERR, '>'.$errf) or die "Could not create '$errf': $!";
 
-my $status = runtests(@tests);
+my $status = Test::Harness::runtests(@tests);
 
 open(STDERR, ">&SAVERR");  # restore STDERR
 open(STDOUT, ">&SAVOUT");  # restore STDOUT

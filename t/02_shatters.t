@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# module.t
+# 02_shatters.t (was module.t)
 # Test program for module bug raised by Mark Puttman.
 
 use strict;

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Tw
-# text.t
+# 10_Ponie.t (was text.t)
 # Currently the only taint-safe test, mainly due to backticks.
 
 use strict;

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# camel.t
+# 01_mug.t (was camel.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string reflect_shape);

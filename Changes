@@ -321,3 +321,17 @@ Revision history for Perl extension EyeDrops
 	- Support PERL_SMOKE environment variable for long-running tests
 	  (see http://archive.develooper.com/perl-qa@perl.org/msg01927.html,
 	  thanks merlyn)
+
+1.42	Sun Aug 3 12:02:08 2003
+
+	- Bug fix release for Perl 5.8.1 (see Perl bug #23143).
+	- For the first time, the EyeDrops test suite uncovered a Perl bug
+	  (dance a little jig): recur.t, test 4 failed on Perl 5.8.1-RC2
+	  with the error: panic: pad_free curpad. Thanks merlyn for reporting.
+	  Since this bug won't be fixed for 5.8.1, we workaround
+	  it by never using $_ as a filler variable
+	- sightly.t: run generated test programs in taint mode
+	- tests: renamed to more appropriate names
+	- tests: new long running test 13_to.t
+	- documentation: added "Getting Started" section
+	- documentation: fixed program in "Naked Arm Wrestling" section

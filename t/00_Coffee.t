@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# convert.t
+# 00_Coffee.t (was convert.t)
 
 use strict;
 use Acme::EyeDrops qw(ascii_to_sightly sightly_to_ascii

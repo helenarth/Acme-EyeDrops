@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# reshape.t
+# 06_not.t (was reshape.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);

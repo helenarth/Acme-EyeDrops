@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# vshape.t
+# 11_bold.t (was vshape.t)
 # The only non-taint safe code is the backticks in make_banner.
 # TODO: fix by removing make_banner from this test and adding -Tr
 # or by making backticks taint-safe (fork/exec ?).

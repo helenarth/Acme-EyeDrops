@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# border.t. Test Border stuff.
+# 07_a.t (was border.t). Test Border stuff.
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);

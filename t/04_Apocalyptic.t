@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# limit2.t
+# 04_Apocalyptic.t (was limit2.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly);

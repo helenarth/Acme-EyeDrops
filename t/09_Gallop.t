@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# recur.t
+# 09_Gallop.t (was recur.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
@@ -47,6 +47,9 @@ $outstr eq "hello world\n" or print "not ";
 $prog =~ tr/!-~/#/;
 $prog eq $camelstr or print "not ";
 ++$itest; print "ok $itest - twice shape\n";
+
+# Prior to Acme::EyeDrops v1.42, test 4 fails on Perl 5.8.1
+# with the error: panic: pad_free curpad (Perl bug #23143).
 
 $prog = sightly({ Shape         => 'camel,window',
                   SourceString  => $progorig,

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# sightly.t
+# 05_parrot.t (was sightly.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string make_siertri
@@ -51,7 +51,7 @@ my $prog;
 sub test_one {
    my ($e, $ostr, $sh) = @_;
    build_file($tmpf, $prog);
-   my $outstr = `$^X -w -Mstrict $tmpf`;
+   my $outstr = `$^X -Tw -Mstrict $tmpf`;
    my $rc = $? >> 8;
    $rc == 0 or print "not ";
    ++$itest; print "ok $itest - $e rc\n";
@@ -106,7 +106,7 @@ build_file($tmpf, $prog);
 #   $outstr = `$^X -w -Mstrict $tmpf`;
 # so use a temporary file instead.
 my $tmpf2 = 'bill2.tmp';
-system("$^X -w -Mstrict $tmpf >$tmpf2");
+system("$^X -Tw -Mstrict $tmpf >$tmpf2");
 my $outstr;
 my $rc = $? >> 8;
 $rc == 0 or print "not ";
@@ -138,7 +138,7 @@ $prog = sightly({ Shape         => 'japh',
                   InformHandler => sub {},
                   Regex         => 1 } );
 build_file($tmpf, $prog);
-$outstr = `$^X -w -Mstrict $tmpf`;
+$outstr = `$^X -Tw -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - self-printing japh rc\n";
@@ -171,7 +171,7 @@ $prog = sightly({ Shape         => 'camel',
                   InformHandler => sub {},
                   Regex         => 1 } );
 build_file($tmpf, $prog);
-$outstr = `$^X -w -Mstrict $tmpf`;
+$outstr = `$^X -Tw -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - Camel helloworld fillervar= rc\n";
@@ -209,7 +209,7 @@ $prog = sightly({ Shape         => 'yanick4',
                   InformHandler => sub {},
                   Regex         => 1 } );
 build_file($tmpf, $prog);
-$outstr = `$^X -w -Mstrict $tmpf`;
+$outstr = `$^X -Tw -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - Yanick4 hellotest FillerVar= rc\n";
@@ -250,7 +250,7 @@ $prog = sightly({ SourceString  => $hellostr,
 $prog eq $baldprogstr or print "not ";
 ++$itest; print "ok $itest - Shapeless helloworld bald\n";
 build_file($tmpf, $prog);
-$outstr = `$^X -w -Mstrict $tmpf`;
+$outstr = `$^X -Tw -Mstrict $tmpf`;
 $rc = $? >> 8;
 $rc == 0 or print "not ";
 ++$itest; print "ok $itest - Shapeless helloworld rc\n";

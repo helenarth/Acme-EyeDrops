@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# nasty.t
+# 08_hoax.t (was nasty.t)
 
 use strict;
 use Acme::EyeDrops qw(sightly get_eye_string);
