@@ -15,7 +15,7 @@ require Exporter;
                 reflect_shape rotate_shape
                 pour_sightly sightly);
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 my @C = map {"'" . chr() . "'"} 0..255;
 $C[39]  = q#"'"#;
@@ -1607,12 +1607,21 @@ Here is the original one camel program, F<t1.pl>:
                    '~';$~=                              '@'|'(';
                  $^="\)"^                                '[';#;
 
-Buffy fans might like to experiment with rotating her letters:
+Buffy fans might like to rotate her letters:
 
     print sightly( { Shape       => 'buffy',
                      Rotate      => 0,  # try 270, 90 and 180 too
                      SourceFile  => 'helloworld.pl',
                      Regex       => 1 } );
+
+or have her ride a pony:
+
+    print sightly( { Shape        => 'buffy3,buffy4,riding,a,pony',
+                     SourceString => "This is how Catherine the ".
+                                     "Great died.\n",
+                     Gap          => 2,
+                     Regex        => 1,
+                     Print        => 1 } );
 
 while cricket fans could compare:
 
@@ -1955,10 +1964,12 @@ or with a string, for example:
 The shapes (F<.eye> files) distributed with this version of
 EyeDrops are:
 
-    bleach      Banner of "use Acme::Bleach;"
-    buffy       Banner of "Buffy"
+    a           Horizontal banner of "a"
+    bleach      Vertical banner of "use Acme::Bleach;"
+    buffy       Vertical banner of "Buffy"
     buffy2      Buffy's angelic face
     buffy3      Buffy riding a pony
+    buffy4      Horizontal banner of "Buffy"
     camel       Dromedary (Camelus dromedarius, one hump)
     camel2      Another dromedary (from use.perl.org)
     camel3      London.pm's bactrian camel at London zoo
@@ -1971,6 +1982,8 @@ EyeDrops are:
     larry2      Caricature of Larry contributed by Ryan King
     merlyn      Just another Perl hacker, aka Randal L Schwartz
     mongers     Perl Mongers logo
+    pony        Horizontal banner of "Pony"
+    riding      Horizontal banner of "riding"
     santa       Santa Claus playing golf
     spoon       A wooden spoon
     uml         A UML diagram

@@ -75,3 +75,12 @@ Revision history for Perl extension EyeDrops
 	- new shape: camel3 (London.pm bactrian camel at London zoo)
 	- new shape: dipsy (London.pm infobot is called dipsy)
 	- new shape: buffy3 (buffy riding a pony)
+
+1.05	Sun Jan 6 17:09:35 2002
+
+	- minor improvements to documentation
+	- minor fixes to shape: buffy3
+	- new shape: buffy4 (horizontal banner of "Buffy")
+	- new shape: riding (banner of "riding")
+	- new shape: a (banner of "a")
+	- new shape: pony (banner of "Pony")

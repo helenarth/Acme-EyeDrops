@@ -3,10 +3,12 @@ MANIFEST
 Makefile.PL
 README
 lib/Acme/EyeDrops.pm
+lib/Acme/a.eye
 lib/Acme/bleach.eye
 lib/Acme/buffy.eye
 lib/Acme/buffy2.eye
 lib/Acme/buffy3.eye
+lib/Acme/buffy4.eye
 lib/Acme/camel.eye
 lib/Acme/camel2.eye
 lib/Acme/camel3.eye
@@ -19,6 +21,8 @@ lib/Acme/larry.eye
 lib/Acme/larry2.eye
 lib/Acme/merlyn.eye
 lib/Acme/mongers.eye
+lib/Acme/pony.eye
+lib/Acme/riding.eye
 lib/Acme/santa.eye
 lib/Acme/spoon.eye
 lib/Acme/uml.eye
