@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Acme-EyeDrops
-version:            1.45
+version:            1.46
 abstract:           Visual Programming in Perl
 license:            perl
 distribution_type:  module

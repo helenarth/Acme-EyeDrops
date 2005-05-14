@@ -385,3 +385,12 @@ Revision history for Perl extension EyeDrops
 	- documentation: added new Error Handling section
 	- Devel::Cover results: stmt   branch cond  sub    pod   total
 	                        95.2   91.3   90.8  100.0  100.0  93.5
+
+1.46	Sat May 14 23:21:04 2005
+
+	- new shape: pugs
+	- new shape: pugs2
+	- minor code improvements (limited scope of %builtin_shapes)
+	- tests: fixed Test::More dependency in 17_Orange.t
+	     simplified 18_sky.t (Test::Pod)
+	     added invalid shape test to 14_gulp.t

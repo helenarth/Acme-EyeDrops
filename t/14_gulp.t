@@ -17,7 +17,7 @@ sub build_file {
 
 # ----------------------------------------------------------------
 
-print "1..37\n";
+print "1..38\n";
 
 my $helloteststr = <<'HELLOTEST';
 # Just a test.
@@ -163,6 +163,10 @@ $prog = sightly({ Shape         => 'yanick4',
 test_one('1 SourceString', '1', $yanick4str);
 
 # ----------------------------------------------------------------
+
+eval { sightly( { Shape  => 'InvalidShape' } ) };
+$@ =~ /InvalidShape/ or print "not ";
+++$itest; print "ok $itest - InvalidShape\n";
 
 eval { sightly( { InvalidAttr => 1 } ) };
 $@ =~ /invalid parameter 'InvalidAttr'/ or print "not ";
