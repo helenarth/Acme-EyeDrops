@@ -394,3 +394,13 @@ Revision history for Perl extension EyeDrops
 	- tests: fixed Test::More dependency in 17_Orange.t
 	     simplified 18_sky.t (Test::Pod)
 	     added invalid shape test to 14_gulp.t
+
+1.47	Sat May 21 19:15:33 2005
+
+	- new shape: autrijus
+	- documentation: updated 'Abbreviated History of Perl 6' section
+	- tests: added new test to 05_Parrot.t
+	- Build.PL: simplified for Module::Build 0.26 and above
+	- Temporarily renamed Build.PL to xBuild.PL to stop CPAN tester
+	  robots from using Build.PL (got a lot of unexplained failures
+	  with v1.46, yet they worked fine when installed manually)

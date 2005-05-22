@@ -2,7 +2,7 @@
 # 05_parrot.t (was sightly.t)
 
 use strict;
-use Acme::EyeDrops qw(sightly get_eye_string make_siertri
+use Acme::EyeDrops qw(sightly get_eye_string make_siertri make_triangle
                       regex_eval_sightly regex_binmode_print_sightly);
 
 $|=1;
@@ -17,7 +17,7 @@ sub build_file {
 
 # --------------------------------------------------
 
-print "1..66\n";
+print "1..69\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -354,6 +354,16 @@ $prog = sightly({ Shape         => 'siertri,larry,siertri,larry',
 test_one('siertr/Larry x 2 helloworld', "hello world\n",
    join("\n\n", make_siertri(0), $larrystr,
                 make_siertri(0), $larrystr));
+
+# ----------------------------------------------------
+
+$prog = sightly({ Shape         => "larry,triangle,$tmpf2",
+                  SourceFile    => $hellofile,
+                  Gap           => 2,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('larry/triangle/camelshapefile helloworld', "hello world\n",
+   join("\n\n", $larrystr, make_triangle(0), $camelstr));
 
 # ----------------------------------------------------
 

@@ -1,4 +1,4 @@
-Build.PL
+xBuild.PL
 Changes
 MANIFEST
 META.yml
@@ -9,6 +9,7 @@ lib/Acme/EyeDrops/a.eye
 lib/Acme/EyeDrops/acme.eye
 lib/Acme/EyeDrops/alien.eye
 lib/Acme/EyeDrops/alpaca.eye
+lib/Acme/EyeDrops/autrijus.eye
 lib/Acme/EyeDrops/baghdad.eye
 lib/Acme/EyeDrops/beer.eye
 lib/Acme/EyeDrops/bighorn.eye
