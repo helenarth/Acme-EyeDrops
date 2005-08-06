@@ -38,4 +38,5 @@ my $m = Module::Build->new(
    build_requires =>  { 'Module::Build' => 0.26 }
 );
 $m->add_build_element('eye');
+$m->add_build_element('eyp');
 $m->create_build_script;

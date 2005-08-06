@@ -404,3 +404,23 @@ Revision history for Perl extension EyeDrops
 	- Temporarily renamed Build.PL to xBuild.PL to stop CPAN tester
 	  robots from using Build.PL (got a lot of unexplained failures
 	  with v1.46, yet they worked fine when installed manually)
+
+1.50	Sat August 6 23:08:42 2005
+
+	- First attempt at "shape properties" -- note that these
+	  are experimental and subject to change in future releases
+	- Added new .eyp (properties) files for all .eye shapes
+	- new functions: get_eye_properties
+	                 find_eye_shapes
+	                 get_eye_keywords
+	- new internal functions: _get_properties
+	                          _get_eye_shapes
+	                          _get_eye_string
+	                          _get_eye_properties
+	                          _find_eye_shapes
+	                          _get_eye_keywords
+	- new attribute: EyeDir
+	- new program: demo/findshapes.pl
+	- tests: added property tests to 13_to.t
+	- tests: adjusted 19_surrounds.t for .eyp files
+	- new shape: schwern2 (shape schwern without the banner)

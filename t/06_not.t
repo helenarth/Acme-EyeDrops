@@ -18,7 +18,7 @@ sub build_file {
 
 # --------------------------------------------------
 
-print "1..50\n";
+print "1..53\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -26,6 +26,7 @@ HELLO
 my $camelstr = get_eye_string('camel');
 my $indent_camelstr = $camelstr; $indent_camelstr =~ s/^/ /mg;
 my $tmpf = 'bill.tmp';
+my $tmpeye = 'tmpeye.eye';
 
 # --------------------------------------------------
 
@@ -55,6 +56,21 @@ test_one('big camel', "hello world\n");
 $bigprog =~ tr/!-~/#/;
 $bigprog eq $camelstr and print "not ";
 ++$itest; print "ok $itest - bigprog\n";
+
+# -------------------------------------------------
+
+build_file($tmpeye, $camelstr);
+$prog = sightly({ Shape         => 'tmpeye',
+                  EyeDir        => '.',
+                  SourceString  => $hellostr,
+                  Expand        => 1,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+$bigprog = $prog;
+test_one('big camel', "hello world\n");
+$bigprog =~ tr/!-~/#/;
+$bigprog eq $camelstr and print "not ";
+++$itest; print "ok $itest - bigprog EyeDir\n";
 
 # -------------------------------------------------
 
@@ -258,4 +274,5 @@ $prog eq $ref_testshape or print "not ";
 
 # -------------------------------------------------
 
-unlink($tmpf) or die "error: unlink '$tmpf': $!";
+unlink($tmpf)   or die "error: unlink '$tmpf': $!";
+unlink($tmpeye) or die "error: unlink '$tmpeye': $!";

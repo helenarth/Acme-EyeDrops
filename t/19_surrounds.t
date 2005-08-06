@@ -86,7 +86,7 @@ sub create_eyedrops_tree {
 
    local *D;
    opendir(D, $fromdrops) or die "error: opendir '$fromdrops': $!";
-   my @eye = grep(/\.eye$/, readdir(D));
+   my @eye = grep(/\.ey[ep]$/, readdir(D));
    closedir(D);
 
    for my $f (@eye) {
