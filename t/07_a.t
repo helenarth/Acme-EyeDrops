@@ -16,7 +16,7 @@ sub build_file {
 
 # --------------------------------------------------
 
-print "1..14\n";
+print "1..16\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -25,6 +25,16 @@ my $camelstr  = get_eye_string('camel');
 my $camel2str = $camelstr . "\n\n\n" . $camelstr;
 my $tmpf = 'bill.tmp';
 
+# Test bailing out via InformHandler when presented with a
+# diabolical shape which sends sightly() into an infinite loop.
+my $max_shapes = 5;
+my $exp_throw_str = "bailing out after " . ($max_shapes+1) . " shapes.\n";
+sub throw_inform {
+   $_[0] =~ /^(\d+) / or die "oops, invalid ihandler string";
+   $1 > $max_shapes and die "bailing out after $1 shapes.\n";
+}
+
+# Simple test of InformHandler.
 my $inform_string;
 sub test_inform { $inform_string .= $_[0] }
 
@@ -32,6 +42,19 @@ sub test_inform { $inform_string .= $_[0] }
 
 my $itest = 0;
 my $prog;
+
+# -------------------------------------------------
+
+eval {
+   sightly( { ShapeString    => "#\n#\n#\n#\n#\n",
+              SourceString   => "# Example nasty shape\n;1;\n",
+              InformHandler  => \&throw_inform,
+              Regex          => 1 } );
+};
+$@ or print "not ";
+++$itest; print "ok $itest - InformHandler throw\n";
+$@ eq $exp_throw_str or print "not ";
+++$itest; print "ok $itest - InformHandler throw string\n";
 
 # -------------------------------------------------
 

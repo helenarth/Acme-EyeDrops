@@ -420,7 +420,16 @@ Revision history for Perl extension EyeDrops
 	                          _find_eye_shapes
 	                          _get_eye_keywords
 	- new attribute: EyeDir
+	- documentation: added 'Shape Properties' section
 	- new program: demo/findshapes.pl
 	- tests: added property tests to 13_to.t
 	- tests: adjusted 19_surrounds.t for .eyp files
 	- new shape: schwern2 (shape schwern without the banner)
+
+1.51	Sun September 11 23:17:33 2005
+
+	- new shape: adrianh
+	- minor enhancements to demo/findshapes.pl
+	- tests: improved property tests in 13_to.t
+	- tests: added InformHandler throw test to 07_a.t
+	- minor code improvements

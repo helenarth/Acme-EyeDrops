@@ -17,7 +17,7 @@ sub build_file {
 
 # --------------------------------------------------
 
-print "1..69\n";
+print "1..75\n";
 
 my $hellostr = <<'HELLO';
 print "hello world\n";
@@ -43,6 +43,8 @@ my $baldprogstr = regex_eval_sightly($hellostr);
 # improve code coverage. Investigate later.
 my $dodgyprogstr = regex_binmode_print_sightly($hellostr);
 my $tmpf = 'bill.tmp';
+my $tmpeye = 'tmpeye.eye';
+my $tmpeye2 = 'tmpeye2.eye';
 
 build_file($hellofile, $hellostr);
 
@@ -81,6 +83,27 @@ $prog = sightly({ Shape         => 'uml,window',
                   InformHandler => sub {},
                   Regex         => 1 } );
 test_one('uml/window helloworld', "hello world\n", $umlstr . $windowstr);
+
+# uml/window helloworld.pl -------------------------
+
+build_file($tmpeye, $umlstr);
+build_file($tmpeye2, $windowstr);
+
+$prog = sightly({ Shape         => 'all',
+                  EyeDir        => '.',
+                  SourceString  => $hellostr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('uml/window all helloworld', "hello world\n", $umlstr . $windowstr);
+
+$prog = sightly({ Shape         => 'all',
+                  EyeDir        => '.',
+                  Width         => 2,
+                  SourceString  => $hellostr,
+                  InformHandler => sub {},
+                  Regex         => 1 } );
+test_one('uml/window all width helloworld', "hello world\n",
+   $umlstr . "\n\n" . $windowstr);
 
 # Text string print --------------------------------
 
@@ -369,4 +392,6 @@ test_one('larry/triangle/camelshapefile helloworld', "hello world\n",
 
 unlink($tmpf) or die "error: unlink '$tmpf': $!";
 unlink($tmpf2) or die "error: unlink '$tmpf2': $!";
+unlink($tmpeye) or die "error: unlink '$tmpeye': $!";
+unlink($tmpeye2) or die "error: unlink '$tmpeye2': $!";
 unlink($hellofile) or die "error: unlink '$hellofile': $!";

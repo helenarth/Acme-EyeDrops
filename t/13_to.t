@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 13_to.t
-# Tests get_eye_dir(), slurp_yerself()
+# Tests _make_filler(), get_eye_dir(), slurp_yerself()
 # get_eye_properties(), get_eye_keywords(), find_eye_shapes()
 
 use strict;
@@ -41,13 +41,50 @@ my $tmpf = 'bill.tmp';
 
 my @eye_shapes = get_eye_shapes();
 my $n_tests = @eye_shapes * 6;
-$n_tests += 71;   # plus property tests
+$n_tests += 95;   # plus other tests
 
 print "1..$n_tests\n";
 
 # --------------------------------------------------
 
 my $itest = 0;
+
+# --------------------------------------------------
+
+# Test _make_filler()
+{
+   my $fillv = '#';
+   # This line is used in A::E pour_sightly().
+   # Note: 11 is the length of, for example, $:='.'^'~';
+   # Multiple of 6 because each filler contains 6 tokens:
+   #   $:  =  '.'  ^  '~'  ;
+   # Also, no single quoted string should contain " or ;
+   # Oh, and $; variable is banned.
+   # XXX: add tests for all these later.
+   my @filler = Acme::EyeDrops::_make_filler(
+                   ref($fillv) ? $fillv : [ '$:', '$~', '$^' ]);
+   my $nfiller = @filler;
+   $nfiller == 72 or print "not ";
+   ++$itest; print "ok $itest - _make_filler 72 items (got $nfiller)\n";
+   $nfiller % 6 == 0 or print "not ";
+   ++$itest; print "ok $itest - _make_filler multiple of 6 (got $nfiller)\n";
+
+   @filler = Acme::EyeDrops::_make_filler([ '$:', '$~', '$^', '$:', '$~' ]);
+   $nfiller = @filler;
+   $nfiller == 60 or print "not ";
+   ++$itest; print "ok $itest - _make_filler 60 items (got $nfiller)\n";
+   $nfiller % 6 == 0 or print "not ";
+   ++$itest; print "ok $itest - _make_filler multiple of 6 (got $nfiller)\n";
+
+   my $badfiller = [ '$:', '$~', '$^',
+                     '$:', '$~', '$^',
+                     '$:', '$~', '$^',
+                     '$:', '$~', '$^',
+                     '$:' ];
+   eval { Acme::EyeDrops::_make_filler($badfiller) };
+   $@ or print "not ";
+   ++$itest; print "ok $itest - _make_filler, too many filler vars\n";
+}
 
 # -----------------------------------------------------------------------
 
@@ -63,6 +100,51 @@ sub test_one_propchars {
    ++$itest; print "ok $itest - $e trailing blank lines\n";
    substr($s, -2, 1) eq "\n" and print "not ";
    ++$itest; print "ok $itest - $e properly newline terminated\n";
+}
+
+sub test_one_get_properties {
+   my ($e, $pstr, $hexp) = @_;
+   build_file($tmpf, $pstr);
+   my $h = Acme::EyeDrops::_get_properties($tmpf);
+   ref($h) eq 'HASH' or print "not ";
+   ++$itest; print "ok $itest - _get_properties 1 $e\n";
+   my @a = sort keys %$h; my @aexp = sort keys %$hexp;
+   scalar(@a) == scalar(@aexp) or print "not ";
+   ++$itest; print "ok $itest - _get_properties 2 $e\n";
+   return unless @aexp;
+   my $min = @a; $min = @aexp if @aexp < $min;
+   for my $i (0 .. $min-1) {
+      $a[$i] eq $aexp[$i] or print "not ";
+      ++$itest; print "ok $itest - _get_properties 3 $e\n";
+      $h->{$a[$i]} eq $hexp->{$aexp[$i]} or print "not ";
+      ++$itest; print "ok $itest - _get_properties 4 $e\n";
+   }
+}
+
+sub test_one_find_eye_shapes {
+   my ($e, $s, $sexp) = @_;
+   my @shapes = find_eye_shapes(@$s);
+   scalar(@shapes) == scalar(@$sexp) or print "not ";
+   ++$itest; print "ok $itest - find_eye_shapes 1 $e\n";
+   return unless @$sexp;
+   my $min = @shapes; $min = @$sexp if @$sexp < $min;
+   for my $i (0 .. $min-1) {
+      $shapes[$i] eq $sexp->[$i] or print "not ";
+      ++$itest; print "ok $itest - find_eye_shapes 2 $e\n";
+   }
+}
+
+sub test_one__find_eye_shapes {
+   my ($e, $s, $sexp) = @_;
+   my @shapes = Acme::EyeDrops::_find_eye_shapes('.', @$s);
+   scalar(@shapes) == scalar(@$sexp) or print "not ";
+   ++$itest; print "ok $itest - _find_eye_shapes 1 $e\n";
+   return unless @$sexp;
+   my $min = @shapes; $min = @$sexp if @$sexp < $min;
+   for my $i (0 .. $min-1) {
+      $shapes[$i] eq $sexp->[$i] or print "not ";
+      ++$itest; print "ok $itest - _find_eye_shapes 2 $e\n";
+   }
 }
 
 sub get_prop_names {
@@ -152,67 +234,41 @@ for my $e (@eye_shapes) {
 # -----------------------------------------------------------------------
 # _get_properties() tests.
 
-{
-   build_file($tmpf, "");
-   my $h = Acme::EyeDrops::_get_properties($tmpf);
-   ref($h) eq 'HASH' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, empty file 1\n";
-   keys(%$h) == 0 or print "not ";
-   ++$itest; print "ok $itest - _get_properties, empty file 2\n";
-}
+test_one_get_properties(
+   'empty file',
+   "",
+   {}
+);
+test_one_get_properties(
+   'simple file',
+   "tang:autrijus\n",
+   { 'tang' => 'autrijus' }
+);
+test_one_get_properties(
+   'comment file',
+   "  # comment\n \ttang \t :\t autrijus",
+   { 'tang' => 'autrijus' }
+);
 
-{
-   build_file($tmpf, "tang:autrijus\n");
-   my $h = Acme::EyeDrops::_get_properties($tmpf);
-   ref($h) eq 'HASH' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, simple file 1\n";
-   keys(%$h) == 1 or print "not ";
-   ++$itest; print "ok $itest - _get_properties, simple file 2\n";
-   $h->{'tang'} eq 'autrijus' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, simple file 3\n";
-}
+test_one_get_properties(
+   'extendo file',
+   "wall:larry  \\\n \t not wall russ\n",
+   { 'wall' => 'larry  not wall russ' }
+);
 
-{
-   build_file($tmpf, "  # comment\n \ttang \t :\t autrijus");
-   my $h = Acme::EyeDrops::_get_properties($tmpf);
-   ref($h) eq 'HASH' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, not term file 1\n";
-   keys(%$h) == 1 or print "not ";
-   ++$itest; print "ok $itest - _get_properties, not term file 2\n";
-   $h->{'tang'} eq 'autrijus' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, not term file 3\n";
-}
-
-{
-   build_file($tmpf, "wall:larry  \\\n \t not wall russ\n");
-   my $h = Acme::EyeDrops::_get_properties($tmpf);
-   ref($h) eq 'HASH' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, extendo file 1\n";
-   keys(%$h) == 1 or print "not ";
-   ++$itest; print "ok $itest - _get_properties, extendo file 2\n";
-   $h->{'wall'} eq 'larry  not wall russ' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, extendo file 3\n";
-}
-
-{
-   build_file($tmpf, " wall:larry\\\nnot wall russ\n\tConway: The  Damian \t\n");
-   my $h = Acme::EyeDrops::_get_properties($tmpf);
-   ref($h) eq 'HASH' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, two keys file 1\n";
-   keys(%$h) == 2 or print "not ";
-   ++$itest; print "ok $itest - _get_properties, two keys file 2\n";
-   $h->{'wall'} eq 'larrynot wall russ' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, two keys file 3\n";
-   $h->{'Conway'} eq 'The  Damian' or print "not ";
-   ++$itest; print "ok $itest - _get_properties, two keys file 4\n";
-}
+test_one_get_properties(
+   'two keys file',
+   " wall:larry\\\nnot wall russ\n\tConway: The  Damian \t\n",
+   { 'wall'   => 'larrynot wall russ',
+     'Conway' => 'The  Damian' }
+);
 
 # -----------------------------------------------------------------------
 # get_eye_properties() tests.
 
 {
-   my $tmpprop = 'tmpeye.eyp';
-   -f $tmpprop and (unlink($tmpprop) or die "error unlink '$tmpprop': $!");
+   my $tmpeyp = 'tmpeye.eyp';
+   -f $tmpeyp and (unlink($tmpeyp) or die "error unlink '$tmpeyp': $!");
    my $h = Acme::EyeDrops::_get_eye_properties('.', 'tmpeye');
    defined($h) and print "not ";
    ++$itest; print "ok $itest - get_eye_properties, no props\n";
@@ -236,62 +292,128 @@ eval { find_eye_shapes() };
 $@ or print "not ";
 ++$itest; print "ok $itest - find_eye_shapes, no params\n";
 
-{
-   # XXX: need to update test when update shape properties.
-   my @flags = find_eye_shapes('flag');
-   @flags == 1 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, one 1\n";
-   $flags[0] eq 'flag_canada' or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, one 2\n";
-}
+# XXX: need to update test when update shape properties.
+test_one_find_eye_shapes(
+   'one',
+   [ 'flag' ],
+   [ 'flag_canada' ]
+);
+# XXX: need to update test when update shape properties.
+test_one_find_eye_shapes(
+   'dup keyword',
+   [ 'flag', 'flag' ],
+   [ 'flag_canada' ]
+);
+# XXX: need to update test when update shape properties.
+# This is the example from the doco that cog specifically asked for.
+test_one_find_eye_shapes(
+   'cog',
+   [ 'face', 'person', 'perlhacker' ],
+   [ 'acme',
+     'adrianh',
+     'autrijus',
+     'damian',
+     'dan',
+     'eugene',
+     'gelly',
+     'larry',
+     'larry2',
+     'merlyn',
+     'schwern2',
+     'simon',
+     'yanick' ]
+);
+# XXX: need to update test when update shape properties.
+test_one_find_eye_shapes(
+   'OR',
+   [ 'flag OR sport' ],
+   [ 'cricket',
+     'flag_canada',
+     'golfer' ]
+);
 
 {
-   # XXX: need to update test when update shape properties.
-   my @flags = find_eye_shapes('flag', 'flag');
-   @flags == 1 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, dup keyword 1\n";
-   $flags[0] eq 'flag_canada' or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, dup keyword 2\n";
-}
+   my $tmpeye  = 'tmpeye.eye';
+   my $tmpeyp  = 'tmpeye.eyp';
+   my $tmpeye2 = 'tmpeye2.eye';
+   my $tmpeyp2 = 'tmpeye2.eyp';
+   my $tmpeye3 = 'tmpeye3.eye';
+   my $tmpeyp3 = 'tmpeye3.eyp';
+   my $tmpeye4 = 'tmpeye4.eye';
+   my $tmpeyp4 = 'tmpeye4.eyp';
+   my $tmpeye5 = 'tmpeye5.eye';
+   my $tmpeyp5 = 'tmpeye5.eyp';
+   my $tmpeye6 = 'tmpeye6.eye';
+   my $tmpeyp6 = 'tmpeye6.eyp';
+   my $tmpeye7 = 'tmpeye7.eye';  # Test .eye file with no .eyp file
+   build_file($tmpeye, "");  build_file($tmpeye2, "");
+   build_file($tmpeye3, ""); build_file($tmpeye4, "");
+   build_file($tmpeye5, ""); build_file($tmpeye6, "");
+   build_file($tmpeye7, "");
+   build_file($tmpeyp, <<'FLAMING_OSTRICHES');
+keywords : pink cat
+FLAMING_OSTRICHES
+   build_file($tmpeyp2, <<'FLAMING_OSTRICHES');
+keywords : dog orange
+FLAMING_OSTRICHES
+   build_file($tmpeyp3, <<'FLAMING_OSTRICHES');
+keywords : dog apple
+FLAMING_OSTRICHES
+   build_file($tmpeyp4, <<'FLAMING_OSTRICHES');
+keywords : dog big
+FLAMING_OSTRICHES
+   build_file($tmpeyp5, <<'FLAMING_OSTRICHES');
+# Test a comment line, blank lines and empty keywords.
 
-{
-   # XXX: need to update test when update shape properties.
-   # This is the example from the doco that cog specifically asked for.
-   my @phackers = find_eye_shapes('face', 'person', 'perlhacker');
-   @phackers == 12 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, doco start\n";
-   for my $hacker ('acme',
-                   'autrijus',
-                   'damian',
-                   'dan',
-                   'eugene',
-                   'gelly',
-                   'larry',
-                   'larry2',
-                   'merlyn',
-                   'schwern2',
-                   'simon',
-                   'yanick') {
-      shift(@phackers) eq $hacker or print "not ";
-      ++$itest; print "ok $itest - find_eye_shapes, doco '$hacker'\n";
+ 
+\t
+ \t 
+keywords : 
+# final comment line
+FLAMING_OSTRICHES
+   build_file($tmpeyp6, <<'FLAMING_OSTRICHES');
+# Test no keywords
+FLAMING_OSTRICHES
+   my @catdog = Acme::EyeDrops::_find_eye_shapes('.', 'cat', 'dog');
+   @catdog == 0 or print "not ";
+   ++$itest; print "ok $itest - _find_eye_shapes, no cats or dogs\n";
+
+   test_one__find_eye_shapes(
+      'OR',
+      [ 'pink OR big' ],
+      [ 'tmpeye',
+        'tmpeye4' ]
+   );
+   test_one__find_eye_shapes(
+      'AND OR',
+      [ 'dog', 'apple OR orange' ],
+      [ 'tmpeye2',
+        'tmpeye3' ]
+   );
+
+   # Test some _get_eye_keywords...
+   {
+      my $h = Acme::EyeDrops::_get_eye_keywords('.');
+      # for my $k (sort keys %{$h}) { print "k='$k' v='@{$h->{$k}}'\n" }
+      ref($h) eq 'HASH' or print "not ";
+      ++$itest; print "ok $itest - get_eye_keywords, hash ref\n";
+      my @skey = sort keys %{$h};
+      @skey == 6 or print "not ";
+      ++$itest; print "ok $itest - get_eye_keywords, number\n";
+      for my $k ('apple',
+                 'big',
+                 'cat',
+                 'dog',
+                 'orange',
+                 'pink') {
+         shift(@skey) eq $k or print "not ";
+         ++$itest; print "ok $itest - get_eye_keywords, '$k'\n";
+      }
    }
-   @phackers == 0 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, doco end\n";
-}
 
-{
-   # XXX: need to update test when update shape properties.
-   my @flag_or_sport = find_eye_shapes('flag OR sport');
-   @flag_or_sport == 3 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, OR start\n";
-   for my $fs ('cricket',
-               'flag_canada',
-               'golfer') {
-      shift(@flag_or_sport) eq $fs or print "not ";
-      ++$itest; print "ok $itest - find_eye_shapes, OR '$fs'\n";
-   }
-   @flag_or_sport == 0 or print "not ";
-   ++$itest; print "ok $itest - find_eye_shapes, OR end\n";
+   unlink($tmpeye, $tmpeyp, $tmpeye2, $tmpeyp2, $tmpeye3, $tmpeyp3,
+          $tmpeye4, $tmpeyp4, $tmpeye5, $tmpeyp5, $tmpeye6, $tmpeyp6,
+          $tmpeye7);
 }
 
 {
