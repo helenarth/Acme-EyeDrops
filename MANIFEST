@@ -4,6 +4,7 @@ MANIFEST
 META.yml
 Makefile.PL
 README
+LICENSE
 lib/Acme/EyeDrops.pm
 lib/Acme/EyeDrops/a.eye
 lib/Acme/EyeDrops/a.eyp
@@ -81,6 +82,8 @@ lib/Acme/EyeDrops/japh.eye
 lib/Acme/EyeDrops/japh.eyp
 lib/Acme/EyeDrops/jon.eye
 lib/Acme/EyeDrops/jon.eyp
+lib/Acme/EyeDrops/jon_oxer.eye
+lib/Acme/EyeDrops/jon_oxer.eyp
 lib/Acme/EyeDrops/kansai_pm.eye
 lib/Acme/EyeDrops/kansai_pm.eyp
 lib/Acme/EyeDrops/kermit.eye

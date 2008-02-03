@@ -41,7 +41,7 @@ my $tmpf = 'bill.tmp';
 
 my @eye_shapes = get_eye_shapes();
 my $n_tests = @eye_shapes * 6;
-$n_tests += 95;   # plus other tests
+$n_tests += 98;   # plus other tests
 
 print "1..$n_tests\n";
 
@@ -220,12 +220,16 @@ for my $e (@eye_shapes) {
    ref($h) eq 'HASH' or print "not ";
    ++$itest; print "ok $itest - valid props, hash ref\n";
    my @skey = sort keys %{$h};
+   my $nskey = @skey;
    print STDERR "# properties: @skey\n";
-   @skey == 3 or print "not ";
-   ++$itest; print "ok $itest - valid props, number\n";
-   for my $k ('description',
+   $nskey == 6 or print "not ";
+   ++$itest; print "ok $itest - valid props, number should be $nskey\n";
+   for my $k ('author',
+              'authorcpanid',
+              'description',
               'keywords',
-              'nick') {
+              'nick',
+              'source') {
       shift(@skey) eq $k or print "not ";
       ++$itest; print "ok $itest - valid props, '$k'\n";
    }
