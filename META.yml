@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Acme-EyeDrops
-version:             1.52
+version:             1.53
 abstract:            Visual Programming in Perl
 license:             perl
 author:
@@ -18,7 +18,7 @@ build_requires:
 provides:
   Acme::EyeDrops:
     file: lib/Acme/EyeDrops.pm
-    version: 1.52
+    version: 1.53
 meta-spec:
   url:     http://module-build.sourceforge.net/META-spec-v1.3.html
   version: 1.3

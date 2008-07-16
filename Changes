@@ -445,3 +445,11 @@ Revision history for Perl extension EyeDrops
 	- new shape: jon_oxer (thanks pjf)
 	- fixed META.yml to comply with its latest spec (1.3) at
 	  http://module-build.sourceforge.net/META-spec-current.html
+
+1.53	Wed July 16 18:17:16 2008
+
+	- new shape: debian (thanks Richard Hartmann)
+	- CPAN testers report occasional failures in test 01_mug
+	  on Perl 5.10.0 with "Out of memory!". Don't know why.
+	  Requires further investigation. Meanwhile, I'll try commenting
+	  out parts of this test and see if the failures disappear.
