@@ -41,7 +41,7 @@ my $tmpf = 'bill.tmp';
 
 my @eye_shapes = get_eye_shapes();
 my $n_tests = @eye_shapes * 6;
-$n_tests += 99;   # plus other tests
+$n_tests += 101;   # plus other tests
 
 print "1..$n_tests\n";
 
@@ -427,15 +427,17 @@ FLAMING_OSTRICHES
    ref($h) eq 'HASH' or print "not ";
    ++$itest; print "ok $itest - get_eye_keywords, hash ref\n";
    my @skey = sort keys %{$h};
-   @skey == 13 or print "not ";
+   @skey == 15 or print "not ";
    ++$itest; print "ok $itest - get_eye_keywords, number\n";
    for my $k ('animal',
               'debian',
               'face',
               'flag',
               'hbanner',
+              'logo',
               'map',
               'object',
+              'opera',
               'perlhacker',
               'person',
               'planet',

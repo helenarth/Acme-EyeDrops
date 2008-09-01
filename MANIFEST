@@ -86,6 +86,8 @@ lib/Acme/EyeDrops/jon.eye
 lib/Acme/EyeDrops/jon.eyp
 lib/Acme/EyeDrops/jon_oxer.eye
 lib/Acme/EyeDrops/jon_oxer.eyp
+lib/Acme/EyeDrops/kangaroo.eye
+lib/Acme/EyeDrops/kangaroo.eyp
 lib/Acme/EyeDrops/kansai_pm.eye
 lib/Acme/EyeDrops/kansai_pm.eyp
 lib/Acme/EyeDrops/kermit.eye
@@ -118,12 +120,18 @@ lib/Acme/EyeDrops/merlyn.eye
 lib/Acme/EyeDrops/merlyn.eyp
 lib/Acme/EyeDrops/mongers.eye
 lib/Acme/EyeDrops/mongers.eyp
+lib/Acme/EyeDrops/moose.eye
+lib/Acme/EyeDrops/moose.eyp
+lib/Acme/EyeDrops/moosecamel.eye
+lib/Acme/EyeDrops/moosecamel.eyp
 lib/Acme/EyeDrops/mosquito.eye
 lib/Acme/EyeDrops/mosquito.eyp
 lib/Acme/EyeDrops/music.eye
 lib/Acme/EyeDrops/music.eyp
 lib/Acme/EyeDrops/naw.eye
 lib/Acme/EyeDrops/naw.eyp
+lib/Acme/EyeDrops/opera.eye
+lib/Acme/EyeDrops/opera.eyp
 lib/Acme/EyeDrops/panda.eye
 lib/Acme/EyeDrops/panda.eyp
 lib/Acme/EyeDrops/parrot.eye

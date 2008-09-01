@@ -449,7 +449,17 @@ Revision history for Perl extension EyeDrops
 1.53	Wed July 16 18:17:16 2008
 
 	- new shape: debian (thanks Richard Hartmann)
+	- new shape property keyword: debian
 	- CPAN testers report occasional failures in test 01_mug
 	  on Perl 5.10.0 with "Out of memory!". Don't know why.
 	  Requires further investigation. Meanwhile, I'll try commenting
 	  out parts of this test and see if the failures disappear.
+
+1.54	Sun August 31 21:19:04 2008
+
+	- new shape: opera (thanks Cosimo)
+	- new shape: kangaroo
+	- new shape: moose
+	- new shape: moosecamel (modelled after http://irclog.perlgeek.de)
+	- new shape property keywords: logo, opera
+	- logo keyword shapes are: debian, opera, pgolf, mongers
