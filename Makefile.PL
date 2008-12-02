@@ -27,6 +27,6 @@ print <<'CAMEL_GREETING';
 CAMEL_GREETING
 WriteMakefile(
    NAME     => 'Acme::EyeDrops',
-   VERSION  => '1.54',
+   VERSION  => '1.55',
    PL_FILES => {}
 );

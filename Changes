@@ -463,3 +463,9 @@ Revision history for Perl extension EyeDrops
 	- new shape: moosecamel (modelled after http://irclog.perlgeek.de)
 	- new shape property keywords: logo, opera
 	- logo keyword shapes are: debian, opera, pgolf, mongers
+
+1.55	Mon December 1 21:42:07 2008
+
+	- fixed rt #39035 "The Acme-EyeDrops Archive Contains World-Writable files"
+	- documentation: updated "99 Bottles of Beer" section with one stroke golf
+	  improvement to mtve/thospel original shortest solution
